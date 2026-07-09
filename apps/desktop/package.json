@@ -10,6 +10,7 @@
     "windows": "react-native run-windows",
     "start": "react-native start",
     "test": "jest",
+    "test:advisor": "jest --config jest.config.advisor.js",
     "lint": "eslint .",
     "build:macos": "cd macos && xcodebuild -workspace LingxiDemo.xcworkspace -scheme LingxiDemo -configuration Release",
     "build:windows": "cd windows && msbuild LingxiDemo.sln /p:Configuration=Release"
