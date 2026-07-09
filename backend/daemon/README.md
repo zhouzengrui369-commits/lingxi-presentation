@@ -137,6 +137,29 @@ $ curl -s -X POST "http://127.0.0.1:<port>/v1/chat/force?provider=api" \
 
 ## 启动方式
 
+### Requirements（Python 版本兼容）
+
+| Python | 是否支持 | 说明 |
+|---|---|---|
+| **3.11+ / 3.12+ / 3.13** | ✅ 推荐 | 原生支持 PEP 604 (`int \| None`)，pydantic v2 + FastAPI 全栈无坑 |
+| **3.10** | ✅ 支持 | 原生支持 PEP 604，单测/服务端 OK |
+| **3.9**（macOS `/usr/bin/python3` 系统版） | ⚠️ 兼容 | 需 `eval_type_backport` 才能让 pydantic v2 解析 `int \| None` 注解 |
+
+> 关键依赖 `eval_type_backport>=0.1.0` 在 `requirements.txt` 用 PEP 508 marker
+> `python_version < "3.10"` 自动按需安装 — 3.10+ 不会拉这个包，3.9 会装。
+
+### 验证安装成功
+
+```bash
+# 3.10+ 直接用：
+pip install -r backend/daemon/requirements.txt
+
+# 3.9 系统 python（macOS 默认）：
+/usr/bin/python3 -m pip install --user -r backend/daemon/requirements.txt
+# 验证：
+/usr/bin/python3 -c "import eval_type_backport; print('OK', eval_type_backport.__file__)"
+```
+
 ### 开发/本地
 
 ```bash
@@ -245,4 +268,5 @@ pytest backend/daemon/tests -v
 
 ## Changelog
 
+- **2026-07-09 (fix_b)**: 加 `eval_type_backport>=0.1.0` (PEP 508 marker `python_version < "3.10"`) 修复 3.9 部署兼容（macOS 系统 `/usr/bin/python3`）。README Requirements 章节加 Python 版本兼容矩阵 + 安装验证步骤。
 - **2026-07-09**: initial T-1.0.a 实现（49 tests pass + 4 screenshots + VERDICT: PASS）

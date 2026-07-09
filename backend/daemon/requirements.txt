@@ -2,5 +2,9 @@ fastapi>=0.110
 uvicorn>=0.27
 httpx>=0.27
 pydantic>=2.6
+# Pydantic v2 on Python <3.10 needs eval_type_backport to evaluate
+# PEP 604 unions (`int | None`) in BaseModel fields. On 3.10+ this is a no-op.
+# Required for: 3.9 (macOS system python), 3.10 fallback. Skip on 3.11+ (native support).
+eval_type_backport>=0.1.0; python_version < "3.10"
 pytest>=8.0
 pytest-asyncio>=0.23

@@ -140,12 +140,18 @@ def _truncate(s: str, max_w: int) -> str:
 
 
 def _run_real_daemon() -> tuple[int, int, str, str]:
-    """起真 daemon 跑 4 个 endpoint，返回 (PID, port, stderr_log, stdout)。"""
+    """起真 daemon 跑 4 个 endpoint，返回 (PID, port, stderr_log, stdout)。
+
+    默认用 /usr/bin/python3 (macOS 系统 3.9) 验证部署兼容性 — 即 fix_b 修复的场景。
+    """
     env = os.environ.copy()
     env.pop("MiniMax_API_KEY", None)  # 强制 mock 路径
 
+    # 用 macOS 系统 python 3.9 验证部署兼容（fix_b 修复目标）
+    py = os.environ.get("LINGXI_TEST_PY", "/usr/bin/python3")
+
     proc = subprocess.Popen(
-        ["/Users/njx/.venvs/lingxi-daemon/bin/python", "-m", "backend.daemon.server"],
+        [py, "-m", "backend.daemon.server"],
         cwd="/Users/njx/Project/wt-daemon",
         env=env,
         stdout=subprocess.PIPE,
@@ -178,7 +184,12 @@ def _run_real_daemon() -> tuple[int, int, str, str]:
 
 
 def main() -> None:
-    print("[1/4] starting daemon...")
+    py_used = os.environ.get("LINGXI_TEST_PY", "/usr/bin/python3")
+    py_version = subprocess.run(
+        [py_used, "-c", "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}')"],
+        capture_output=True, text=True,
+    ).stdout.strip()
+    print(f"[1/4] starting daemon with {py_used} (Python {py_version})...")
     pid, port, _, _ = _run_real_daemon()
 
     import httpx
@@ -187,10 +198,10 @@ def main() -> None:
     # ---- 截图 01: daemon started ----
     print("[2/4] capturing 01_daemon_started.png")
     s01 = [
-        "[ok] Lingxi Daemon started (uvicorn + FastAPI)",
+        "[ok] Lingxi Daemon started (uvicorn + FastAPI, Python " + py_version + ")",
         "",
         "$ cd /Users/njx/Project/wt-daemon",
-        "$ python -m backend.daemon.server",
+        "$ /usr/bin/python3 -m backend.daemon.server",
         "",
         "[stdout] PID:    " + str(pid),
         "[stdout] PORT:   " + str(port),
@@ -201,8 +212,9 @@ def main() -> None:
         f"python3  {pid}   njx    6u  IPv4  ...           TCP  127.0.0.1:{port} (LISTEN)",
         "",
         "[ok] daemon listening on 127.0.0.1:" + str(port),
+        "[ok] Python " + py_version + " 部署兼容 (fix_b: eval_type_backport 已装)",
     ]
-    render_screenshot(s01, "lingxi-daemon — T-1.0.a [01] daemon started",
+    render_screenshot(s01, "lingxi-daemon — T-1.0.a [01] daemon started (3.9 fix_b)",
                       SCREENSHOT_DIR / "01_daemon_started.png")
 
     # ---- 截图 02: health ----
