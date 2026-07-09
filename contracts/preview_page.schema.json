@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lingxi.local/contracts/preview_page.schema.json",
+  "title": "PreviewPage",
+  "description": "HTML 预览页结构（T-1.4 HTML 预览与编辑）。AI 优先出 HTML 预览（PRD 3.4），preview.renderer 渲染 → 用户轻量编辑 → output_request 引用 preview_id",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "preview_id",
+    "html",
+    "template_id",
+    "kb_entry_ids",
+    "sections",
+    "generated_at",
+    "latency_ms"
+  ],
+  "properties": {
+    "preview_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "预览页 UUID v4，被 output_request.preview_id 引用"
+    },
+    "html": {
+      "type": "string",
+      "minLength": 1,
+      "description": "完整 HTML 字符串（<!DOCTYPE html>...</html>），含模板 style 标签"
+    },
+    "template_id": {
+      "type": ["string", "null"],
+      "description": "使用的模板 ID（用户导入的 .pptx 模板解析得到 / 内置简约商务主题），null=无模板"
+    },
+    "kb_entry_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "description": "预览页引用到的 KB 条目 ID（外键 → wiki_kb.entry_id），用于追溯内容来源"
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["heading", "content_html", "image_urls"],
+        "properties": {
+          "heading": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "章节标题"
+          },
+          "content_html": {
+            "type": "string",
+            "minLength": 1,
+            "description": "章节正文 HTML（不含 outer <section>，由 renderer 包裹）"
+          },
+          "image_urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri",
+              "minLength": 1
+            },
+            "description": "章节内的图片 URL（file:// 或 https://）"
+          }
+        }
+      },
+      "description": "结构化章节列表（用于轻量编辑 / 重做时定位）"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "生成时间，ISO 8601"
+    },
+    "latency_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 60000,
+      "description": "生成耗时毫秒，PRD 硬指标 ≤ 10s（10000ms），上限 60s 留容错"
+    }
+  }
+}

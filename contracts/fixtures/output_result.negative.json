@@ -1,0 +1,8 @@
+{
+  "request_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+  "status": "partial",
+  "output_path": "/tmp/half_done.pptx",
+  "size_bytes": -1,
+  "error": "PowerPoint 写入失败：libreoffice headless 转换超时",
+  "generated_at": "2026-07-09T09:46:00+08:00"
+}

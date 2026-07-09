@@ -1,0 +1,24 @@
+{
+  "preview_id": "77777777-7777-4777-8777-777777777777",
+  "html": "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Q1 2026 季度汇报</title><style>body{font-family:'Microsoft YaHei',sans-serif;}</style></head><body><section><h1>Q1 2026 季度汇报</h1><p>营收达成率 108%，同比增长 23%。</p></section></body></html>",
+  "template_id": "builtin_business_light",
+  "kb_entry_ids": [
+    "33333333-3333-4333-8333-333333333333"
+  ],
+  "sections": [
+    {
+      "heading": "Q1 2026 季度汇报",
+      "content_html": "<p>营收达成率 108%，同比增长 23%。</p>",
+      "image_urls": []
+    },
+    {
+      "heading": "关键业绩",
+      "content_html": "<ul><li>营收达成率 108%</li><li>同比增长 23%</li><li>新增企业客户 14 家</li></ul>",
+      "image_urls": [
+        "file:///Users/njx/Documents/quarterly_review/charts/q1_revenue.png"
+      ]
+    }
+  ],
+  "generated_at": "2026-07-09T09:42:18+08:00",
+  "latency_ms": 8420
+}

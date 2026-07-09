@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lingxi.local/contracts/wiki_kb.schema.json",
+  "title": "WikiKbEntry",
+  "description": "LLM Wiki 知识库条目（T-1.1 文件管理与知识库构建）。T-1.1 wiki 整理产出 → 本地 SQLite/JSON 持久化 → T-1.2 advisor.kb_linker 关联补全 / T-1.4 preview 渲染时拉相关条目",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "entry_id",
+    "title",
+    "summary",
+    "tags",
+    "related_files",
+    "created_at",
+    "confidence"
+  ],
+  "properties": {
+    "entry_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "知识条目 UUID v4，被 preview_page.kb_entry_ids 引用"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "知识条目标题（来自 LLM Wiki 整理）"
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 50,
+      "maxLength": 1000,
+      "description": "知识条目摘要，PRD 强调不用 RAG → summary 由 LLM 直接生成"
+    },
+    "tags": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 64
+      },
+      "description": "关联标签，用于 advisor 关键词匹配"
+    },
+    "related_files": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "description": "关联 file_id 列表（外键 → file_import.file_id）"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "条目创建时间，ISO 8601"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "LLM Wiki 整理的可信度（0-1），用于 advisor 排序"
+    }
+  }
+}

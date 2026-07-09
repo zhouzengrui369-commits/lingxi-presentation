@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lingxi.local/contracts/output_result.schema.json",
+  "title": "OutputResult",
+  "description": "输出结果结构（T-1.5 多格式输出）。output.writer 完成后回写 → UI 通知用户 → preview 历史归档",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_id",
+    "status",
+    "output_path",
+    "size_bytes",
+    "error",
+    "generated_at"
+  ],
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "对应的输出请求 ID（外键 → output_request.request_id）"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ok", "failed"],
+      "description": "生成结果：ok=成功 / failed=失败"
+    },
+    "output_path": {
+      "type": ["string", "null"],
+      "description": "成功时为生成文件的绝对路径，失败时为 null"
+    },
+    "size_bytes": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "生成文件大小，失败时为 null"
+    },
+    "error": {
+      "type": ["string", "null"],
+      "description": "失败时的错误信息，成功时为 null"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "完成时间，ISO 8601"
+    }
+  }
+}

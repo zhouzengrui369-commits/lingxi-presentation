@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lingxi.local/contracts/output_request.schema.json",
+  "title": "OutputRequest",
+  "description": "输出请求结构（T-1.5 多格式输出）。用户确认预览后 → 选格式 → output.writer 接收 request → 写 output_result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_id",
+    "preview_id",
+    "format",
+    "output_path"
+  ],
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "输出请求 UUID v4，被 output_result.request_id 引用"
+    },
+    "preview_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "基于哪个预览生成（外键 → preview_page.preview_id）"
+    },
+    "format": {
+      "type": "string",
+      "enum": ["pptx", "pdf", "docx", "html"],
+      "description": "输出格式，PRD 3.5 限定 4 种"
+    },
+    "output_path": {
+      "type": "string",
+      "minLength": 1,
+      "description": "绝对输出路径（macOS / Win 自适配）"
+    },
+    "options": {
+      "type": ["object", "null"],
+      "description": "格式相关选项（pdf 纸张 / pptx 幻灯片尺寸 / docx 字体 等），可空",
+      "additionalProperties": true,
+      "properties": {
+        "page_size": {
+          "type": "string",
+          "enum": ["A4", "A3", "Letter", "16:9", "4:3"],
+          "description": "纸张 / 幻灯片尺寸，pdf 与 pptx 共用"
+        },
+        "embed_fonts": {
+          "type": "boolean",
+          "description": "是否内嵌字体（pdf / pptx）"
+        },
+        "include_toc": {
+          "type": "boolean",
+          "description": "是否包含目录（docx / pdf）"
+        }
+      }
+    }
+  }
+}
