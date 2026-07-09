@@ -1,0 +1,674 @@
+{
+  "source_path": "/Users/njx/Project/wt-template/apps/desktop/src/modules/template/testdata/templates/creative-gradient.pptx",
+  "file_sha1": "21d099a972367d8f",
+  "slide_count": 10,
+  "slide_width_emu": 12191695,
+  "slide_height_emu": 6858000,
+  "slides": [
+    {
+      "index": 0,
+      "layout_type": "section",
+      "background_color": "#FAF5FF",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            -914400,
+            -914400,
+            7315200,
+            7315200
+          ],
+          "text": "",
+          "font_names": [],
+          "text_colors": [],
+          "fill_color": "#A855F7"
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            4572000,
+            1828800,
+            6400800,
+            5486400
+          ],
+          "text": "",
+          "font_names": [],
+          "text_colors": [],
+          "fill_color": "#EC4899"
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            9144000,
+            4572000,
+            4572000,
+            3657600
+          ],
+          "text": "",
+          "font_names": [],
+          "text_colors": [],
+          "fill_color": "#F59E0B"
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            2286000,
+            10972800,
+            2286000
+          ],
+          "text": "品牌升级\n从 0 到 1",
+          "font_names": [
+            "PingFang SC"
+          ],
+          "text_colors": [
+            "#FFFFFF"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "PingFang SC"
+      ],
+      "colors": [
+        "#A855F7",
+        "#EC4899",
+        "#F59E0B",
+        "#FFFFFF"
+      ]
+    },
+    {
+      "index": 1,
+      "layout_type": "section",
+      "background_color": "#FCE7F3",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            548640,
+            10972800,
+            1097280
+          ],
+          "text": "01 品牌故事",
+          "font_names": [
+            "PingFang SC"
+          ],
+          "text_colors": [
+            "#831843"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            2286000,
+            10972800,
+            4114800
+          ],
+          "text": "从工坊到全球",
+          "font_names": [
+            "PingFang SC"
+          ],
+          "text_colors": [
+            "#9D174D"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "PingFang SC"
+      ],
+      "colors": [
+        "#831843",
+        "#9D174D"
+      ]
+    },
+    {
+      "index": 2,
+      "layout_type": "two_column",
+      "background_color": "#FFFFFF",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            457200,
+            10972800,
+            1097280
+          ],
+          "text": "三大支柱",
+          "font_names": [
+            "PingFang SC"
+          ],
+          "text_colors": [
+            "#581C87"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            731520,
+            2286000,
+            3200400,
+            3200400
+          ],
+          "text": "",
+          "font_names": [],
+          "text_colors": [],
+          "fill_color": "#A855F7"
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            4480560,
+            2286000,
+            3200400,
+            3200400
+          ],
+          "text": "",
+          "font_names": [],
+          "text_colors": [],
+          "fill_color": "#EC4899"
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            8229600,
+            2286000,
+            3200400,
+            3200400
+          ],
+          "text": "",
+          "font_names": [],
+          "text_colors": [],
+          "fill_color": "#F59E0B"
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            731520,
+            3383280,
+            3200400,
+            4114800
+          ],
+          "text": "创新",
+          "font_names": [
+            "PingFang SC"
+          ],
+          "text_colors": [
+            "#FFFFFF"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            4480560,
+            3383280,
+            3200400,
+            4114800
+          ],
+          "text": "品质",
+          "font_names": [
+            "PingFang SC"
+          ],
+          "text_colors": [
+            "#FFFFFF"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            8229600,
+            3383280,
+            3200400,
+            4114800
+          ],
+          "text": "社群",
+          "font_names": [
+            "PingFang SC"
+          ],
+          "text_colors": [
+            "#FFFFFF"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "PingFang SC"
+      ],
+      "colors": [
+        "#581C87",
+        "#A855F7",
+        "#EC4899",
+        "#F59E0B",
+        "#FFFFFF"
+      ]
+    },
+    {
+      "index": 3,
+      "layout_type": "title",
+      "background_color": "#FDF4FF",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            457200,
+            10972800,
+            1097280
+          ],
+          "text": "增长数据",
+          "font_names": [
+            "PingFang SC"
+          ],
+          "text_colors": [
+            "#581C87"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            1828800,
+            10972800,
+            4114800
+          ],
+          "text": "• 月活: 50 万 → 230 万\n• 转化率: 2.1% → 5.8%\n• NPS: 42 → 67\n• 客单价: ¥299 → ¥459",
+          "font_names": [
+            "PingFang SC",
+            "PingFang SC",
+            "PingFang SC",
+            "PingFang SC"
+          ],
+          "text_colors": [
+            "#581C87",
+            "#581C87",
+            "#581C87",
+            "#581C87"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "PingFang SC"
+      ],
+      "colors": [
+        "#581C87"
+      ]
+    },
+    {
+      "index": 4,
+      "layout_type": "section",
+      "background_color": "#FFFFFF",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            457200,
+            10972800,
+            1097280
+          ],
+          "text": "用户故事",
+          "font_names": [
+            "PingFang SC"
+          ],
+          "text_colors": [
+            "#581C87"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            2011680,
+            5303520,
+            3657600
+          ],
+          "text": "",
+          "font_names": [],
+          "text_colors": [],
+          "fill_color": "#A855F7"
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            6309360,
+            2011680,
+            5303520,
+            3657600
+          ],
+          "text": "",
+          "font_names": [],
+          "text_colors": [],
+          "fill_color": "#EC4899"
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            731520,
+            2743200,
+            4937760,
+            2286000
+          ],
+          "text": "\"我每天早上都用它来开始创作。\"",
+          "font_names": [
+            "PingFang SC"
+          ],
+          "text_colors": [
+            "#FFFFFF"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            6492240,
+            2743200,
+            4937760,
+            2286000
+          ],
+          "text": "\"灵犀让品牌升级像游戏一样有趣。\"",
+          "font_names": [
+            "PingFang SC"
+          ],
+          "text_colors": [
+            "#FFFFFF"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "PingFang SC"
+      ],
+      "colors": [
+        "#581C87",
+        "#A855F7",
+        "#EC4899",
+        "#FFFFFF"
+      ]
+    },
+    {
+      "index": 5,
+      "layout_type": "section",
+      "background_color": "#FAE8FF",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            548640,
+            10972800,
+            1097280
+          ],
+          "text": "02 未来路线",
+          "font_names": [
+            "PingFang SC"
+          ],
+          "text_colors": [
+            "#831843"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "PingFang SC"
+      ],
+      "colors": [
+        "#831843"
+      ]
+    },
+    {
+      "index": 6,
+      "layout_type": "title",
+      "background_color": "#FFFFFF",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            457200,
+            10972800,
+            1097280
+          ],
+          "text": "2026 路线图",
+          "font_names": [
+            "PingFang SC"
+          ],
+          "text_colors": [
+            "#581C87"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            1828800,
+            10972800,
+            4114800
+          ],
+          "text": "• Q1: AI 助手上线\n• Q2: 移动端 App\n• Q3: 全球扩张\n• Q4: IPO 准备",
+          "font_names": [
+            "PingFang SC",
+            "PingFang SC",
+            "PingFang SC",
+            "PingFang SC"
+          ],
+          "text_colors": [
+            "#581C87",
+            "#581C87",
+            "#581C87",
+            "#581C87"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "PingFang SC"
+      ],
+      "colors": [
+        "#581C87"
+      ]
+    },
+    {
+      "index": 7,
+      "layout_type": "section",
+      "background_color": "#FDF4FF",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            4572000,
+            1828800,
+            3017520,
+            3017520
+          ],
+          "text": "",
+          "font_names": [],
+          "text_colors": [],
+          "fill_color": "#F59E0B"
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            1371600,
+            2743200,
+            9418320,
+            1371600
+          ],
+          "text": "\"让每个人都能成为创作者。\"",
+          "font_names": [
+            "PingFang SC"
+          ],
+          "text_colors": [
+            "#581C87"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "PingFang SC"
+      ],
+      "colors": [
+        "#581C87",
+        "#F59E0B"
+      ]
+    },
+    {
+      "index": 8,
+      "layout_type": "section",
+      "background_color": "#FFFFFF",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            457200,
+            10972800,
+            1097280
+          ],
+          "text": "团队介绍",
+          "font_names": [
+            "PingFang SC"
+          ],
+          "text_colors": [
+            "#581C87"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            2286000,
+            10972800,
+            4114800
+          ],
+          "text": "60+ 同事 · 来自 12 个国家 · 平均年龄 28",
+          "font_names": [
+            "PingFang SC"
+          ],
+          "text_colors": [
+            "#831843"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "PingFang SC"
+      ],
+      "colors": [
+        "#581C87",
+        "#831843"
+      ]
+    },
+    {
+      "index": 9,
+      "layout_type": "summary",
+      "background_color": "#FAF5FF",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            -914400,
+            4572000,
+            12801600,
+            2743200
+          ],
+          "text": "",
+          "font_names": [],
+          "text_colors": [],
+          "fill_color": "#A855F7"
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            -914400,
+            5943600,
+            12801600,
+            1828800
+          ],
+          "text": "",
+          "font_names": [],
+          "text_colors": [],
+          "fill_color": "#EC4899"
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            2286000,
+            10972800,
+            1097280
+          ],
+          "text": "谢谢！",
+          "font_names": [
+            "PingFang SC"
+          ],
+          "text_colors": [
+            "#FFFFFF"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "PingFang SC"
+      ],
+      "colors": [
+        "#A855F7",
+        "#EC4899",
+        "#FFFFFF"
+      ]
+    }
+  ],
+  "all_fonts": [
+    "PingFang SC"
+  ],
+  "all_colors": [
+    "#581C87",
+    "#831843",
+    "#9D174D",
+    "#A855F7",
+    "#EC4899",
+    "#F59E0B",
+    "#FFFFFF"
+  ]
+}

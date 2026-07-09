@@ -1,0 +1,572 @@
+{
+  "source_path": "/Users/njx/Project/wt-template/apps/desktop/src/modules/template/testdata/templates/business-dark.pptx",
+  "file_sha1": "9a3673b59db470fe",
+  "slide_count": 10,
+  "slide_width_emu": 12191695,
+  "slide_height_emu": 6858000,
+  "slides": [
+    {
+      "index": 0,
+      "layout_type": "section",
+      "background_color": "#0E1421",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            2286000,
+            10972800,
+            1097280
+          ],
+          "text": "2026 Q1 业务回顾",
+          "font_names": [
+            "Microsoft YaHei"
+          ],
+          "text_colors": [
+            "#C9A227"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            3657600,
+            10972800,
+            1097280
+          ],
+          "text": "董事会汇报 · 仅限内部",
+          "font_names": [
+            "Microsoft YaHei"
+          ],
+          "text_colors": [
+            "#E8E8E8"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            5120640,
+            11064240,
+            73152
+          ],
+          "text": "",
+          "font_names": [],
+          "text_colors": [],
+          "fill_color": "#C9A227"
+        }
+      ],
+      "fonts": [
+        "Microsoft YaHei"
+      ],
+      "colors": [
+        "#C9A227",
+        "#E8E8E8"
+      ]
+    },
+    {
+      "index": 1,
+      "layout_type": "section",
+      "background_color": "#0E1421",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            548640,
+            10972800,
+            1097280
+          ],
+          "text": "01 业绩概览",
+          "font_names": [
+            "Microsoft YaHei"
+          ],
+          "text_colors": [
+            "#C9A227"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            2286000,
+            10972800,
+            4114800
+          ],
+          "text": "营收达成率 108% · 同比增长 23%",
+          "font_names": [
+            "Microsoft YaHei"
+          ],
+          "text_colors": [
+            "#E8E8E8"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "Microsoft YaHei"
+      ],
+      "colors": [
+        "#C9A227",
+        "#E8E8E8"
+      ]
+    },
+    {
+      "index": 2,
+      "layout_type": "title",
+      "background_color": "#1A1A2E",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            457200,
+            10972800,
+            1097280
+          ],
+          "text": "关键数字",
+          "font_names": [
+            "Microsoft YaHei"
+          ],
+          "text_colors": [
+            "#C9A227"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            1828800,
+            10972800,
+            4114800
+          ],
+          "text": "• 营收 1.42 亿\n• 毛利 5,800 万\n• 净利 2,310 万\n• ARPU 同比 +18%",
+          "font_names": [
+            "Microsoft YaHei",
+            "Microsoft YaHei",
+            "Microsoft YaHei",
+            "Microsoft YaHei"
+          ],
+          "text_colors": [
+            "#FFFFFF",
+            "#FFFFFF",
+            "#FFFFFF",
+            "#FFFFFF"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "Microsoft YaHei"
+      ],
+      "colors": [
+        "#C9A227",
+        "#FFFFFF"
+      ]
+    },
+    {
+      "index": 3,
+      "layout_type": "content",
+      "background_color": "#1A1A2E",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            457200,
+            10972800,
+            1097280
+          ],
+          "text": "区域表现",
+          "font_names": [
+            "Microsoft YaHei"
+          ],
+          "text_colors": [
+            "#C9A227"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            1828800,
+            10972800,
+            4114800
+          ],
+          "text": "• 华东: 5,400 万 (+25%)\n• 华南: 3,800 万 (+18%)\n• 华北: 3,200 万 (+30%)\n• 西部: 1,800 万 (+15%)",
+          "font_names": [
+            "Microsoft YaHei",
+            "Microsoft YaHei",
+            "Microsoft YaHei",
+            "Microsoft YaHei"
+          ],
+          "text_colors": [
+            "#FFFFFF",
+            "#FFFFFF",
+            "#FFFFFF",
+            "#FFFFFF"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "Microsoft YaHei"
+      ],
+      "colors": [
+        "#C9A227",
+        "#FFFFFF"
+      ]
+    },
+    {
+      "index": 4,
+      "layout_type": "section",
+      "background_color": "#0E1421",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            457200,
+            10972800,
+            1097280
+          ],
+          "text": "客户增长",
+          "font_names": [
+            "Microsoft YaHei"
+          ],
+          "text_colors": [
+            "#C9A227"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            2286000,
+            5486400,
+            4114800
+          ],
+          "text": "新增企业客户\n42 家",
+          "font_names": [
+            "Microsoft YaHei",
+            "Microsoft YaHei"
+          ],
+          "text_colors": [
+            "#FFFFFF",
+            "#FFFFFF"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            6217920,
+            2286000,
+            5486400,
+            4114800
+          ],
+          "text": "续约率\n91%",
+          "font_names": [
+            "Microsoft YaHei",
+            "Microsoft YaHei"
+          ],
+          "text_colors": [
+            "#C9A227",
+            "#C9A227"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "Microsoft YaHei"
+      ],
+      "colors": [
+        "#C9A227",
+        "#FFFFFF"
+      ]
+    },
+    {
+      "index": 5,
+      "layout_type": "section",
+      "background_color": "#0E1421",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            548640,
+            10972800,
+            1097280
+          ],
+          "text": "02 产品线",
+          "font_names": [
+            "Microsoft YaHei"
+          ],
+          "text_colors": [
+            "#C9A227"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "Microsoft YaHei"
+      ],
+      "colors": [
+        "#C9A227"
+      ]
+    },
+    {
+      "index": 6,
+      "layout_type": "section",
+      "background_color": "#1A1A2E",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            457200,
+            10972800,
+            1097280
+          ],
+          "text": "产品矩阵",
+          "font_names": [
+            "Microsoft YaHei"
+          ],
+          "text_colors": [
+            "#C9A227"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            2286000,
+            10972800,
+            4114800
+          ],
+          "text": "旗舰版 · 增长版 · 入门版 · 定制版",
+          "font_names": [
+            "Microsoft YaHei"
+          ],
+          "text_colors": [
+            "#FFFFFF"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "Microsoft YaHei"
+      ],
+      "colors": [
+        "#C9A227",
+        "#FFFFFF"
+      ]
+    },
+    {
+      "index": 7,
+      "layout_type": "section",
+      "background_color": "#0E1421",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            1371600,
+            2560320,
+            9418320,
+            1828800
+          ],
+          "text": "\"灵犀演示让我们的季度汇报从 3 天压缩到 4 小时。\"",
+          "font_names": [
+            "Microsoft YaHei"
+          ],
+          "text_colors": [
+            "#C9A227"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            4572000,
+            10972800,
+            4114800
+          ],
+          "text": "— 张总监 · 某制造业上市公司",
+          "font_names": [
+            "Microsoft YaHei"
+          ],
+          "text_colors": [
+            "#FFFFFF"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "Microsoft YaHei"
+      ],
+      "colors": [
+        "#C9A227",
+        "#FFFFFF"
+      ]
+    },
+    {
+      "index": 8,
+      "layout_type": "title",
+      "background_color": "#1A1A2E",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            457200,
+            10972800,
+            1097280
+          ],
+          "text": "风险与挑战",
+          "font_names": [
+            "Microsoft YaHei"
+          ],
+          "text_colors": [
+            "#C9A227"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            1828800,
+            10972800,
+            4114800
+          ],
+          "text": "• 原材料成本上涨 12%\n• 汇率波动影响海外营收\n• 新业务线尚在投入期\n• 监管政策变化",
+          "font_names": [
+            "Microsoft YaHei",
+            "Microsoft YaHei",
+            "Microsoft YaHei",
+            "Microsoft YaHei"
+          ],
+          "text_colors": [
+            "#FFFFFF",
+            "#FFFFFF",
+            "#FFFFFF",
+            "#FFFFFF"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "Microsoft YaHei"
+      ],
+      "colors": [
+        "#C9A227",
+        "#FFFFFF"
+      ]
+    },
+    {
+      "index": 9,
+      "layout_type": "summary",
+      "background_color": "#0E1421",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            548640,
+            10972800,
+            1097280
+          ],
+          "text": "Q2 展望",
+          "font_names": [
+            "Microsoft YaHei"
+          ],
+          "text_colors": [
+            "#C9A227"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            2286000,
+            10972800,
+            4114800
+          ],
+          "text": "• 聚焦核心产品迭代\n• 扩大华东华南覆盖\n• 启动海外试点\n• 目标营收 1.6 亿",
+          "font_names": [
+            "Microsoft YaHei",
+            "Microsoft YaHei",
+            "Microsoft YaHei",
+            "Microsoft YaHei"
+          ],
+          "text_colors": [
+            "#FFFFFF",
+            "#FFFFFF",
+            "#FFFFFF",
+            "#FFFFFF"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            5120640,
+            11064240,
+            73152
+          ],
+          "text": "",
+          "font_names": [],
+          "text_colors": [],
+          "fill_color": "#C9A227"
+        }
+      ],
+      "fonts": [
+        "Microsoft YaHei"
+      ],
+      "colors": [
+        "#C9A227",
+        "#FFFFFF"
+      ]
+    }
+  ],
+  "all_fonts": [
+    "Microsoft YaHei"
+  ],
+  "all_colors": [
+    "#C9A227",
+    "#E8E8E8",
+    "#FFFFFF"
+  ]
+}

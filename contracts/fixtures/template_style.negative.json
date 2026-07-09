@@ -1,0 +1,21 @@
+{
+  "template_id": "imported_invalid_demo",
+  "source": "external",
+  "name": "故意违反 schema 的反例 — source 不在 enum 内 + page_count 字符串 + color 短格式",
+  "layout_types": ["title"],
+  "palette": {
+    "primary": "#FFF",
+    "secondary": "#0EA5E9",
+    "accent": "#16A34A",
+    "background": "#FFFFFF",
+    "text": "#1A1A1A"
+  },
+  "fonts": {
+    "heading": "PingFang SC",
+    "body": "PingFang SC"
+  },
+  "decorations": ["solid_block"],
+  "page_count": "ten",
+  "analyzed_at": "2026-07-09T11:00:00+08:00",
+  "analyzer_version": "1.0.0"
+}
