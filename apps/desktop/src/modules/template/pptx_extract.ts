@@ -23,7 +23,7 @@ export function findExtractorScript(): string {
     return process.env.PPTX_EXTRACTOR_SCRIPT;
   }
   // __dirname = apps/desktop/src/modules/template, 上 4 级 = repo root
-  const repoRoot = resolve(dirname(__dirname), '..', '..', '..');
+  const repoRoot = resolve(dirname(__dirname), '..', '..', '..', '..');
   return resolve(repoRoot, 'backend', 'scripts', 'extract_pptx.py');
 }
 

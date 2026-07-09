@@ -7,6 +7,7 @@
  * 灵犀演示 · Phase 1 · T-1.3
  */
 
+import { resolve } from 'node:path';
 import type { PPTXExtractedJson } from '../types';
 
 const EMU_W = 12191695;
@@ -83,7 +84,7 @@ export function makeBusinessDarkFixture(): PPTXExtractedJson {
   };
 }
 
-/** 学术浅色：10 页，白底 + 深灰文字 + 蓝色标题 */
+/** 学术浅色：10 页，深学术蓝主导（~76%）+ 米白底部装饰条（24%）+ 白字 */
 export function makeAcademicLightFixture(): PPTXExtractedJson {
   const slides = [];
   for (let i = 0; i < 10; i++) {
@@ -95,10 +96,10 @@ export function makeAcademicLightFixture(): PPTXExtractedJson {
       index: i,
       layout_type_guess: layout,
       shapes: [
-        rect(0, 0, 13.333, 7.5, 'FAFAF7'),  // 米白背景
-        rect(0, 0, 0.15, 7.5, '1F4E79'),     // 深学术蓝侧边条
-        textbox(0.8, 0.5, 11.5, 0.8, `学术第 ${i + 1} 页`, { font: 'SimHei', size: 28, bold: true, color: '1F4E79' }),
-        textbox(0.8, 2.0, 11.5, 4.5, `学术内容 ${i + 1}`, { font: 'SimSun', size: 20, color: '222222' }),
+        rect(0, 0, 13.333, 5.7, '1F4E79'),     // 深学术蓝主区 (76% 面积 = brand color / primary)
+        rect(0, 5.7, 13.333, 1.8, 'FAFAF7'),   // 米白底部装饰条 (24% 面积)
+        textbox(0.5, 0.5, 12.3, 1.0, `学术第 ${i + 1} 页`, { font: 'SimHei', size: 28, bold: true, color: 'FFFFFF' }),
+        textbox(0.8, 2.5, 11.5, 3.0, `学术内容 ${i + 1}`, { font: 'SimSun', size: 14, color: 'FFFFFF' }),
       ],
     });
   }
@@ -113,6 +114,13 @@ export function makeAcademicLightFixture(): PPTXExtractedJson {
     extractor_version: '1.0.0',
   };
 }
+
+/** TEMPLATES — 用于 test_template_export_schema 跑真 PPTX 文件 analyze */
+export const TEMPLATES: Record<string, string> = {
+  businessDark: resolve(__dirname, '..', '..', '..', '..', 'testdata', 'templates', 'business-dark.pptx'),
+  academicLight: resolve(__dirname, '..', '..', '..', '..', 'testdata', 'templates', 'academic-light.pptx'),
+  creativeGradient: resolve(__dirname, '..', '..', '..', '..', 'testdata', 'templates', 'creative-gradient.pptx'),
+};
 
 /** 创意渐变：8 页，多色填充（紫/粉/橙） */
 export function makeCreativeGradientFixture(): PPTXExtractedJson {
