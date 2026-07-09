@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+*.lock
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# Local dev
+.env
+.env.local

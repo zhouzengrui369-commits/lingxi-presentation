@@ -1,0 +1,118 @@
+"""API provider 测试。
+
+覆盖：
+  - 无 env key → 走 mock 路径
+  - 有 key + httpx MockTransport → 真实 HTTP 路径跑通
+  - 5xx → ProviderCallError
+  - 异常响应 schema → ProviderCallError
+"""
+
+from __future__ import annotations
+
+import json
+
+import httpx
+import pytest
+
+from backend.daemon.ai_provider import ProviderCallError
+from backend.daemon.providers.api_provider import MockProvider, MiniMaxAPIProvider
+
+
+class TestApiProviderNoKey:
+    async def test_no_env_key_uses_mock(self, monkeypatch):
+        """env 没 MiniMax_API_KEY → is_mock=True，chat 返回 mock。"""
+        monkeypatch.delenv("MiniMax_API_KEY", raising=False)
+        p = MiniMaxAPIProvider()
+        assert p.is_mock is True
+        assert await p.health() is True
+        assert await p.chat("anything") == "hello (mock)"
+
+    async def test_empty_key_treated_as_missing(self, monkeypatch):
+        """key 设成空串也算 mock。"""
+        monkeypatch.setenv("MiniMax_API_KEY", "   ")
+        p = MiniMaxAPIProvider()
+        assert p.is_mock is True
+
+    async def test_custom_mock_reply(self, monkeypatch):
+        """直接显式传 api_key=None 强制 mock 路径。"""
+        monkeypatch.delenv("MiniMax_API_KEY", raising=False)
+        p = MiniMaxAPIProvider(api_key=None)
+        assert p.is_mock is True
+
+
+def _mock_transport_handler(content: str = "hello from api"):
+    """生成一个 httpx MockTransport handler，模拟 MiniMax 风格 chat completion 响应。"""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        # 验证请求结构
+        body = json.loads(request.content.decode("utf-8"))
+        assert body["messages"][0]["role"] == "user"
+        return httpx.Response(
+            200,
+            json={
+                "choices": [{"message": {"role": "assistant", "content": content}}],
+            },
+        )
+
+    return handler
+
+
+class TestApiProviderWithKey:
+    async def test_chat_with_injected_client(self, monkeypatch):
+        """注入 httpx MockTransport，验证真实 HTTP 路径。"""
+        monkeypatch.setenv("MiniMax_API_KEY", "sk-test-abc123")
+        transport = httpx.MockTransport(_mock_transport_handler("hello api"))
+        p = MiniMaxAPIProvider(client=httpx.AsyncClient(transport=transport, base_url="https://api.example"))
+        assert p.is_mock is False
+        assert await p.health() is True
+        out = await p.chat("hi")
+        assert out == "hello api"
+
+    async def test_chat_5xx_raises(self, monkeypatch):
+        monkeypatch.setenv("MiniMax_API_KEY", "sk-test")
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(500, text="internal error")
+
+        transport = httpx.MockTransport(handler)
+        p = MiniMaxAPIProvider(client=httpx.AsyncClient(transport=transport, base_url="https://api.example"))
+        with pytest.raises(ProviderCallError) as exc_info:
+            await p.chat("hi")
+        assert "500" in str(exc_info.value)
+
+    async def test_chat_bad_json_raises(self, monkeypatch):
+        monkeypatch.setenv("MiniMax_API_KEY", "sk-test")
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(200, text="not json")
+
+        transport = httpx.MockTransport(handler)
+        p = MiniMaxAPIProvider(client=httpx.AsyncClient(transport=transport, base_url="https://api.example"))
+        with pytest.raises(ProviderCallError):
+            await p.chat("hi")
+
+    async def test_chat_unexpected_shape_raises(self, monkeypatch):
+        monkeypatch.setenv("MiniMax_API_KEY", "sk-test")
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(200, json={"choices": []})  # empty choices
+
+        transport = httpx.MockTransport(handler)
+        p = MiniMaxAPIProvider(client=httpx.AsyncClient(transport=transport, base_url="https://api.example"))
+        with pytest.raises(ProviderCallError) as exc_info:
+            await p.chat("hi")
+        assert "shape" in str(exc_info.value).lower()
+
+
+class TestMockProviderDirect:
+    async def test_mock_provider_health(self):
+        m = MockProvider()
+        assert await m.health() is True
+
+    async def test_mock_provider_default_reply(self):
+        m = MockProvider()
+        assert await m.chat("anything") == "hello (mock)"
+
+    async def test_mock_provider_custom_reply(self):
+        m = MockProvider(reply="custom answer")
+        assert await m.chat("x") == "custom answer"

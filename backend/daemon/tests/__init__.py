@@ -1,0 +1,1 @@
+"""tests/__init__.py — 让 pytest 把 backend.daemon.tests 视作 package。"""
