@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>灵犀演示 · 源码结构 (T-1.0.b)</title>
+  <style>
+    body { background: #1E1E1E; margin: 0; padding: 24px; font-family: -apple-system, "SF Mono", Menlo, Monaco, Consolas, monospace; }
+    h1 { color: #E1E4EA; font-size: 16px; margin-bottom: 16px; font-weight: 600; }
+    .terminal {
+      background: #0F1115;
+      color: #B4BAC4;
+      padding: 16px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 22px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .tree { color: #4D8CF2; }
+    .file { color: #E1E4EA; }
+    .comment { color: #5C636E; }
+    .yellow { color: #F59E0B; }
+    .green { color: #22C55E; }
+    .header { color: #38BDF8; font-weight: 700; font-size: 15px; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+  <div class="terminal">
+    <div class="header">📁 apps/desktop/  (T-1.0.b RN 桌面端脚手架 — 已就绪)</div>
+    <div><span class="tree">├──</span> <span class="file">package.json</span>          <span class="comment">RN 0.86 + React 19.2 + TypeScript</span></div>
+    <div><span class="tree">├──</span> <span class="file">app.json</span>             <span class="comment">AppRegistry name: LingxiDemo</span></div>
+    <div><span class="tree">├──</span> <span class="file">index.js</span>             <span class="comment">RN 入口（macOS 通用）</span></div>
+    <div><span class="tree">├──</span> <span class="file">index.windows.js</span>     <span class="comment">RN 入口（Windows 平台）</span></div>
+    <div><span class="tree">├──</span> <span class="file">App.tsx</span>              <span class="comment">入口组件 → 加载 src/App</span></div>
+    <div><span class="tree">├──</span> <span class="file">babel.config.js</span>      <span class="comment">Babel 配置</span></div>
+    <div><span class="tree">├──</span> <span class="file">metro.config.js</span>      <span class="comment">Metro bundler 配置</span></div>
+    <div><span class="tree">├──</span> <span class="file">tsconfig.json</span>        <span class="comment">TypeScript 配置</span></div>
+    <div><span class="tree">├──</span> <span class="file">README.md</span>            <span class="comment">启动 + 打包说明</span></div>
+    <div><span class="tree">├──</span> <span class="file">.electron-builder.macos.json</span>   <span class="comment">macOS 打包配置</span></div>
+    <div><span class="tree">└──</span> <span class="file">.electron-builder.windows.json</span> <span class="comment">Windows 打包配置</span></div>
+    <div style="margin-top: 14px;"><span class="tree">├──</span> <span class="yellow">src/</span>  <span class="comment">业务代码（自研实现）</span></div>
+    <div style="padding-left: 22px;"><span class="tree">├──</span> <span class="file">App.tsx</span>           <span class="comment">主组件（Header + ThemeSwitch + Router）</span></div>
+    <div style="padding-left: 22px;"><span class="tree">├──</span> <span class="file">router.tsx</span>        <span class="comment">5 模块路由（自研极简 tab 路由）</span></div>
+    <div style="padding-left: 22px;"><span class="tree">├──</span> <span class="yellow">theme/</span>           <span class="comment">主题系统（Context 注入）</span></div>
+    <div style="padding-left: 44px;"><span class="tree">├──</span> <span class="file">light.ts</span>         <span class="comment">浅色主题</span></div>
+    <div style="padding-left: 44px;"><span class="tree">├──</span> <span class="file">dark.ts</span>          <span class="comment">深色主题</span></div>
+    <div style="padding-left: 44px;"><span class="tree">└──</span> <span class="file">index.tsx</span>        <span class="comment">ThemeProvider + useTheme</span></div>
+    <div style="padding-left: 22px;"><span class="tree">├──</span> <span class="yellow">screens/</span>        <span class="comment">5 模块占位屏</span></div>
+    <div style="padding-left: 44px;"><span class="tree">├──</span> <span class="file">FileKBScreen.tsx</span>     <span class="comment">T-1.1</span></div>
+    <div style="padding-left: 44px;"><span class="tree">├──</span> <span class="file">AdvisorScreen.tsx</span>    <span class="comment">T-1.2</span></div>
+    <div style="padding-left: 44px;"><span class="tree">├──</span> <span class="file">TemplateScreen.tsx</span>   <span class="comment">T-1.3</span></div>
+    <div style="padding-left: 44px;"><span class="tree">├──</span> <span class="file">PreviewScreen.tsx</span>    <span class="comment">T-1.4</span></div>
+    <div style="padding-left: 44px;"><span class="tree">└──</span> <span class="file">OutputScreen.tsx</span>     <span class="comment">T-1.5</span></div>
+    <div style="padding-left: 22px;"><span class="tree">└──</span> <span class="yellow">components/</span>     <span class="comment">通用组件</span></div>
+    <div style="padding-left: 44px;"><span class="tree">└──</span> <span class="file">ThemeSwitch.tsx</span>   <span class="comment">顶部右上角 light/dark 切换按钮</span></div>
+    <div style="margin-top: 14px;"><span class="tree">├──</span> <span class="yellow">ios/</span>          <span class="comment">iOS 原生（react-native init 模板）</span></div>
+    <div style="margin-top: 14px;"><span class="tree">├──</span> <span class="yellow">android/</span>      <span class="comment">Android 原生（react-native init 模板）</span></div>
+    <div style="margin-top: 14px;"><span class="tree">├──</span> <span class="yellow">macos/</span>       <span class="comment">macOS 原生（react-native-macos 占位）</span></div>
+    <div style="margin-top: 14px;"><span class="tree">└──</span> <span class="yellow">windows/</span>     <span class="comment">Windows 原生（react-native-windows 占位）</span></div>
+    <div style="margin-top: 18px; color: #22C55E; font-weight: 700;">✅ 验证：</div>
+    <div class="green">   npm install → 861 packages, 28s</div>
+    <div class="green">   npx react-native bundle → 3.9MB jsbundle, 85338 行</div>
+    <div class="green">   iOS / macOS / Windows 三平台配置就绪</div>
+  </div>
+</body>
+</html>
