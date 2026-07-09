@@ -268,10 +268,14 @@ export class KbStorage {
       throw new Error(`invalid entry_id (not UUID v4): ${entry.entry_id}`);
     }
     if (entry.summary.length < 50 || entry.summary.length > 1000) {
-      throw new Error(`summary length ${entry.summary.length} outside [50, 1000]`);
+      const err = new Error(`summary length ${entry.summary.length} outside [50, 1000]`);
+      (err as Error & { code?: string }).code = 'ERR_SUMMARY_LENGTH';
+      throw err;
     }
     if (entry.tags.length < 1 || entry.tags.length > 10) {
-      throw new Error(`tags length ${entry.tags.length} outside [1, 10]`);
+      const err = new Error(`tags length ${entry.tags.length} outside [1, 10]`);
+      (err as Error & { code?: string }).code = 'ERR_TAGS_LENGTH';
+      throw err;
     }
     const ep = path.join(this.paths.entriesDir, `${entry.entry_id}.json`);
     await atomicWriteJSON(ep, entry);

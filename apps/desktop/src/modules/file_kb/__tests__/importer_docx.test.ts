@@ -8,7 +8,7 @@ import * as path from 'path';
 
 describe('importer: docx', () => {
   it('imports real generated docx and extracts paragraphs', async () => {
-    const sample = path.resolve(__dirname, '../../../../../testdata/docx_sample.docx');
+    const sample = path.resolve(__dirname, '../../../../testdata/docx_sample.docx');
     const r = await importFile(sample);
     expect(r.record.format).toBe('docx');
     expect(r.record.status).toBe('ok');

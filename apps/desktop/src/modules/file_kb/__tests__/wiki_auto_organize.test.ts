@@ -8,7 +8,7 @@ import * as path from 'path';
 
 describe('wiki: auto-organize', () => {
   it('organizes docx into wiki entry (forceLocal, no daemon)', async () => {
-    const sample = path.resolve(__dirname, '../../../../../testdata/docx_sample.docx');
+    const sample = path.resolve(__dirname, '../../../../testdata/docx_sample.docx');
     const ir = await importFile(sample);
     expect(ir.text.length).toBeGreaterThan(50);
 
@@ -30,7 +30,7 @@ describe('wiki: auto-organize', () => {
   });
 
   it('falls back to local heuristic when daemon is unreachable', async () => {
-    const sample = path.resolve(__dirname, '../../../../../testdata/md_sample.md');
+    const sample = path.resolve(__dirname, '../../../../testdata/md_sample.md');
     const ir = await importFile(sample);
 
     // 用一个 unreachable URL；用 fetch mock 让其快速 reject
@@ -48,7 +48,7 @@ describe('wiki: auto-organize', () => {
   });
 
   it('uses daemon response when valid JSON returned', async () => {
-    const sample = path.resolve(__dirname, '../../../../../testdata/md_sample.md');
+    const sample = path.resolve(__dirname, '../../../../testdata/md_sample.md');
     const ir = await importFile(sample);
 
     const fakeJson = JSON.stringify({

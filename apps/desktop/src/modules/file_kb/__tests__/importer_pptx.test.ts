@@ -7,7 +7,7 @@ import * as path from 'path';
 
 describe('importer: pptx', () => {
   it('imports real generated pptx and extracts slide text', async () => {
-    const sample = path.resolve(__dirname, '../../../../../testdata/pptx_sample.pptx');
+    const sample = path.resolve(__dirname, '../../../../testdata/pptx_sample.pptx');
     const r = await importFile(sample);
     expect(r.record.format).toBe('pptx');
     expect(r.record.status).toBe('ok');

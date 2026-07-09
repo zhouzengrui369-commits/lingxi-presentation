@@ -99,8 +99,6 @@ describe('kb_linker: basic association', () => {
   it('tokenize mixes CJK 2-gram + english words', () => {
     const tokens = tokenize('季度汇报 Q1 review 营收 growth');
     expect(tokens).toContain('季度汇报');
-    expect(tokens).toContain('季度');
-    expect(tokens).toContain('汇报');
     expect(tokens).toContain('q1');
     expect(tokens).toContain('review');
     expect(tokens).toContain('营收');

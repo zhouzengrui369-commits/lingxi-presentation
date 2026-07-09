@@ -7,7 +7,7 @@ import * as path from 'path';
 
 describe('importer: png', () => {
   it('imports real generated png and extracts IHDR width/height', async () => {
-    const sample = path.resolve(__dirname, '../../../../../testdata/png_sample.png');
+    const sample = path.resolve(__dirname, '../../../../testdata/png_sample.png');
     const r = await importFile(sample);
     expect(r.record.format).toBe('png');
     expect(r.record.status).toBe('ok');

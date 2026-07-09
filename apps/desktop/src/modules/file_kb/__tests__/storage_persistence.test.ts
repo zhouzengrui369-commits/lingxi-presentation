@@ -41,7 +41,7 @@ describe('storage: persistence', () => {
     const entry: WikiKbEntry = {
       entry_id: entryId,
       title: '测试条目',
-      summary: '这是一个测试摘要，必须大于等于 50 字符才能通过 schema 校验，确保长度足够。',
+      summary: '这是一个测试摘要，必须保证字符长度大于等于 50 才能通过 schema 校验，确保长度足够覆盖各种边界情况。',
       tags: ['测试'],
       related_files: [fileId],
       created_at: new Date().toISOString(),
@@ -126,7 +126,7 @@ describe('storage: persistence', () => {
     await s.putEntry({
       entry_id: eid,
       title: 't',
-      summary: 'summary 必须够五十字确保通过 schema 校验的填充文案这里就是填充。',
+      summary: 'summary 摘要字段必须够五十字确保通过 schema 校验的填充文案这里就是填充不能省略这是更多填充字符。',
       tags: ['x'],
       related_files: [fid],
       created_at: new Date().toISOString(),

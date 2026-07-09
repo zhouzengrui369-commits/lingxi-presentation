@@ -7,7 +7,7 @@ import * as path from 'path';
 
 describe('importer: jpg', () => {
   it('imports real generated jpg and extracts SOF width/height', async () => {
-    const sample = path.resolve(__dirname, '../../../../../testdata/jpg_sample.jpg');
+    const sample = path.resolve(__dirname, '../../../../testdata/jpg_sample.jpg');
     const r = await importFile(sample);
     expect(r.record.format).toBe('jpg');
     expect(r.record.status).toBe('ok');

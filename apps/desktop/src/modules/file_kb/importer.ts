@@ -98,7 +98,11 @@ export async function importFile(filePath: string, opts: ImporterOptions = {}): 
     const result = await parseBuffer(buf, format, name);
     text = result.text;
     meta = result.meta;
-    if (!text && format !== 'jpg' && format !== 'png') {
+    // 解析器报告了 error（如 invalid PNG signature / 缺 word/document.xml）
+    if (typeof result.meta.error === 'string' && result.meta.error) {
+      status = stat.size >= 50 * 1024 * 1024 ? 'failed' : 'partial';
+      error = result.meta.error;
+    } else if (!text && format !== 'jpg' && format !== 'png') {
       // 文本格式但没抽出文本 → partial
       status = 'partial';
       error = 'no text extracted (file may be image-only or unsupported variant)';
@@ -601,5 +605,15 @@ function decodeXmlEntities(s: string): string {
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&apos;/g, "'")
+    // numeric character references: &#NNNN; (decimal) and &#xNNNN; (hex)
+    .replace(/&#(\d+);/g, (_m, code) => {
+      const n = parseInt(code, 10);
+      return Number.isFinite(n) && n > 0 ? String.fromCodePoint(n) : _m;
+    })
+    .replace(/&#x([0-9a-fA-F]+);/g, (_m, code) => {
+      const n = parseInt(code, 16);
+      return Number.isFinite(n) && n > 0 ? String.fromCodePoint(n) : _m;
+    })
+    // 注意：&amp; 必须最后替换，避免误把 &amp;lt; 当成 &lt;
     .replace(/&amp;/g, '&');
 }
