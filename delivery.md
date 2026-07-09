@@ -43,6 +43,26 @@
 - Phase 1 Gate 准备度: 4/5 done (T-1.5 仍待启动) — 3 个延后项 (T-1.1 56MB stress / T-1.3 daemon e2e / T-1.4 10-shot latency) 都在 Phase 2 端到端验证时跑
 - 12:55 PM 弹窗选项设计基于旧 verify, 实际进展远超过 30-45min 预期 — 教训: 弹窗 verify 必须 double-check worker self-report, 不能凭 producer 一句话推断 FAIL (PM discipline #1+#7 强化)
 
+#### 2026-07-09 17:44 — Phase 1 第三波启动（T-1.5 only sub-plan）
+- Author: PM (Mavis)
+- Confirmed by: NJX 17:40 主动 cue "严格按 project-pm skill 执行" → 走 PM 完整 verify + 自主推进
+- 触发: NJX HARD GATE 触发 + NJX 13:21 🅰 决策授权 PM 自主 salvage
+- 双 verify 结论（按 PM discipline #12 优先级 6 档）:
+  1. `state.json.results[].verifier_results[].passed` → 1 PASS (T-1.2 only)
+  2. `state.json.verdict_summary` → "Some failed" (T-1.1/1.3)
+  3. `state.json.status` → verifying/ready (T-1.4/1.5)
+  4. outputs/verifier_report.md → 同 #1
+  5. `git log main --oneline` + delivery.md 13:21 段 → **4/5 merged PASS** ✓
+  6. deliverable.md 末行 VERDICT → producer self-report（最不可信）
+  - 冲突解: 取优先级 5 (代码端真实) — PM 13:14-13:21 已自主 salvage 修了 attempt-2 时的 14/3/0 FAIL + mock 截图 + fabricated 截图 + no-deliverable
+- 内容:
+  1. `mavis team plan cancel plan_a4e892c5` — paused 终态归档（保留 files 供检查，max_cycles=3 触底后 resume 不再触发 cycle，PM discipline #10）
+  2. 写新 plan.yaml `/tmp/plan_t15_output_v1.yaml` — T-1.5-output-v1 单 task
+  3. `mavis team plan run` → **plan_6a38e433** 已 started（17:44:36 cycle 1 producing）
+- Phase 1 Gate 准备度: **4/5 done (T-1.1/T-1.2/T-1.3/T-1.4 merged) + T-1.5 启动中** → 等 T-1.5 完成 = 5/5 done → Phase 1 Gate 可验收
+- 3 个延后项 (T-1.1 56MB stress / T-1.3 daemon e2e / T-1.4 10-shot latency) 仍在 Phase 2 端到端验证时跑
+- 教训: 状态 verify 优先看代码端 + delivery.md PM 笔记（最贴近真实），state.json verifier 端是"定格快照"会滞后于 PM 主动 salvage
+
 #### 2026-07-09 08:49 — rules.md 批准
 - Author: PM
 - Confirmed by: NJX
