@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>灵犀演示 · Desktop Scaffold (T-1.0.b)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: #F0F2F5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .macos-frame {
+      width: 1100px;
+      max-width: 100%;
+      height: 720px;
+      background: #FFFFFF;
+      border-radius: 12px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.12), 0 6px 16px rgba(0,0,0,0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .titlebar {
+      height: 28px;
+      background: #ECEEF1;
+      border-bottom: 1px solid #D8DCE3;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 8px;
+    }
+    .traffic {
+      display: flex; gap: 6px;
+    }
+    .dot {
+      width: 12px; height: 12px; border-radius: 50%;
+    }
+    .dot.r { background: #FF5F57; }
+    .dot.y { background: #FFBD2E; }
+    .dot.g { background: #28C840; }
+    .title {
+      flex: 1;
+      text-align: center;
+      font-size: 12px;
+      color: #5C636E;
+    }
+    .header {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px;
+      border-bottom: 1px solid #E1E4EA;
+      display: flex;
+    }
+    body[data-theme="dark"] .header { border-bottom-color: #2A2F38; }
+    body[data-theme="dark"] .macos-frame { background: #0F1115; }
+    body[data-theme="dark"] .titlebar { background: #171A21; border-bottom-color: #2A2F38; }
+    body[data-theme="dark"] .title { color: #B4BAC4; }
+    .brand { display: flex; flex-direction: column; gap: 2px; }
+    .brandTitle { font-size: 18px; font-weight: 700; }
+    .brandSubtitle { font-size: 12px; }
+    .themeSwitch {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid;
+      display: flex; align-items: center; gap: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: opacity 0.2s;
+    }
+    .themeSwitch:hover { opacity: 0.85; }
+    .themeDot { width: 12px; height: 12px; border-radius: 50%; }
+
+    .body { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .tabbar {
+      border-bottom: 1px solid;
+      display: flex;
+      padding: 0 16px;
+      gap: 4px;
+      overflow-x: auto;
+    }
+    .tab {
+      padding: 14px 18px;
+      border-bottom: 2px solid transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      cursor: pointer;
+    }
+    .tab.active { border-bottom-color: #2D6CDF; }
+    body[data-theme="dark"] .tab.active { border-bottom-color: #4D8CF2; }
+    .tabLabel { font-size: 14px; font-weight: 600; }
+    .tabTag { font-size: 11px; margin-top: 2px; opacity: 0.7; }
+
+    .content { flex: 1; padding: 24px; overflow-y: auto; }
+    .pageTitle { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+    .pageSubtitle { font-size: 14px; margin-bottom: 16px; }
+    .card {
+      margin-top: 16px;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid;
+    }
+    .cardText { font-size: 14px; line-height: 22px; }
+    .empty {
+      margin-top: 24px;
+      padding: 32px;
+      border-radius: 12px;
+      border: 1px dashed;
+      text-align: center;
+    }
+    .emptyText { font-size: 13px; }
+
+    /* Light theme colors */
+    body[data-theme="light"] .macos-frame { background: #FFFFFF; }
+    body[data-theme="light"] .titlebar { background: #ECEEF1; border-bottom-color: #D8DCE3; }
+    body[data-theme="light"] .header { background: #FFFFFF; border-bottom-color: #E1E4EA; }
+    body[data-theme="light"] .brandTitle { color: #1A1A1A; }
+    body[data-theme="light"] .brandSubtitle { color: #5C636E; }
+    body[data-theme="light"] .themeSwitch { background: #F7F8FA; border-color: #E1E4EA; color: #1A1A1A; }
+    body[data-theme="light"] .themeDot { background: #FFD56B; }
+    body[data-theme="light"] .tabbar { background: #F7F8FA; border-bottom-color: #E1E4EA; }
+    body[data-theme="light"] .tabLabel { color: #5C636E; }
+    body[data-theme="light"] .tab.active .tabLabel { color: #1A1A1A; }
+    body[data-theme="light"] .tabTag { color: #8A8F99; }
+    body[data-theme="light"] .content { background: #FFFFFF; }
+    body[data-theme="light"] .pageTitle { color: #1A1A1A; }
+    body[data-theme="light"] .pageSubtitle { color: #5C636E; }
+    body[data-theme="light"] .card { background: #F7F8FA; border-color: #E1E4EA; }
+    body[data-theme="light"] .cardText { color: #8A8F99; }
+    body[data-theme="light"] .empty { border-color: #C6CAD3; }
+    body[data-theme="light"] .emptyText { color: #8A8F99; }
+
+    /* Dark theme colors */
+    body[data-theme="dark"] .macos-frame { background: #0F1115; }
+    body[data-theme="dark"] .titlebar { background: #171A21; border-bottom-color: #2A2F38; }
+    body[data-theme="dark"] .header { background: #0F1115; border-bottom-color: #2A2F38; }
+    body[data-theme="dark"] .brandTitle { color: #F1F3F7; }
+    body[data-theme="dark"] .brandSubtitle { color: #B4BAC4; }
+    body[data-theme="dark"] .themeSwitch { background: #171A21; border-color: #2A2F38; color: #F1F3F7; }
+    body[data-theme="dark"] .themeDot { background: #5A6478; }
+    body[data-theme="dark"] .tabbar { background: #171A21; border-bottom-color: #2A2F38; }
+    body[data-theme="dark"] .tabLabel { color: #B4BAC4; }
+    body[data-theme="dark"] .tab.active .tabLabel { color: #F1F3F7; }
+    body[data-theme="dark"] .tabTag { color: #7B8089; }
+    body[data-theme="dark"] .content { background: #0F1115; }
+    body[data-theme="dark"] .pageTitle { color: #F1F3F7; }
+    body[data-theme="dark"] .pageSubtitle { color: #B4BAC4; }
+    body[data-theme="dark"] .card { background: #171A21; border-color: #2A2F38; }
+    body[data-theme="dark"] .cardText { color: #7B8089; }
+    body[data-theme="dark"] .empty { border-color: #3A4150; }
+    body[data-theme="dark"] .emptyText { color: #7B8089; }
+
+    .footer {
+      padding: 8px 16px;
+      border-top: 1px solid;
+      font-size: 11px;
+      display: flex;
+      justify-content: space-between;
+    }
+    body[data-theme="light"] .footer { background: #F7F8FA; border-top-color: #E1E4EA; color: #8A8F99; }
+    body[data-theme="dark"] .footer { background: #171A21; border-top-color: #2A2F38; color: #7B8089; }
+  </style>
+</head>
+<body data-theme="light">
+  <div class="macos-frame">
+    <!-- macOS titlebar -->
+    <div class="titlebar">
+      <div class="traffic">
+        <div class="dot r"></div>
+        <div class="dot y"></div>
+        <div class="dot g"></div>
+      </div>
+      <div class="title" id="title">灵犀演示 — LingxiDemo</div>
+      <div style="width: 50px;"></div>
+    </div>
+
+    <!-- App header -->
+    <div class="header">
+      <div class="brand">
+        <div class="brandTitle">灵犀演示</div>
+        <div class="brandSubtitle">AI 驱动的办公内容生成桌面 App · Phase 1</div>
+      </div>
+      <div class="themeSwitch" id="themeSwitch" onclick="toggleTheme()">
+        <div class="themeDot" id="themeDot"></div>
+        <div id="themeLabel">Light</div>
+      </div>
+    </div>
+
+    <!-- Body: tab + content -->
+    <div class="body">
+      <div class="tabbar" id="tabbar"></div>
+      <div class="content" id="content"></div>
+    </div>
+
+    <div class="footer">
+      <span id="routeFooter">T-1.1 · 文件管理</span>
+      <span>灵犀演示 v0.1.0 · Phase 1 · T-1.0.b</span>
+    </div>
+  </div>
+
+  <script>
+    const routes = [
+      { key: 'file-kb', label: '文件管理', tag: 'T-1.1', title: '文件管理 · LLM Wiki', subtitle: 'T-1.1 等待实现',
+        desc: '本模块负责：本地单文件/文件夹导入（Word/PDF/Excel/PPTX/MD/JPG/PNG），LLM Wiki 整理，仅本地存储。' },
+      { key: 'advisor', label: '顾问交互', tag: 'T-1.2', title: '顾问式交互', subtitle: 'T-1.2 等待实现',
+        desc: '本模块负责：AI 主动选项提问（90% 提问带选项），选项点击 + 语音 + 文字三模输入，实时关联知识库补全。' },
+      { key: 'template', label: '模板', tag: 'T-1.3', title: '模板导入', subtitle: 'T-1.3 等待实现',
+        desc: '本模块负责：用户导入 .pptx 模板 → 转 HTML，AI 分析版式/配色/字体；无模板则用内置简约商务。' },
+      { key: 'preview', label: '预览', tag: 'T-1.4', title: 'HTML 预览', subtitle: 'T-1.4 等待实现',
+        desc: '本模块负责：AI 优先出 HTML 预览（不直接成品），轻量改文字/段落直接在预览页改，复杂改动回 AI 重生成；实时保存。' },
+      { key: 'output', label: '输出', tag: 'T-1.5', title: '多格式输出', subtitle: 'T-1.5 等待实现',
+        desc: '本模块负责：确认预览后选格式：PPT 类出 .pptx + .pdf；报告类出 .docx/.html/.pdf/.pptx 四选。' },
+    ];
+
+    let active = 'file-kb';
+    let theme = 'light';
+
+    function renderTabs() {
+      const tabbar = document.getElementById('tabbar');
+      tabbar.innerHTML = routes.map(r => {
+        const isActive = r.key === active;
+        return `<div class="tab ${isActive ? 'active' : ''}" data-key="${r.key}" onclick="selectRoute('${r.key}')">
+          <div class="tabLabel">${r.label}</div>
+          <div class="tabTag">${r.tag}</div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderContent() {
+      const r = routes.find(x => x.key === active);
+      const content = document.getElementById('content');
+      content.innerHTML = `
+        <div class="pageTitle">${r.title}</div>
+        <div class="pageSubtitle">${r.subtitle}</div>
+        <div class="card">
+          <div class="cardText">${r.desc}</div>
+        </div>
+        <div class="empty">
+          <div class="emptyText">— 该模块由对应 sub-agent 在 worktree 中实现（${r.tag}） —</div>
+        </div>
+      `;
+      document.getElementById('routeFooter').textContent = `${r.tag} · ${r.label}`;
+    }
+
+    function selectRoute(key) {
+      active = key;
+      renderTabs();
+      renderContent();
+    }
+
+    function toggleTheme() {
+      theme = theme === 'light' ? 'dark' : 'light';
+      document.body.setAttribute('data-theme', theme);
+      document.getElementById('themeLabel').textContent = theme === 'light' ? 'Light' : 'Dark';
+    }
+
+    renderTabs();
+    renderContent();
+  </script>
+</body>
+</html>

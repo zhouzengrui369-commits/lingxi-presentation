@@ -1,0 +1,25 @@
+{
+  "appId": "com.lingxi.desktop",
+  "productName": "灵犀演示",
+  "directories": {
+    "output": "dist/macos"
+  },
+  "files": [
+    "macos/build/Release/LingxiDemo.app/**/*",
+    "package.json"
+  ],
+  "mac": {
+    "category": "public.app-category.productivity",
+    "target": [
+      {
+        "target": "dmg",
+        "arch": ["x64", "arm64"]
+      }
+    ],
+    "hardenedRuntime": true,
+    "gatekeeperAssess": false
+  },
+  "dmg": {
+    "title": "灵犀演示 ${version}"
+  }
+}
