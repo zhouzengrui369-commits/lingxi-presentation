@@ -474,15 +474,48 @@ Sub-agent 反馈（要求 24h 内）:
 
 ## 6. Phase 验收（owner 确认）
 
-### Phase 0 验收（立项完成）
+### Phase 0 验收（立项完成）✅
 
-Time: 2026-07-09 08:49 (进行中)
-Done tasks: [T-0.0 4 文档中 3 已批准，1 待最终签字]
+Time: 2026-07-09 08:51
+Done tasks: [T-0.0 4 文档全部 owner 批准]
 Pending / blocked: []
 
-Owner signature: <待弹窗>
-Owner comment: <待弹窗>
-Next phase go-ahead: ⏸ (待最终签字弹窗)
+**Owner signature**: NJX ✅（8:51 弹窗选 "签字进入 Step 2"）
+**Owner comment**: "签字进入 Step 2（推荐 - PM spawn 8 个 sub-agent 开干）"
+**Next phase go-ahead**: ✅ **进入 Phase 1**
+
+#### 立项阶段决策记录（8 个弹窗）
+
+| # | 时间 | 场景 | owner 决策 |
+|---|---|---|---|
+| 1 | 08:17 | MVP 范围 | 完整 P0（5 大模块全跑通） |
+| 2 | 08:18 | MVP 截止 | Others: 质量优先，按质量门卡分阶段 |
+| 3 | 08:19 | 平台优先 | macOS + Win 并行（双 sub-agent） |
+| 4 | 08:20 | CLI 接入 v1 | Others: 长期视角+后期切换+成本可控 |
+| 4v2 | 08:23 | CLI 接入 v2 | daemon + AIProvider 抽象 + CLI 主 + API 兜底（初期双路） |
+| 5 | 08:24 | First-use 场景 | 季度汇报 PPT |
+| 6 | 08:35 | goal.md 批准 | 批准原方案 |
+| 7 | 08:45 | plan.md 批准 | 批准原方案 |
+| 8 | 08:49 | rules.md 批准 | 批准原方案 |
+| 9 | 08:51 | delivery.md 批准 | 批准原方案 |
+| 10 | 08:52 | 最终签字 | 进入 Step 2（PM spawn 8 sub-agent） |
+
+#### Phase 1 启动计划
+
+- **第一波**（现在启动）：3 个基础设施 sub-agent 并行
+  - T-1.0.a: HTTP daemon + AIProvider 抽象层
+  - T-1.0.b: RN 桌面端脚手架（macOS + Win）
+  - T-1.0.c: 跨模块 API schema 契约
+- **第二波**（基础设施 OK 后）：5 个模块 sub-agent 全并行
+  - T-1.1 / T-1.2 / T-1.3 / T-1.4 / T-1.5
+- **第三波**（5 模块 OK 后）：Phase 2 集成
+  - T-2.1 / T-2.2 / T-2.3
+- **第四波**：Phase 3 双平台
+  - T-3.1 / T-3.2
+- **第五波**：Phase 4 北极星
+  - T-4.1
+- **收尾**：Phase 5
+  - T-5.1
 
 ---
 
