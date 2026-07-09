@@ -1,0 +1,21 @@
+{
+  "template_id": "builtin_business_light",
+  "source": "builtin",
+  "name": "简约商务·浅色",
+  "layout_types": ["title", "section", "content", "two_column", "summary"],
+  "palette": {
+    "primary": "#2D6CDF",
+    "secondary": "#0EA5E9",
+    "accent": "#16A34A",
+    "background": "#FFFFFF",
+    "text": "#1A1A1A"
+  },
+  "fonts": {
+    "heading": "PingFang SC",
+    "body": "PingFang SC"
+  },
+  "decorations": ["solid_block", "line_accent"],
+  "page_count": 5,
+  "analyzed_at": "2026-07-09T11:00:00+08:00",
+  "analyzer_version": "1.0.0"
+}

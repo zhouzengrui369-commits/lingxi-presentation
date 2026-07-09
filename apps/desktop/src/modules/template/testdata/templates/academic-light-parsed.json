@@ -1,0 +1,544 @@
+{
+  "source_path": "/Users/njx/Project/wt-template/apps/desktop/src/modules/template/testdata/templates/academic-light.pptx",
+  "file_sha1": "2c5c22f779e889a9",
+  "slide_count": 10,
+  "slide_width_emu": 12191695,
+  "slide_height_emu": 6858000,
+  "slides": [
+    {
+      "index": 0,
+      "layout_type": "section",
+      "background_color": "#FFFFFF",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            1828800,
+            10972800,
+            2286000
+          ],
+          "text": "基于大语言模型的\n代码生成综述",
+          "font_names": [
+            "Source Han Sans CN"
+          ],
+          "text_colors": [
+            "#1E40AF"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            4572000,
+            10972800,
+            4114800
+          ],
+          "text": "论文答辩 · 2026 春季",
+          "font_names": [
+            "Source Han Sans CN"
+          ],
+          "text_colors": [
+            "#475569"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            5943600,
+            11064240,
+            45720
+          ],
+          "text": "",
+          "font_names": [],
+          "text_colors": [],
+          "fill_color": "#3B82F6"
+        }
+      ],
+      "fonts": [
+        "Source Han Sans CN"
+      ],
+      "colors": [
+        "#1E40AF",
+        "#3B82F6",
+        "#475569"
+      ]
+    },
+    {
+      "index": 1,
+      "layout_type": "section",
+      "background_color": "#FFFFFF",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            548640,
+            10972800,
+            1097280
+          ],
+          "text": "01 研究背景",
+          "font_names": [
+            "Source Han Sans CN"
+          ],
+          "text_colors": [
+            "#1E40AF"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            2286000,
+            10972800,
+            4114800
+          ],
+          "text": "LLM 在代码生成领域取得显著进展",
+          "font_names": [
+            "Source Han Sans CN"
+          ],
+          "text_colors": [
+            "#334155"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "Source Han Sans CN"
+      ],
+      "colors": [
+        "#1E40AF",
+        "#334155"
+      ]
+    },
+    {
+      "index": 2,
+      "layout_type": "title",
+      "background_color": "#F8FAFC",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            457200,
+            10972800,
+            1097280
+          ],
+          "text": "研究问题",
+          "font_names": [
+            "Source Han Sans CN"
+          ],
+          "text_colors": [
+            "#1E40AF"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            1828800,
+            10972800,
+            4114800
+          ],
+          "text": "• 现有方法在长上下文生成上的局限？\n• 不同模型在多语言场景的差异？\n• 代码质量评估指标的局限性？",
+          "font_names": [
+            "Source Han Sans CN",
+            "Source Han Sans CN",
+            "Source Han Sans CN"
+          ],
+          "text_colors": [
+            "#334155",
+            "#334155",
+            "#334155"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "Source Han Sans CN"
+      ],
+      "colors": [
+        "#1E40AF",
+        "#334155"
+      ]
+    },
+    {
+      "index": 3,
+      "layout_type": "section",
+      "background_color": "#F8FAFC",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            457200,
+            10972800,
+            1097280
+          ],
+          "text": "文献综述",
+          "font_names": [
+            "Source Han Sans CN"
+          ],
+          "text_colors": [
+            "#1E40AF"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            1828800,
+            10972800,
+            4114800
+          ],
+          "text": "我们综述了 2018-2026 年间 87 篇相关论文，覆盖 5 大研究主题。",
+          "font_names": [
+            "Source Han Sans CN"
+          ],
+          "text_colors": [
+            "#334155"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "Source Han Sans CN"
+      ],
+      "colors": [
+        "#1E40AF",
+        "#334155"
+      ]
+    },
+    {
+      "index": 4,
+      "layout_type": "section",
+      "background_color": "#FFFFFF",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            457200,
+            10972800,
+            1097280
+          ],
+          "text": "方法对比",
+          "font_names": [
+            "Source Han Sans CN"
+          ],
+          "text_colors": [
+            "#1E40AF"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            2286000,
+            5486400,
+            4114800
+          ],
+          "text": "基于 Prompt 的方法\n直观但难优化",
+          "font_names": [
+            "Source Han Sans CN",
+            "Source Han Sans CN"
+          ],
+          "text_colors": [
+            "#334155",
+            "#334155"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            6217920,
+            2286000,
+            5486400,
+            4114800
+          ],
+          "text": "基于微调的方法\n效果好但成本高",
+          "font_names": [
+            "Source Han Sans CN",
+            "Source Han Sans CN"
+          ],
+          "text_colors": [
+            "#334155",
+            "#334155"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "Source Han Sans CN"
+      ],
+      "colors": [
+        "#1E40AF",
+        "#334155"
+      ]
+    },
+    {
+      "index": 5,
+      "layout_type": "section",
+      "background_color": "#FFFFFF",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            548640,
+            10972800,
+            1097280
+          ],
+          "text": "02 我们的方法",
+          "font_names": [
+            "Source Han Sans CN"
+          ],
+          "text_colors": [
+            "#1E40AF"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "Source Han Sans CN"
+      ],
+      "colors": [
+        "#1E40AF"
+      ]
+    },
+    {
+      "index": 6,
+      "layout_type": "content",
+      "background_color": "#F8FAFC",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            457200,
+            10972800,
+            1097280
+          ],
+          "text": "实验设置",
+          "font_names": [
+            "Source Han Sans CN"
+          ],
+          "text_colors": [
+            "#1E40AF"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            1828800,
+            10972800,
+            4114800
+          ],
+          "text": "• 数据集: HumanEval + MBPP + 自建\n• 基线: Codex / CodeLlama / GPT-4\n• 评估: pass@k / BLEU / CodeBLEU",
+          "font_names": [
+            "Source Han Sans CN",
+            "Source Han Sans CN",
+            "Source Han Sans CN"
+          ],
+          "text_colors": [
+            "#334155",
+            "#334155",
+            "#334155"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "Source Han Sans CN"
+      ],
+      "colors": [
+        "#1E40AF",
+        "#334155"
+      ]
+    },
+    {
+      "index": 7,
+      "layout_type": "title",
+      "background_color": "#F8FAFC",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            457200,
+            10972800,
+            1097280
+          ],
+          "text": "实验结果",
+          "font_names": [
+            "Source Han Sans CN"
+          ],
+          "text_colors": [
+            "#1E40AF"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            1828800,
+            10972800,
+            4114800
+          ],
+          "text": "我们的方法在 HumanEval 上 pass@1 达到 78.5%，比基线最优高 4.2%。",
+          "font_names": [
+            "Source Han Sans CN"
+          ],
+          "text_colors": [
+            "#334155"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "Source Han Sans CN"
+      ],
+      "colors": [
+        "#1E40AF",
+        "#334155"
+      ]
+    },
+    {
+      "index": 8,
+      "layout_type": "section",
+      "background_color": "#FFFFFF",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            1371600,
+            2560320,
+            9418320,
+            1828800
+          ],
+          "text": "\"在长上下文场景下，检索增强能将准确率提升 12%。\"",
+          "font_names": [
+            "Source Han Sans CN"
+          ],
+          "text_colors": [
+            "#1E40AF"
+          ],
+          "fill_color": null
+        }
+      ],
+      "fonts": [
+        "Source Han Sans CN"
+      ],
+      "colors": [
+        "#1E40AF"
+      ]
+    },
+    {
+      "index": 9,
+      "layout_type": "summary",
+      "background_color": "#FFFFFF",
+      "shapes": [
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            548640,
+            10972800,
+            1097280
+          ],
+          "text": "结论与展望",
+          "font_names": [
+            "Source Han Sans CN"
+          ],
+          "text_colors": [
+            "#1E40AF"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            2286000,
+            10972800,
+            4114800
+          ],
+          "text": "• 提出检索增强生成框架\n• 在 5 个数据集上验证\n• 未来: 多模态代码理解",
+          "font_names": [
+            "Source Han Sans CN",
+            "Source Han Sans CN",
+            "Source Han Sans CN"
+          ],
+          "text_colors": [
+            "#334155",
+            "#334155",
+            "#334155"
+          ],
+          "fill_color": null
+        },
+        {
+          "shape_type": "text",
+          "is_title": false,
+          "bbox_emu": [
+            548640,
+            5943600,
+            11064240,
+            45720
+          ],
+          "text": "",
+          "font_names": [],
+          "text_colors": [],
+          "fill_color": "#3B82F6"
+        }
+      ],
+      "fonts": [
+        "Source Han Sans CN"
+      ],
+      "colors": [
+        "#1E40AF",
+        "#334155",
+        "#3B82F6"
+      ]
+    }
+  ],
+  "all_fonts": [
+    "Source Han Sans CN"
+  ],
+  "all_colors": [
+    "#1E40AF",
+    "#334155",
+    "#3B82F6",
+    "#475569"
+  ]
+}

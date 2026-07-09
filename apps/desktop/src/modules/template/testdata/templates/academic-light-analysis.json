@@ -1,0 +1,28 @@
+{
+  "template_id": "imported_2c5c22f7",
+  "source": "imported",
+  "name": "academic-light",
+  "layout_types": [
+    "section",
+    "title",
+    "content",
+    "summary"
+  ],
+  "palette": {
+    "primary": "#1E40AF",
+    "secondary": "#F8FAFC",
+    "accent": "#334155",
+    "background": "#FFFFFF",
+    "text": "#1A1A1A"
+  },
+  "fonts": {
+    "heading": "Source Han Sans CN",
+    "body": "Source Han Sans CN"
+  },
+  "decorations": [
+    "line_accent"
+  ],
+  "page_count": 10,
+  "analyzed_at": "2026-07-09T04:06:16.732Z",
+  "analyzer_version": "1.0.0"
+}

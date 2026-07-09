@@ -1,0 +1,30 @@
+{
+  "template_id": "imported_9a3673b5",
+  "source": "imported",
+  "name": "business-dark",
+  "layout_types": [
+    "section",
+    "title",
+    "content",
+    "summary"
+  ],
+  "palette": {
+    "primary": "#C9A227",
+    "secondary": "#1A1A2E",
+    "accent": "#FFFFFF",
+    "background": "#0E1421",
+    "text": "#E8E8E8"
+  },
+  "fonts": {
+    "heading": "Microsoft YaHei",
+    "body": "Microsoft YaHei"
+  },
+  "decorations": [
+    "solid_block",
+    "border",
+    "line_accent"
+  ],
+  "page_count": 10,
+  "analyzed_at": "2026-07-09T04:06:15.982Z",
+  "analyzer_version": "1.0.0"
+}

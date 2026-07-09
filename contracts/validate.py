@@ -30,6 +30,7 @@ SCHEMAS = [
     "preview_page",
     "output_request",
     "output_result",
+    "template_style",
 ]
 
 

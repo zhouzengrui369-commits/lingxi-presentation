@@ -28,6 +28,7 @@ Phase 1 有 5 个模块 sub-agent（file_kb / advisor / template / preview / out
 | 4 | [`preview_page.schema.json`](./preview_page.schema.json) | HTML 预览页（HTML 全文 / 模板 / 引用 KB / 结构化 sections / 延迟） | T-1.4 `renderer.ts` | T-1.4 `editor`、T-1.5 全部 writer |
 | 5 | [`output_request.schema.json`](./output_request.schema.json) | 多格式输出请求（预览 ID / 格式 / 输出路径 / 格式选项） | T-1.5 UI | T-1.5 全部 writer |
 | 6 | [`output_result.schema.json`](./output_result.schema.json) | 多格式输出结果（状态 / 路径 / 大小 / 错误 / 完成时间） | T-1.5 全部 writer | T-1.5 UI 通知 / 历史归档 |
+| 7 | [`template_style.schema.json`](./template_style.schema.json) | PPTX 模板风格分析结果（版式类型 + 主辅色 + 字体 + 装饰） | T-1.3 `style_analyzer.ts` | T-1.4 `renderer.ts`（按 template_id 套主题） |
 
 ---
 
@@ -89,7 +90,7 @@ python contracts/validate.py
 [OK]   fixtures/wiki_kb.positive.json
 [OK]   fixtures/wiki_kb.negative.json correctly rejected (...)
 ...
-[PASS] All 6 schemas + 12 fixtures validated.
+[PASS] All 7 schemas + 14 fixtures validated.
 ```
 
 ### 4.2 模块实现里怎么引用
