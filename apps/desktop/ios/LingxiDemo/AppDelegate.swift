@@ -39,10 +39,7 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
   }
 
   override func bundleURL() -> URL? {
-#if DEBUG
-    RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
-#else
+    // T-1.0.b: 强制使用嵌入 bundle 跳过 Metro (DevSupport forwardRef 问题绕过)
     Bundle.main.url(forResource: "main", withExtension: "jsbundle")
-#endif
   }
 }
