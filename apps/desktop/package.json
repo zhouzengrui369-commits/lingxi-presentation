@@ -18,6 +18,7 @@
     "cli:template": "tsx src/modules/template/cli.ts",
     "cli:preview": "node cli/preview.ts",
     "cli:export": "node --experimental-vm-modules cli/export.ts",
+    "cli:full-demo": "tsx cli/full-demo.ts",
     "build:macos": "cd macos && xcodebuild -workspace LingxiDemo.xcworkspace -scheme LingxiDemo -configuration Release",
     "build:windows": "cd windows && msbuild LingxiDemo.sln /p:Configuration=Release"
   },
