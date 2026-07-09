@@ -1,0 +1,11 @@
+{
+  "request_id": "99999999-9999-4999-8999-999999999999",
+  "preview_id": "77777777-7777-4777-8777-777777777777",
+  "format": "pptx",
+  "output_path": "/Users/njx/Documents/quarterly_review/output/Q1_2026_汇报.pptx",
+  "options": {
+    "page_size": "16:9",
+    "embed_fonts": true,
+    "include_toc": false
+  }
+}

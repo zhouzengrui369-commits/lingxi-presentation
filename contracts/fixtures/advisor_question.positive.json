@@ -1,0 +1,24 @@
+{
+  "question_id": "55555555-5555-4555-8555-555555555555",
+  "text": "本次汇报的核心主题是什么？",
+  "options": [
+    {
+      "label": "季度业绩总结",
+      "value": "quarterly_review",
+      "kb_linked": true
+    },
+    {
+      "label": "项目立项汇报",
+      "value": "project_proposal",
+      "kb_linked": false
+    },
+    {
+      "label": "年终总结",
+      "value": "annual_summary",
+      "kb_linked": false
+    }
+  ],
+  "input_mode": "select",
+  "depends_on": [],
+  "required": true
+}

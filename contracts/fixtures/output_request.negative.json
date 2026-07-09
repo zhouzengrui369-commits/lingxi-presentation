@@ -1,0 +1,7 @@
+{
+  "request_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+  "preview_id": "77777777-7777-4777-8777-777777777777",
+  "format": "xlsx",
+  "output_path": "/tmp/wrong_format.xlsx",
+  "options": null
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lingxi.local/contracts/file_import.schema.json",
+  "title": "FileImport",
+  "description": "文件导入结果（T-1.1 文件管理与知识库构建）。T-1.1 importer 写出 → T-1.1 storage 持久化 → T-1.2 advisor 读 related_files 关联补全",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "file_id",
+    "path",
+    "name",
+    "size_bytes",
+    "format",
+    "imported_at",
+    "status"
+  ],
+  "properties": {
+    "file_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "导入后生成的唯一文件 ID（UUID v4），全局不变。被 wiki_kb.related_files 引用。"
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "description": "文件绝对路径（macOS / POSIX 路径在 Win 上做路径归一化映射）"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "description": "文件名（含扩展名）"
+    },
+    "size_bytes": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 107374182400,
+      "description": "文件字节数，PRD 硬指标 100M 以内导入成功率 ≥ 99% → 上限 100 * 1024 * 1024 * 1024 已留余量"
+    },
+    "format": {
+      "type": "string",
+      "enum": ["docx", "pdf", "xlsx", "pptx", "md", "jpg", "png"],
+      "description": "识别出的文件格式，PRD 3.1 限定 7 种"
+    },
+    "imported_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "导入完成时间，ISO 8601（UTC 或带时区偏移）"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ok", "failed", "partial"],
+      "description": "ok=全文解析成功 / partial=部分页面成功（PDF 大文件常见） / failed=解析失败"
+    },
+    "error": {
+      "type": ["string", "null"],
+      "description": "status=failed 或 partial 时的错误信息，ok 时为 null"
+    }
+  }
+}

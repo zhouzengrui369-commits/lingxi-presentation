@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lingxi.local/contracts/advisor_question.schema.json",
+  "title": "AdvisorQuestion",
+  "description": "顾问提问结构（T-1.2 顾问式需求交互）。advisor.questions 模板 → LLM 实例化 → UI 渲染带选项的提问卡片（PRD 硬指标 ≥ 90% 提问带选项）",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "question_id",
+    "text",
+    "options",
+    "input_mode",
+    "required"
+  ],
+  "properties": {
+    "question_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "问题实例 ID，被其他问题的 depends_on 引用"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "问题正文（中文优先）"
+    },
+    "options": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "value", "kb_linked"],
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "UI 显示文案"
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "选中后传给后端的实际值"
+          },
+          "kb_linked": {
+            "type": "boolean",
+            "description": "true=该选项由 advisor.kb_linker 从 KB 关联补全，UI 可标记为 AI 推荐"
+          }
+        }
+      },
+      "description": "可选项（select / select_multi 模式必填 ≥1，text / voice 模式可空）"
+    },
+    "input_mode": {
+      "type": "string",
+      "enum": ["select", "select_multi", "text", "voice"],
+      "description": "输入模式：select=单选卡片 / select_multi=多选卡片 / text=文字输入 / voice=语音输入"
+    },
+    "depends_on": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "description": "依赖的上游 question_id 列表，UI 渲染时按依赖排序"
+    },
+    "required": {
+      "type": "boolean",
+      "description": "true=用户必须回答才能进入下一题 / false=可跳过"
+    }
+  }
+}
