@@ -12,7 +12,10 @@
     "test": "jest",
     "test:advisor": "jest --config jest.config.advisor.js",
     "test:template": "jest --config jest.template.config.js",
+    "test:preview": "jest --config jest.preview.config.js",
     "lint": "eslint .",
+    "cli:template": "tsx src/modules/template/cli.ts",
+    "cli:preview": "node cli/preview.ts",
     "cli:template": "tsx src/modules/template/cli.ts",
     "build:macos": "cd macos && xcodebuild -workspace LingxiDemo.xcworkspace -scheme LingxiDemo -configuration Release",
     "build:windows": "cd windows && msbuild LingxiDemo.sln /p:Configuration=Release"

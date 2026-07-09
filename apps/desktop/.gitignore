@@ -73,3 +73,7 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# T-1.4 preview 生成的中间产物（test:preview / cli:preview 可重新生成）
+apps/desktop/testdata/preview-visual/
+apps/desktop/testdata/preview-cli-out/
