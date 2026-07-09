@@ -21,3 +21,15 @@ htmlcov/
 # Local dev
 .env
 .env.local
+# Node
+node_modules/
+npm-debug.log
+
+# Build artifacts
+apps/desktop/.tmp/
+apps/desktop/dist/
+apps/desktop/build/
+
+# Test outputs
+apps/desktop/testdata/preview-*/
+apps/desktop/testdata/output/
