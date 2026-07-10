@@ -1,0 +1,49 @@
+========================================
+T-G4-win: Win electron-builder --win BUILD EVIDENCE
+Platform: macOS host (Wine auto-provision 钉子 #37)
+Generated: Sat Jul 11 04:40:28 CST 2026
+========================================
+
+>>> electron-builder --win --x64 --publish=never
+
+  • electron-builder  version=25.1.8 os=25.2.0
+  • loaded configuration  file=package.json ("build" field)
+  • author is missed in the package.json  appPackageFile=/Users/njx/Project/wt-gate4-win/apps/desktop/electron-shell/package.json
+  • executing @electron/rebuild  electronVersion=33.4.11 arch=x64 buildFromSource=false appDir=./
+  • installing native dependencies  arch=x64
+  • completed installing native dependencies
+  • packaging       platform=win32 arch=x64 electron=33.4.11 appOutDir=dist/win-unpacked
+  • asar usage is disabled — this is strongly not recommended  solution=enable asar and use asarUnpack to unpack files that must be externally available
+  • signing with signtool.exe  path=dist/win-unpacked/resources/lingxi-runtime/apps/desktop/node_modules/hermes-compiler/hermesc/win64-bin/hermesc.exe
+  • no signing info identified, signing is skipped  signHook=false cscInfo=null
+  • signing with signtool.exe  path=dist/win-unpacked/resources/lingxi-runtime/apps/desktop/node_modules/fb-dotslash/bin/windows-arm64/dotslash.exe
+  • no signing info identified, signing is skipped  signHook=false cscInfo=null
+  • signing with signtool.exe  path=dist/win-unpacked/resources/lingxi-runtime/apps/desktop/node_modules/fb-dotslash/bin/windows/dotslash.exe
+  • no signing info identified, signing is skipped  signHook=false cscInfo=null
+  • asar usage is disabled — this is strongly not recommended  solution=enable asar and use asarUnpack to unpack files that must be externally available
+  • default Electron icon is used  reason=application icon is not set
+  • signing with signtool.exe  path=dist/win-unpacked/灵犀演示.exe
+  • no signing info identified, signing is skipped  signHook=false cscInfo=null
+  • building        target=nsis file=dist/灵犀演示 Setup 0.1.0.exe archs=x64 oneClick=true perMachine=false
+  • signing with signtool.exe  path=dist/win-unpacked/resources/elevate.exe
+  • no signing info identified, signing is skipped  signHook=false cscInfo=null
+
+>>> Built artifacts:
+-rw-rw-rw-@ 1 njx  staff  188784128 Jul 11 04:33 /Users/njx/Project/wt-gate4-win/apps/desktop/electron-shell/dist/win-unpacked/灵犀演示.exe
+
+/Users/njx/Project/wt-gate4-win/apps/desktop/electron-shell/dist/win-unpacked/灵犀演示.exe: PE32+ executable (GUI) x86-64, for MS Windows
+
+>>> Wine auto-provisioned at:
+total 0
+drwx------@  7 njx  staff   224 Jul 10 17:51 .
+drwxr-xr-x@  3 njx  staff    96 Jul 10 17:51 ..
+drwxr-xr-x@  3 njx  staff    96 Mar  3  2019 SDL2.framework
+drwxr-xr-x@ 80 njx  staff  2560 Jul 10 17:51 bin
+drwxr-xr-x@ 32 njx  staff  1024 Jul 10 17:51 lib64
+drwxr-xr-x@  5 njx  staff   160 Jul  7  2019 share
+drwxr-xr-x@  8 njx  staff   256 Jul 11 04:34 wine-home
+
+>>> PARTIAL 标注: Wine 模拟 macOS host ≠ 真 Win OS
+    - 钉子 #37 path: electron-builder 25.1.8 自动下载 wine-4.0.1-mac.7z
+    - 钉子 #37 path: 用 Wine 模拟运行 .exe (wineboot init OK)
+    - 真 Win 物理机/VM 验证仍需 NJX 拍 Win VM SKU (T-3.2 PARTIAL 路径)

@@ -1,0 +1,28 @@
+========================================
+T-G4-win: Wine 4.0.1 (钉子 #37 auto-provision) 运行 灵犀演示.exe
+Generated: Sat Jul 11 04:40:38 CST 2026
+========================================
+
+>>> wine --version
+wine-4.0.1
+
+>>> file 灵犀演示.exe
+/Users/njx/Project/wt-gate4-win/apps/desktop/electron-shell/dist/win-unpacked/灵犀演示.exe: PE32+ executable (GUI) x86-64, for MS Windows
+
+>>> wine 灵犀演示.exe 启动过程 (从 ps aux):
+  - PID 17812: wine64-preloader 灵犀演示.exe
+  - PID 18163: wine64-preloader C:\windows\system32\wineboot.exe --init
+  - PID 18050: wineserver
+
+  验证方法: 启动 wine 灵犀演示.exe 后 5s, pgrep 看到 ≥ 1 PID
+  结果: ✓ 3 个 wine 进程 (preloader + wineboot + wineserver)
+
+  实际输出 (ps aux | grep wine | grep -v grep | head -3):
+  njx  17812  /Users/njx/Library/Caches/electron-builder/wine/wine-4.0.1-mac/lib64/../bin/wine64-preloader dist/win-unpacked/灵犀演示.exe
+  njx  18163  /Users/njx/Library/Caches/electron-builder/wine/wine-4.0.1-mac/lib64/../bin/wine64-preloader /Users/njx/Library/Caches/electron-builder/wine/wine-4.0.1-mac/lib64/../bin/wine64 C:\windows\system32\wineboot.exe --init
+  njx  18050  /Users/njx/Library/Caches/electron-builder/wine/wine-4.0.1-mac/lib64/../bin/wineserver
+
+>>> PARTIAL 标注: Wine 4.0.1 ≠ 真 Win OS
+    - Wine 在 macOS host 模拟 Win API, 不保证 100% Win 行为
+    - 灵犀演示.app 主进程 (Electron) 在 Wine 下启动慢/不显示 GUI (无 X11/Wayland)
+    - 真 Win 物理机/VM 验证: NJX 拍 Win VM SKU (T-3.2 PARTIAL)
