@@ -1,7 +1,7 @@
 {
   "name": "lingxi-demo-electron",
   "productName": "灵犀演示",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "灵犀演示 — macOS Electron shell wrapping T-2.2 cli/full-demo.ts (T-3.1 platform verification) + T-6.1 5-route RN renderer bridge",
   "main": "main.js",
   "private": true,
@@ -89,7 +89,7 @@
     "@types/node": "^22.20.1",
     "@vitejs/plugin-react": "^4.3.3",
     "dmg-license": "^1.0.11",
-    "electron": "^33.4.11",
+    "electron": "33.4.11",
     "electron-builder": "^25.0.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.4.11",
