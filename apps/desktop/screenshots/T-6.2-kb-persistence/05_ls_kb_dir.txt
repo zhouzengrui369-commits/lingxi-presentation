@@ -1,0 +1,71 @@
+=== ls -la KB root ===
+total 16
+drwxr-xr-x@ 6 njx  staff  192 Jul 11 00:54 .
+drwxr-xr-x@ 4 njx  staff  128 Jul 11 00:53 ..
+drwxr-xr-x@ 9 njx  staff  288 Jul 11 00:54 entries
+drwxr-xr-x@ 9 njx  staff  288 Jul 11 00:54 files
+-rw-r--r--@ 1 njx  staff  654 Jul 11 00:54 index.json
+-rw-r--r--@ 1 njx  staff  137 Jul 11 00:54 manifest.json
+
+=== ls -la KB files/ ===
+total 56
+drwxr-xr-x@ 9 njx  staff  288 Jul 11 00:54 .
+drwxr-xr-x@ 6 njx  staff  192 Jul 11 00:54 ..
+-rw-r--r--@ 1 njx  staff  318 Jul 11 00:54 121f7e86-3758-4286-a0cb-a530ab189911.json
+-rw-r--r--@ 1 njx  staff  303 Jul 11 00:54 1c910e25-f4db-4190-89e8-2c61a94db7cf.json
+-rw-r--r--@ 1 njx  staff  317 Jul 11 00:54 2a57b0ef-5bbc-4787-b50f-667dd3f9b07a.json
+-rw-r--r--@ 1 njx  staff  324 Jul 11 00:54 3bb5dbe0-3f40-471f-b465-0cd02b044268.json
+-rw-r--r--@ 1 njx  staff  311 Jul 11 00:54 88fc1075-4cdd-4906-8a07-3ba941479372.json
+-rw-r--r--@ 1 njx  staff  303 Jul 11 00:54 8a7ed1ac-5229-4ded-a311-61b8e13690d6.json
+-rw-r--r--@ 1 njx  staff  382 Jul 11 00:54 afed790b-42d4-43e9-8db6-5cbfe674b351.json
+
+=== ls -la KB entries/ ===
+total 56
+drwxr-xr-x@ 9 njx  staff   288 Jul 11 00:54 .
+drwxr-xr-x@ 6 njx  staff   192 Jul 11 00:54 ..
+-rw-r--r--@ 1 njx  staff   403 Jul 11 00:54 11350558-8b12-43e2-8eee-2c8c279c6360.json
+-rw-r--r--@ 1 njx  staff   414 Jul 11 00:54 188dc835-6f31-4cac-885c-a98138ced957.json
+-rw-r--r--@ 1 njx  staff   403 Jul 11 00:54 45f65fa1-8c68-4fa2-9e1d-9243850ba70f.json
+-rw-r--r--@ 1 njx  staff   922 Jul 11 00:54 749e82bc-5ed1-43f7-9657-e2287eefc6ed.json
+-rw-r--r--@ 1 njx  staff  1229 Jul 11 00:54 aa6ece2f-d83b-40f3-9904-c5f6ed01a88c.json
+-rw-r--r--@ 1 njx  staff  1242 Jul 11 00:54 cd256913-2169-41d6-a5ea-d7969cc3dcf0.json
+-rw-r--r--@ 1 njx  staff   778 Jul 11 00:54 d0363352-d7b6-4a9f-8aa9-9591f6d1f649.json
+
+=== cat manifest.json ===
+{
+  "version": "1.0.0",
+  "created_at": "2026-07-10T16:54:02.372Z",
+  "file_count": 7,
+  "entry_count": 7,
+  "total_size_bytes": 158301
+}
+=== cat one entry (architecture.png wiki) ===
+{
+  "entry_id": "11350558-8b12-43e2-8eee-2c8c279c6360",
+  "title": "架构图",
+  "summary": "本条目由本地启发式生成：来源文件 架构图.png（png，32636 字节）。原文较短或抽取失败，待 LLM 在线时补全。",
+  "tags": [
+    "PNG"
+  ],
+  "related_files": [
+    "8a7ed1ac-5229-4ded-a311-61b8e13690d6"
+  ],
+  "created_at": "2026-07-10T16:54:04.760Z",
+  "confidence": 0.4
+}
+=== cat index.json (head) ===
+{
+  "files": [
+    "121f7e86-3758-4286-a0cb-a530ab189911",
+    "3bb5dbe0-3f40-471f-b465-0cd02b044268",
+    "2a57b0ef-5bbc-4787-b50f-667dd3f9b07a",
+    "88fc1075-4cdd-4906-8a07-3ba941479372",
+    "afed790b-42d4-43e9-8db6-5cbfe674b351",
+    "1c910e25-f4db-4190-89e8-2c61a94db7cf",
+    "8a7ed1ac-5229-4ded-a311-61b8e13690d6"
+  ],
+  "entries": [
+    "cd256913-2169-41d6-a5ea-d7969cc3dcf0",
+    "d0363352-d7b6-4a9f-8aa9-9591f6d1f649",
+    "749e82bc-5ed1-43f7-9657-e2287eefc6ed",
+    "aa6ece2f-d83b-40f3-99...

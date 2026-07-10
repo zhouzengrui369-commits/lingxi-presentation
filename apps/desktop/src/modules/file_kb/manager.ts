@@ -10,7 +10,7 @@
  * 灵犀演示 · Phase 1 · T-1.1
  */
 
-import { KbStorage, kbRootExists, resolveKbRoot } from './storage.ts';
+import { KbStorage, kbRootExists, resolveKbRoot, getKbRoot, ensureKbDir, kbDirInfo } from './storage.ts';
 import type { WikiKbEntry, FileImportRecord } from './storage.ts';
 import { importFile, SUPPORTED_FORMATS, detectFormat } from './importer.ts';
 import type { ImportResult, SupportedFormat } from './importer.ts';
@@ -185,6 +185,9 @@ export {
   KbStorage,
   kbRootExists,
   resolveKbRoot,
+  getKbRoot,
+  ensureKbDir,
+  kbDirInfo,
   // importer
   importFile as importSingleFile,
   SUPPORTED_FORMATS,

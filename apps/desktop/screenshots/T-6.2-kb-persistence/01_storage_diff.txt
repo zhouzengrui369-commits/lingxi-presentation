@@ -1,0 +1,307 @@
+diff --git a/apps/desktop/src/modules/file_kb/storage.ts b/apps/desktop/src/modules/file_kb/storage.ts
+index 3117bd6..dcb65dc 100644
+--- a/apps/desktop/src/modules/file_kb/storage.ts
++++ b/apps/desktop/src/modules/file_kb/storage.ts
+@@ -1,10 +1,10 @@
+ /**
+  * 本地 KB 持久化 — T-1.1 文件管理与 LLM Wiki 知识库
+  *
+- * 存储位置（PRD 硬约束：仅本地，不上传云端）：
+- *   macOS: ~/Library/Application Support/灵犀演示/kb/
+- *   Windows: %APPDATA%/灵犀演示/kb/
+- *   Linux/other: ~/.lingxi/kb/  (开发/CI 兜底)
++ * 存储位置（PRD 3.1 硬约束：仅本地，不上传云端）：
++ *   macOS:   ~/Library/Application Support/灵犀演示/kb/  (PRD §3.1 唯一硬要求)
++ *   Windows: %APPDATA%/灵犀演示/kb/                       (XDG 兼容，PRD 范围外)
++ *   Linux:   ~/.config/灵犀演示/kb/                        (XDG 兼容，PRD 范围外)
+  *
+  * 存储结构（无 SQLite 依赖，纯 JSON 落盘，方便人工 review）：
+  *   kb/
+@@ -21,7 +21,7 @@
+  *   - 写操作 atomic：先写 .tmp 再 rename，避免半写状态
+  *   - 索引文件单独维护，避免每次扫目录（O(1) 启动）
+  *
+- * 灵犀演示 · Phase 1 · T-1.1
++ * 灵犀演示 · Phase 1 · T-1.1 + Phase 6 · T-6.2 (治本 LLM Wiki KB 真持久化)
+  */
+ 
+ import { promises as fs } from 'fs';
+@@ -77,32 +77,60 @@ const KB_SUBDIR = 'kb';
+ const STORAGE_VERSION = '1.0.0';
+ 
+ /**
+- * 解析 KB 根目录。跨平台：
+- *   macOS:   $HOME/Library/Application Support/灵犀演示/kb
+- *   Windows: %APPDATA%/灵犀演示/kb （process.env.APPDATA 在 CI 兜底）
+- *   Linux:   $XDG_DATA_HOME/灵犀演示/kb 或 $HOME/.local/share/灵犀演示/kb
++ * 解析 KB 根目录。跨平台（PRD 3.1 唯一硬要求为 macOS `~/Library/Application Support/灵犀演示/kb/`）：
++ *   macOS:   $HOME/Library/Application Support/灵犀演示/kb         (PRD 3.1)
++ *   Windows: %APPDATA%/灵犀演示/kb                                  (process.env.APPDATA 兜底)
++ *   Linux:   $HOME/.config/灵犀演示/kb                              (XDG config 兜底)
+  *
+  * 可被 LINGXI_KB_ROOT 环境变量覆盖（测试用）。
++ *
++ * 内部委托给 _resolveKbRootWith (可注入 deps, 让测试无需 mock os.homedir — 该 prop
++ * 在 jest VM 环境下 configurable=false, 直接 Object.defineProperty 抛 TypeError).
+  */
+ export function resolveKbRoot(override?: string): string {
++  return _resolveKbRootWith({
++    override,
++    platform: process.platform,
++    home: os.homedir(),
++    env: process.env,
++  });
++}
++
++/**
++ * 内部纯函数 — 所有 deps 都作为参数传入, 便于测试跨平台路径 (T-6.2 测试用).
++ * 不导出在 re-export list, 但保留 export 让测试可调.
++ */
++export function _resolveKbRootWith(deps: {
++  override?: string;
++  platform: NodeJS.Platform;
++  home: string;
++  env: NodeJS.ProcessEnv;
++}): string {
++  const { override, platform, home, env } = deps;
+   if (override && override.trim()) {
+     return path.resolve(override);
+   }
+-  if (process.env.LINGXI_KB_ROOT && process.env.LINGXI_KB_ROOT.trim()) {
+-    return path.resolve(process.env.LINGXI_KB_ROOT);
++  if (env.LINGXI_KB_ROOT && env.LINGXI_KB_ROOT.trim()) {
++    return path.resolve(env.LINGXI_KB_ROOT);
+   }
+-  const platform = process.platform;
+-  const home = os.homedir();
+   if (platform === 'darwin') {
+     return path.join(home, 'Library', 'Application Support', APP_DIR_NAME, KB_SUBDIR);
+   }
+   if (platform === 'win32') {
+-    const appdata = process.env.APPDATA || path.join(home, 'AppData', 'Roaming');
++    const appdata = env.APPDATA || path.join(home, 'AppData', 'Roaming');
+     return path.join(appdata, APP_DIR_NAME, KB_SUBDIR);
+   }
+-  // Linux / other: XDG 兜底
+-  const xdg = process.env.XDG_DATA_HOME || path.join(home, '.local', 'share');
+-  return path.join(xdg, APP_DIR_NAME, KB_SUBDIR);
++  // Linux / other: XDG config 兜底 (PRD 范围外, 仅 dev/CI 用)
++  return path.join(home, '.config', APP_DIR_NAME, KB_SUBDIR);
++}
++
++/**
++ * KB 根目录的 alias — 与 resolveKbRoot 等价。
++ * 命名沿用 PRD 3.1 / Phase 6 T-6.2 任务约定 (getKbRoot)。
++ * 推荐 import: `import { getKbRoot, ensureKbDir } from '...'`
++ */
++export function getKbRoot(override?: string): string {
++  return resolveKbRoot(override);
+ }
+ 
+ /** 测试 / 业务自定义路径下生成 KB 根 */
+@@ -117,6 +145,63 @@ export function kbPaths(rootOverride?: string) {
+   };
+ }
+ 
++/**
++ * KB_DIR_INFO — startup 落地的标准 log 行 (T-6.2 验收信号)。
++ * 格式: `KB_DIR_INFO platform=darwin root=/Users/.../Library/Application Support/灵犀演示/kb files_dir=... entries_dir=...`
++ */
++export function kbDirInfo(rootOverride?: string): {
++  platform: NodeJS.Platform;
++  root: string;
++  files_dir: string;
++  entries_dir: string;
++  index_path: string;
++  manifest_path: string;
++} {
++  const p = kbPaths(rootOverride);
++  return {
++    platform: process.platform,
++    root: p.root,
++    files_dir: p.filesDir,
++    entries_dir: p.entriesDir,
++    index_path: p.indexPath,
++    manifest_path: p.manifestPath,
++  };
++}
++
++/**
++ * ensureKbDir — startup 幂等确保 KB 根 + files/ + entries/ 3 个目录都存在。
++ * T-6.2 治本：app 第一次启动时调一次，后续 init() 也调 (idempotent)，失败 throw (不静默吞)。
++ *
++ * 用法:
++ *   import { ensureKbDir } from './storage';
++ *   await ensureKbDir();  // 不传 override → 走 PRD 3.1 路径
++ *
++ * 设计:
++ *   - mkdir recursive, 重复调用无副作用
++ *   - 失败 throw 真实 err, 业务层把它 wrap 成 UI init error 暴露给用户
++ *   - print KB_DIR_INFO 落 startup log (PM/verifier grep 用)
++ */
++export async function ensureKbDir(rootOverride?: string): Promise<string> {
++  const p = kbPaths(rootOverride);
++  try {
++    await fs.mkdir(p.root, { recursive: true });
++    await fs.mkdir(p.filesDir, { recursive: true });
++    await fs.mkdir(p.entriesDir, { recursive: true });
++  } catch (err) {
++    const msg = `[ensureKbDir] failed to create KB dir at ${p.root}: ${(err as Error).message}`;
++    console.error(msg);
++    throw new Error(msg);
++  }
++  // KB_DIR_INFO log (Phase 6 T-6.2 验收: grep 命中)
++  const info = kbDirInfo(rootOverride);
++  console.log(
++    `KB_DIR_INFO platform=${info.platform} root=${info.root} ` +
++      `files_dir=${info.files_dir} entries_dir=${info.entries_dir} ` +
++      `index_path=${info.index_path} manifest_path=${info.manifest_path}`,
++  );
++  return p.root;
++}
++
+ // ---- UUID ----
+ 
+ const UUID_V4_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+diff --git a/apps/desktop/src/modules/file_kb/index.tsx b/apps/desktop/src/modules/file_kb/index.tsx
+index 1ee14c7..f1869e9 100644
+--- a/apps/desktop/src/modules/file_kb/index.tsx
++++ b/apps/desktop/src/modules/file_kb/index.tsx
+@@ -1,12 +1,14 @@
+ /**
+- * File KB Module — T-1.1
++ * File KB Module — T-1.1 + Phase 6 T-6.2 (LLM Wiki KB 真持久化)
+  *
+- * 公共 API 入口（业务代码 + RN UI 都从这个文件导入）。
++ * 公共 API 入口（业务代码 + RN UI + Electron main 都从这个文件导入）。
+  *
+  *   - RN UI 默认导出 FileKbScreen（真实按钮 + 7 格式状态 + Wiki 列表）
+  *   - 业务 API（FileKbManager + 各子模块）从 manager.ts 导入
++ *   - 启动钩子 initKbModule() (T-6.2): 幂等 ensure PRD 3.1 KB 路径存在,
++ *     失败 throw → 暴露 init error 给 UI (不静默吞)
+  *
+- * 灵犀演示 · Phase 1 · T-1.1
++ * 灵犀演示 · Phase 1 · T-1.1 + Phase 6 · T-6.2
+  */
+ 
+ // ---- RN UI（default export） ----
+@@ -21,6 +23,9 @@ export {
+   KbStorage,
+   kbRootExists,
+   resolveKbRoot,
++  getKbRoot,
++  ensureKbDir,
++  kbDirInfo,
+   importSingleFile,
+   SUPPORTED_FORMATS,
+   detectFormat,
+@@ -45,3 +50,86 @@ export type {
+   BatchResult,
+   ImportStage,
+ } from './manager.ts';
++
++// ---- 启动钩子 (Phase 6 T-6.2) ----
++//
++// RN/electron-shell 启动时调一次 initKbModule(), 幂等.
++// 失败时 initState.error 暴露给 UI, UI 显示给用户 + 触发降级路径 (例如提示用户手动建目录).
++//
++// 设计要点:
++//   - top-level 不 await (RN bundler 限制) → 必须显式调 initKbModule()
++//   - 重复调用 idempotent (ensureKbDir 内部 mkdir recursive)
++//   - 失败 throw → initState.error 兜底, UI 不白屏
++//   - console.log KB_DIR_INFO 让 PM/verifier grep 验证 PRD 3.1 路径生效
++//
++// 业务代码:
++//   import { initKbModule, getKbModuleInitState } from '...';
++//   useEffect(() => { initKbModule().catch(() => { /* error already in state */ }); }, []);
++//   const init = getKbModuleInitState();
++//   if (init.error) return <ErrorScreen error={init.error} />;
++
++import { ensureKbDir, kbDirInfo, getKbRoot } from './storage.ts';
++
++export type KbModuleInitState = {
++  /** initKbModule() 是否被调过至少一次 */
++  initialized: boolean;
++  /** 实际生效的 KB 根路径 (PRD 3.1 darwin 路径) */
++  root: string | null;
++  /** 最后一次 init 错误 (msg), null = 成功 */
++  error: string | null;
++  /** 最后一次 init 成功时间 (ISO) */
++  ready_at: string | null;
++};
++
++const initState: KbModuleInitState = {
++  initialized: false,
++  root: null,
++  error: null,
++  ready_at: null,
++};
++
++/** 取启动 init 状态 (UI 渲染用) */
++export function getKbModuleInitState(): Readonly<KbModuleInitState> {
++  return initState;
++}
++
++/**
++ * 启动钩子 — 幂等 ensure KB 路径存在 (PRD 3.1).
++ *
++ * 调用点:
++ *   - Electron main process boot  (recommended: 在 app.whenReady 之后立刻调)
++ *   - RN App.tsx root useEffect   (推荐: 第一次 render 后)
++ *   - CLI 入口                     (cli/import-5-files-to-kb.ts)
++ *
++ * 失败时:
++ *   - console.error 真实 err
++ *   - initState.error 暴露
++ *   - **不** 抛 — 业务调用方自己决定如何降级 (UI 显示 / CLI exit 1)
++ *   - 但 ensureKbDir 内部会 throw, 这里用 try-catch 接住, 写 initState
++ */
++export async function initKbModule(opts: { rootOverride?: string } = {}): Promise<KbModuleInitState> {
++  try {
++    // 解决 root 早 expose (UI 在 await 完成前也能拿到目标路径)
++    const expectedRoot = getKbRoot(opts.rootOverride);
++    initState.root = expectedRoot;
++    initState.initialized = true;
++    initState.error = null;
++
++    // 真正 ensure dir (递归建 kb/ + files/ + entries/)
++    await ensureKbDir(opts.rootOverride);
++
++    initState.ready_at = new Date().toISOString();
++    initState.error = null;
++    return initState;
++  } catch (err) {
++    const msg = `[initKbModule] KB init failed: ${(err as Error).message}`;
++    console.error(msg);
++    initState.error = msg;
++    return initState;
++  }
++}
++
++/** 给业务用的 debug helper — 直接 print kbDirInfo 对象 */
++export function debugKbInfo(): ReturnType<typeof kbDirInfo> {
++  return kbDirInfo();
++}
+diff --git a/apps/desktop/src/modules/file_kb/manager.ts b/apps/desktop/src/modules/file_kb/manager.ts
+index db80edb..1cc5d1c 100644
+--- a/apps/desktop/src/modules/file_kb/manager.ts
++++ b/apps/desktop/src/modules/file_kb/manager.ts
+@@ -10,7 +10,7 @@
+  * 灵犀演示 · Phase 1 · T-1.1
+  */
+ 
+-import { KbStorage, kbRootExists, resolveKbRoot } from './storage.ts';
++import { KbStorage, kbRootExists, resolveKbRoot, getKbRoot, ensureKbDir, kbDirInfo } from './storage.ts';
+ import type { WikiKbEntry, FileImportRecord } from './storage.ts';
+ import { importFile, SUPPORTED_FORMATS, detectFormat } from './importer.ts';
+ import type { ImportResult, SupportedFormat } from './importer.ts';
+@@ -185,6 +185,9 @@ export {
+   KbStorage,
+   kbRootExists,
+   resolveKbRoot,
++  getKbRoot,
++  ensureKbDir,
++  kbDirInfo,
+   // importer
+   importFile as importSingleFile,
+   SUPPORTED_FORMATS,

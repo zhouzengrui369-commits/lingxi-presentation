@@ -1,0 +1,32 @@
+PASS src/modules/file_kb/__tests__/storage-real-path.test.ts
+    ✓ macOS: getKbRoot() returns ~/Library/Application Support/灵犀演示/kb (PRD 3.1) (4 ms)
+    ✓ linux: getKbRoot() returns ~/.config/灵犀演示/kb (T-6.2 spec) (1 ms)
+    ✓ win32: getKbRoot() returns %APPDATA%/灵犀演示/kb (1 ms)
+    ✓ win32: getKbRoot() falls back to $HOME/AppData/Roaming when APPDATA is unset (1 ms)
+    ✓ LINGXI_KB_ROOT env var overrides platform path (test escape hatch) (1 ms)
+    ✓ ensureKbDir: creates kb/ + files/ + entries/, idempotent, logs KB_DIR_INFO (19 ms)
+    ✓ 5 imports → 5 file records + 5 wiki entries persisted (using override path) (651 ms)
+    ✓ kbDirInfo: returns platform + root + 4 sub-paths (UI debug helper) (4 ms)
+    ✓ getKbRoot === resolveKbRoot (alias, back-compat for Phase 1 callers) (2 ms)
+    ✓ resolveKbRoot on real macOS host: real os.homedir path (no mock) (1 ms)
+Tests:       10 passed, 10 total
+      at ensureKbDir (src/modules/file_kb/storage.ts:197:11)
+
+PASS src/modules/file_kb/__tests__/storage-real-path.test.ts
+  storage: real path resolution (Phase 6 T-6.2)
+    ✓ macOS: getKbRoot() returns ~/Library/Application Support/灵犀演示/kb (PRD 3.1) (4 ms)
+    ✓ linux: getKbRoot() returns ~/.config/灵犀演示/kb (T-6.2 spec) (1 ms)
+    ✓ win32: getKbRoot() returns %APPDATA%/灵犀演示/kb (1 ms)
+    ✓ win32: getKbRoot() falls back to $HOME/AppData/Roaming when APPDATA is unset (1 ms)
+    ✓ LINGXI_KB_ROOT env var overrides platform path (test escape hatch) (1 ms)
+    ✓ ensureKbDir: creates kb/ + files/ + entries/, idempotent, logs KB_DIR_INFO (19 ms)
+    ✓ 5 imports → 5 file records + 5 wiki entries persisted (using override path) (651 ms)
+    ✓ kbDirInfo: returns platform + root + 4 sub-paths (UI debug helper) (4 ms)
+    ✓ getKbRoot === resolveKbRoot (alias, back-compat for Phase 1 callers) (2 ms)
+    ✓ resolveKbRoot on real macOS host: real os.homedir path (no mock) (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       10 passed, 10 total
+Snapshots:   0 total
+Time:        1.916 s, estimated 2 s
+Ran all test suites matching /storage-real-path.test.ts/i.

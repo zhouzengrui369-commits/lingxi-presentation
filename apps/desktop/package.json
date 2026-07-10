@@ -14,11 +14,13 @@
     "test:template": "jest --config jest.template.config.js",
     "test:preview": "jest --config jest.preview.config.js",
     "test:output": "jest --config jest.config.output.js",
+    "test:file-kb:real-path": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.file_kb.js",
     "lint": "eslint .",
     "cli:template": "tsx src/modules/template/cli.ts",
     "cli:preview": "node cli/preview.ts",
     "cli:export": "node --experimental-vm-modules cli/export.ts",
     "cli:full-demo": "tsx cli/full-demo.ts",
+    "cli:import-5-files": "tsx cli/import-5-files-to-kb.ts",
     "build:macos": "cd macos && xcodebuild -workspace LingxiDemo.xcworkspace -scheme LingxiDemo -configuration Release",
     "build:windows": "cd windows && msbuild LingxiDemo.sln /p:Configuration=Release"
   },

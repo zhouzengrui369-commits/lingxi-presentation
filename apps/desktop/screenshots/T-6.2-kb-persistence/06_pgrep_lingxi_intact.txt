@@ -1,0 +1,15 @@
+=== pgrep -lf 灵犀演示 ===
+64315 /Applications/灵犀演示.app/Contents/MacOS/灵犀演示
+64897 /Applications/灵犀演示.app/Contents/Frameworks/灵犀演示 Helper (GPU).app/Contents/MacOS/灵犀演示 Helper (GPU) --type=gpu-process --user-data-dir=/Users/njx/Library/Application Support/lingxi-demo-electron --gpu-preferences=UAAAAAAAAAAgAAAEAAAAAAAAAAAAAAAAAABgAAEAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAIAAAAAAAAAAgAAAAAAAAA --shared-files --field-trial-handle=1718379636,r,8861863591984271192,10621804141088015360,262144 --enable-features=ScreenCaptureKitPickerScreen,ScreenCaptureKitStreamPickerSonoma --disable-features=MacWebContentsOcclusion,SpareRendererForSitePerProcess,TimeoutHangingVideoCaptureStarts --variations-seed-version --seatbelt-client=31
+64903 /Applications/灵犀演示.app/Contents/Frameworks/灵犀演示 Helper.app/Contents/MacOS/灵犀演示 Helper --type=utility --utility-sub-type=network.mojom.NetworkService --lang=zh-CN --service-sandbox-type=network --user-data-dir=/Users/njx/Library/Application Support/lingxi-demo-electron --shared-files --field-trial-handle=1718379636,r,8861863591984271192,10621804141088015360,262144 --enable-features=ScreenCaptureKitPickerScreen,ScreenCaptureKitStreamPickerSonoma --disable-features=MacWebContentsOcclusion,SpareRendererForSitePerProcess,TimeoutHangingVideoCaptureStarts --variations-seed-version --seatbelt-client=31
+65000 /Applications/灵犀演示.app/Contents/Frameworks/灵犀演示 Helper (Renderer).app/Contents/MacOS/灵犀演示 Helper (Renderer) --type=renderer --user-data-dir=/Users/njx/Library/Application Support/lingxi-demo-electron --app-path=/Applications/灵犀演示.app/Contents/Resources/app --no-sandbox --no-zygote --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=4 --time-ticks-at-unix-epoch=-1782080629325813 --launch-time-ticks=1614900379067 --shared-files --field-trial-handle=1718379636,r,8861863591984271192,10621804141088015360,262144 --enable-features=ScreenCaptureKitPickerScreen,ScreenCaptureKitStreamPickerSonoma --disable-features=MacWebContentsOcclusion,SpareRendererForSitePerProcess,TimeoutHangingVideoCaptureStarts --variations-seed-version
+
+=== lsappinfo (LingxiDemo running state) ===
+    bundleID="com.openclaw.lingxi"
+    bundle path="/Applications/灵犀演示.app"
+    executable path="/Applications/灵犀演示.app/Contents/MacOS/灵犀演示"
+    pid = 64315 type="Foreground" flavor=3 Version="0.1.0" fileType="APPL" creator="????" Arch=ARM64 
+
+=== KB path EXISTS check ===
+/Users/njx/Library/Application Support/灵犀演示/kb
+OK: KB dir present
