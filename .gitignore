@@ -33,3 +33,6 @@ apps/desktop/build/
 # Test outputs
 apps/desktop/testdata/preview-*/
 apps/desktop/testdata/output/
+
+# PM/mavis metadata (not project source)
+.mavis/
