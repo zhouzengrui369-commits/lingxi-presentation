@@ -1,0 +1,25 @@
+=== 16. Real git status (worktree state) ===
+ M apps/desktop/electron-shell/package-lock.json
+ M apps/desktop/electron-shell/package.json
+?? apps/desktop/electron-shell/__tests__/
+?? apps/desktop/electron-shell/jest.config.electron.js
+?? screenshots/T-6.4-naming-unify/
+
+=== 17. Real git log (this branch) ===
+(no commits yet on this branch — to be added)
+
+=== 18. worktree list ===
+/Users/njx/Project/wt-phase6-t61         febf330 [feat/phase6-t61-bridge]
+/Users/njx/Project/wt-phase6-t64         b649e1f [feat/phase6-t64-naming]
+
+=== 19. file checksums (anti-mock) ===
+MD5 (dist/mac-arm64/灵犀演示.app/Contents/MacOS/灵犀演示) = 8ce63096bba0e5519f080f628a27a5f5
+MD5 (__tests__/naming.test.ts) = 900ab1918bbdf3973f53b487eac7e278
+MD5 (jest.config.electron.js) = d8d72cf37a2148c48f6e35c2af428dd2
+MD5 (package.json) = 444526efdb719ec6c420041eb16cecbf
+
+=== 20. ts-jest versions (real installed) ===
+29.7.0
+{
+  "name": "ts-jest",
+  "version": "29.4.11",

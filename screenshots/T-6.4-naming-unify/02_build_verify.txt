@@ -1,0 +1,37 @@
+=== 4. electron-builder --mac dir --arm64 --publish=never (real run) ===
+  • electron-builder  version=25.1.8 os=25.2.0
+  • loaded configuration  file=package.json ("build" field)
+  • author is missed in the package.json  appPackageFile=/Users/njx/Project/wt-phase6-t64/apps/desktop/electron-shell/package.json
+  • executing @electron/rebuild  electronVersion=33.4.11 arch=arm64 buildFromSource=false appDir=./
+  • installing native dependencies  arch=arm64
+  • completed installing native dependencies
+  • packaging       platform=darwin arch=arm64 electron=33.4.11 appOutDir=dist/mac-arm64
+  • asar usage is disabled — this is strongly not recommended  solution=enable asar and use asarUnpack to unpack files that must be externally available
+  • asar usage is disabled — this is strongly not recommended  solution=enable asar and use asarUnpack to unpack files that must be externally available
+  • skipped macOS code signing  reason=identity explicitly is set to null
+
+=== 5. dist/ contents ===
+total 8
+drwxr-xr-x@  5 njx  staff  160 Jul 11 00:30 .
+drwxr-xr-x@ 11 njx  staff  352 Jul 11 00:30 ..
+drwxr-xr-x@  3 njx  staff   96 Jul 11 00:30 .icon-icns
+-rw-r--r--@  1 njx  staff  840 Jul 11 00:31 builder-debug.yml
+drwxr-xr-x@  3 njx  staff   96 Jul 11 00:31 mac-arm64
+
+=== 6. dist/mac-arm64/灵犀演示.app/Contents/MacOS/ ===
+total 104
+drwxr-xr-x@ 3 njx  staff     96 Jul 11 00:31 .
+drwxr-xr-x@ 7 njx  staff    224 Jul 11 00:31 ..
+-rwxr-xr-x@ 1 njx  staff  50472 Jul 11 00:31 灵犀演示
+
+=== 7. file dist/mac-arm64/灵犀演示.app/Contents/MacOS/灵犀演示 ===
+dist/mac-arm64/灵犀演示.app/Contents/MacOS/灵犀演示: Mach-O 64-bit executable arm64
+
+=== 8. PlistBuddy verify (中文 binary name) ===
+灵犀演示
+灵犀演示
+灵犀演示
+com.openclaw.lingxi
+
+=== 9. .app total size ===
+246M	dist/mac-arm64/灵犀演示.app/
