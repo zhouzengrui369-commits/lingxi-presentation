@@ -1,0 +1,50 @@
+=== 10. lsappinfo verify (system-level: 灵犀演示 bundle in /Applications) ===
+    checkin time = 2026/07/10 22:45:06 ( 1 hours, 46 minutes, 40.1789 seconds ago )
+228) "灵犀演示" ASN:0x0-0x4247142f: 
+    bundleID="com.openclaw.lingxi"
+    bundle path="/Applications/灵犀演示.app"
+    executable path="/Applications/灵犀演示.app/Contents/MacOS/灵犀演示"
+--
+    checkin time = 2026/07/10 23:45:25 ( 46 minutes, 20.8377 seconds ago )
+234) "ThemeWidgetControlViewService (灵犀演示)" ASN:0x0-0x42559517: 
+
+=== 11. ls /Applications/灵犀演示.app ===
+drwxr-xr-x@ 3 njx  admin  96 Jul 10 22:57 /Applications/灵犀演示.app
+
+=== 12. ls /Applications/LingxiDemo.app (must NOT exist) ===
+ls: /Applications/LingxiDemo.app: No such file or directory
+
+=== 13. .app Framework structure (中文 Helper apps) ===
+Electron Framework.framework
+Mantle.framework
+ReactiveObjC.framework
+Squirrel.framework
+灵犀演示 Helper (GPU).app
+灵犀演示 Helper (Plugin).app
+灵犀演示 Helper (Renderer).app
+灵犀演示 Helper.app
+
+=== 14. .app Resources structure ===
+af.lproj
+am.lproj
+app
+ar.lproj
+bg.lproj
+bn.lproj
+ca.lproj
+cs.lproj
+da.lproj
+de.lproj
+el.lproj
+en.lproj
+en_GB.lproj
+es.lproj
+es_419.lproj
+
+=== 15. main.js + renderer.html packaged (electron-builder files manifest) ===
+total 40
+drwxr-xr-x@  5 njx  staff   160 Jul 11 00:31 .
+drwxr-xr-x@ 60 njx  staff  1920 Jul 11 00:31 ..
+-rw-r--r--@  1 njx  staff  6107 Jul 11 00:31 main.js
+-rw-r--r--@  1 njx  staff   251 Jul 11 00:31 package.json
+-rw-r--r--@  1 njx  staff  7548 Jul 11 00:31 renderer.html
