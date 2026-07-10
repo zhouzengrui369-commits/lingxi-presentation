@@ -24,7 +24,7 @@
     ],
     "extraResources": [
       {
-        "from": "/Users/njx/Project/wt-macos/apps/desktop",
+        "from": "../",
         "to": "lingxi-runtime/apps/desktop",
         "filter": [
           "cli/**/*",
@@ -39,7 +39,7 @@
         ]
       },
       {
-        "from": "/Users/njx/Project/wt-macos/backend",
+        "from": "../../../backend",
         "to": "lingxi-runtime/backend"
       }
     ],
@@ -89,6 +89,7 @@
     "asar": false
   },
   "devDependencies": {
+    "dmg-license": "^1.0.11",
     "electron": "^33.4.11",
     "electron-builder": "^25.0.0"
   }
