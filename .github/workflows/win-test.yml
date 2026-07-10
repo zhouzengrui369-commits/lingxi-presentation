@@ -1,0 +1,46 @@
+name: win-test (Phase 4 Win half)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  win-test:
+    name: Windows 11 (windows-latest)
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: apps/desktop
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: apps/desktop/package-lock.json
+
+      - name: Install dependencies (npm ci)
+        run: npm ci
+        env:
+          CI: 'true'
+
+      - name: Lint (eslint)
+        run: npm run lint
+        continue-on-error: false
+
+      - name: Unit tests (jest)
+        run: npm test -- --watchAll=false
+        env:
+          CI: 'true'
+
+      - name: Type check (tsc --noEmit)
+        run: npx tsc --noEmit
+        continue-on-error: true
