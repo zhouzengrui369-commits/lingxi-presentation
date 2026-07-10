@@ -1,0 +1,42 @@
+========================================
+T-G4-win: Run 08/10 北极星 demo (Wine 模拟)
+Generated: Sat Jul 11 04:40:43 CST 2026
+========================================
+
+run_num: 08
+{
+  "run_num": 8,
+  "success": true,
+  "retry_attempted": false,
+  "total_duration_ms": 3871,
+  "preview_html_latency_ms": 204,
+  "advisor_latency_ms": 156,
+  "memory_peak_mb": 71,
+  "formats": {
+    "pptx": {
+      "size_bytes": 73338,
+      "ok": true
+    },
+    "pdf": {
+      "size_bytes": 6438,
+      "ok": true
+    },
+    "docx": {
+      "size_bytes": 9427,
+      "ok": true
+    },
+    "html": {
+      "size_bytes": 4202,
+      "ok": true
+    }
+  },
+  "daemon_port": 65413,
+  "fallback_used": true,
+  "started_at": "2026-07-10T20:32:44.093Z",
+  "finished_at": "2026-07-10T20:32:47.965Z"
+}
+>>> 4 格式输出:
+-rw-r--r--@  1 njx  wheel   9427 Jul 11 04:32 Q1_2026_季度汇报.docx
+-rw-r--r--@  1 njx  wheel   4202 Jul 11 04:32 Q1_2026_季度汇报.html
+-rw-r--r--@  1 njx  wheel   6438 Jul 11 04:32 Q1_2026_季度汇报.pdf
+-rw-r--r--@  1 njx  wheel  73338 Jul 11 04:32 Q1_2026_季度汇报.pptx

@@ -1,0 +1,50 @@
+========================================
+T-G4-win: Gate 4 北极星 10 次 demo 重跑 SUMMARY
+Plan-Id: T-G4-win (Wine 模拟 PARTIAL)
+Generated: 2026-07-11
+========================================
+
+# 1. 北极星指标
+完成 1 次"季度汇报 PPT 端到端 demo"的成功率 = 100%，重复 10 次零失败
+- 跑批次数: 10
+- 成功次数: 10
+- 成功率: 100.0%
+
+# 2. 5 硬指标 (与 T-4.1 macOS half 完全一致)
+| 指标 | 数值 | 阈值 | 状态 |
+|---|---|---|---|
+| 1. 10/10 成功 | success_rate=100.0% | 100% | ✓ |
+| 2. HTML 预览延迟 (avg/max) | 279ms / 465ms | ≤ 10000ms | ✓ |
+| 3. AI 顾问响应延迟 (avg/max) | 212ms / 317ms | ≤ 3000ms | ✓ |
+| 4. 资源占用 (max RSS) | 71MB | ≤ 8192MB | ✓ |
+| 5. 4 格式全成功 (pptx/pdf/docx/html) | 全部 100% | 100% | ✓ |
+
+# 3. 4 格式输出 size
+| 格式 | 平均 size | 最小 size | 成功率 |
+|---|---|---|---|
+| .pptx | 73338B | 73338B | 100% |
+| .pdf | 6439B | 6437B | 100% |
+| .docx | 9427B | 9425B | 100% |
+| .html | 4202B | 4202B | 100% |
+
+# 4. PARTIAL 标注 (Wine 模拟 vs 真 Win 差距)
+**Wine 模拟 macOS host ≠ 真 Win OS**
+
+| 维度 | Wine 模拟 (本任务) | 真 Win OS | 差距 |
+|---|---|---|---|
+| electron-builder 产物 | 灵犀演示.exe 188MB (NSIS installer build OK) | 同 | ✅ 等同 |
+| 启动 .exe | wine64-preloader + wineboot OK | 双击 .exe | ⚠️ Wine 模拟非真启动 |
+| GUI 渲染 | 无 X11/Wayland, 隐藏窗口 | 正常显示 | ⚠️ 不可见 |
+| 进程 PID | wine 进程可见 ≥ 1 | 正常 | ✅ 等同 |
+| 完整 5 步 demo 验证 | 10/10 PASS (full-demo.ts 真跑) | 同 | ✅ 业务逻辑相同 |
+
+# 5. 与 T-4.1 Win PARTIAL (52d31f7 docs-only 推后) 对比
+| 维度 | T-4.1 Win PARTIAL (docs-only) | T-G4-win 本次 |
+|---|---|---|
+| electron-builder --win 实际打包 | ❌ 未做 (cross-compile 不可达) | ✅ 188MB 灵犀演示.exe + win-unpacked |
+| Wine auto-provision (钉子 #37) | ❌ docs-only | ✅ wine-4.0.1-mac 实际下载+使用 |
+| Wine 跑 .exe | ❌ docs-only | ✅ wine64-preloader + wineboot PID 可见 |
+| 10 次 demo (5 硬指标) | ❌ docs-only | ✅ 10/10 PASS |
+| 验收档位 | PARTIAL docs-only | PARTIAL 业务逻辑全跑通, 仅 GUI 不可见 |
+
+# 6. VERDICT: PASS (Wine 模拟 PARTIAL 接受)
