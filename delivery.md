@@ -132,10 +132,8 @@
 | T-2.1 | 端到端集成 | P0 | ✅ done (95f0258) | 中 | session | 2026-07-10 | PM | jest 真 PASS + e2e_flow.ts |
 | T-2.2 | PM 端到端 demo 跑通 | P0 | ✅ done (6452840 salvage) | 短 | session | 2026-07-10 | PM | 8 PNG + 4 格式真活生成 |
 | T-2.3 | 启动页动态动画 + 图标 | P0 | ✅ done (f706c08 + ed392a7) | 中 | session | 2026-07-10 | PM | SplashScreen + icon.svg |
-| T-3.1 | macOS 端到端 | P0 | ✅ override_accept (cycle 2 done) | 中 | session | 2026-07-10 13:24 | PM | commit 6994e24 on feat/macos-e2e · DMG 119999314 B (sha256 74eed1ec...) + .app 232MB arm64 + e2e 1862ms 5/5 + 4 格式输出 |
-| T-3.2 | Windows 端到端 | P0 | ✅ override_accept PARTIAL (cycle 1) | 中 | session | 2026-07-10 | PM | commit 8ef9f44 / d8f9aea on feat/windows-e2e, 等 Win VM |
-| T-3.1 | macOS 端到端 | P0 | ⏸ unmerged (Phase 4 启动时合并) | 中 | session | 2026-07-10 | PM | unmerged per rules.md §2.2 |
-| T-3.2 | Windows 端到端 | P0 | ⏸ unmerged (Phase 4 启动时合并) | 中 | session | 2026-07-10 | PM | unmerged per rules.md §2.2 |
+| T-3.1 | macOS 端到端 | P0 | ✅ override_accept cycle 2 done | 中 | session | 2026-07-10 13:24 | PM | commit 6994e24 on feat/macos-e2e · DMG 119999314 B (sha256 74eed1ec...) + .app 232MB arm64 + e2e 1862ms 5/5 + 4 格式输出 |
+| T-3.2 | Windows 端到端 | P0 | ✅ override_accept PARTIAL cycle 1 | 中 | session | 2026-07-10 | PM | commit 8ef9f44 / d8f9aea on feat/windows-e2e, 等 Win VM |
 | T-4.1 | 北极星 10 次 demo 验证 | P0 | pending | 中 | session | - | - | - |
 | T-5.1 | Cron 清理 + 文档归档 | P0 | pending | 短 | session | - | - | - |
 
