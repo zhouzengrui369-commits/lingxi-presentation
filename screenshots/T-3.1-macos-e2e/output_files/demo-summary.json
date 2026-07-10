@@ -1,0 +1,130 @@
+{
+  "ok": true,
+  "total_ms": 3592,
+  "daemon": {
+    "port": 52697,
+    "healthy": true,
+    "providers": [
+      "cli",
+      "api"
+    ]
+  },
+  "input_dir": "/Users/njx/Project/wt-macos/apps/desktop/testdata/quarterly_review",
+  "output_dir": "/tmp/lingxi-final-demo",
+  "pipeline": [
+    {
+      "step": "daemon_probe",
+      "status": "ok",
+      "data": {
+        "port": 52697,
+        "healthy": true,
+        "providers": [
+          "cli",
+          "api"
+        ]
+      }
+    },
+    {
+      "step": "file_kb_import",
+      "status": "ok",
+      "data": {
+        "files": 7,
+        "entries": 7,
+        "failed": 0,
+        "kb_root": "/tmp/lingxi_demo_kb"
+      },
+      "ms": 2618
+    },
+    {
+      "step": "advisor_3_rounds",
+      "status": "ok",
+      "data": {
+        "rounds": 3,
+        "picked": [
+          "业务增长",
+          "部门同事",
+          "精简 (8-12 页)"
+        ],
+        "daemon_chat_provider": "api"
+      },
+      "ms": 170
+    },
+    {
+      "step": "template_select",
+      "status": "ok",
+      "data": {
+        "template_id": "builtin_business_dark",
+        "palette": {
+          "primary": "#5B8DEF",
+          "secondary": "#38BDF8",
+          "accent": "#FACC15",
+          "background": "#0F172A",
+          "text": "#F8FAFC"
+        },
+        "layout_types": [
+          "title",
+          "section",
+          "content",
+          "two_column",
+          "summary"
+        ],
+        "source": "builtin"
+      },
+      "ms": 368
+    },
+    {
+      "step": "preview_generate",
+      "status": "ok",
+      "data": {
+        "preview_id": "f13cca30-8a42-44ea-811a-21d89d4549b1",
+        "latency_ms": 179,
+        "under_10s": true,
+        "html_path": "/tmp/lingxi-final-demo/previews/f13cca30-8a42-44ea-811a-21d89d4549b1.html",
+        "provider": "api"
+      },
+      "ms": 299
+    },
+    {
+      "step": "output_4_formats",
+      "status": "ok",
+      "data": {
+        "pptx": {
+          "status": "ok",
+          "size_bytes": 73338,
+          "output_path": "/tmp/lingxi-final-demo/Q1_2026_季度汇报.pptx",
+          "elapsed_ms": 16,
+          "verifier_ok": true,
+          "page_count": 5,
+          "paragraph_count": 7
+        },
+        "pdf": {
+          "status": "ok",
+          "size_bytes": 6439,
+          "output_path": "/tmp/lingxi-final-demo/Q1_2026_季度汇报.pdf",
+          "elapsed_ms": 16,
+          "verifier_ok": true,
+          "page_count": 5,
+          "paragraph_count": 6
+        },
+        "docx": {
+          "status": "ok",
+          "size_bytes": 9427,
+          "output_path": "/tmp/lingxi-final-demo/Q1_2026_季度汇报.docx",
+          "elapsed_ms": 23,
+          "verifier_ok": true,
+          "paragraph_count": 11
+        },
+        "html": {
+          "status": "ok",
+          "size_bytes": 4202,
+          "output_path": "/tmp/lingxi-final-demo/Q1_2026_季度汇报.html",
+          "elapsed_ms": 1,
+          "verifier_ok": true,
+          "page_count": 4,
+          "paragraph_count": 7
+        }
+      },
+      "ms": 56
+    }
+  ]
+}
