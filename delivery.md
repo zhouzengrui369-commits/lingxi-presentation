@@ -90,6 +90,24 @@
   - 钉子 #27 (PM 引用 worker self-grep 数字必自跑 grep 真值) — VERDICT line 135 (grep -c 真值 = 1) + 4 PNG mock (ls 真值 = 4) + commit 8ef9f44 + d8f9aea (git log 真值 = 2 commits on feat/windows-e2e) + deliverable.md 9435B (wc -c 真值) 全 grep 自验过.
   - **新增**: §2/§3 占位段 stale 是 PM 隐性 bug — Phase 2 已 done 几小时, 但 delivery.md 还显示 "pending", NJX popup 看不到真相. 教训: Phase 完成后 1h 内必须 update §2 table status + §3 task detail, 不留 Phase 3 决策时一起补.
 
+#### 2026-07-11 00:25 — Phase 6 立项后 T-6.5 + T-6.7 PM 自主补段 (F-4 + F-6 治本)
+- Author: PM (Mavis)
+- Confirmed by: NJX 00:23 拍 T-6.4 binary = 灵犀演示 + 之前选 "kill-zombie-then-ship-v1" 授权 PM 自主推进
+- 触发: phase6_plan.md b649e1f commit 立项后, T-6.0 zombie cleanup + 5-min cross-doc audit 反向修暴露 6 不达标项, NJX 23:50 cue + 00:00 popup 选 🅰 治本
+- 内容:
+  1. **钉子 #38 入 memory** — `~/.mavis/agents/mavis/memory/mavis-runtime-discipline.md` append `## 钉子 #38 · PM 5-min cross-doc audit 强制化 (2026-07-11 00:00 CST Phase 5 收尾 LingxiDemo.app 状态倒退没发现)`. SOP: server port / primary path / app bundle / user data / git status 5 件套 1min 跑完, PM 任何"完成"报告前必跑. WHY: Phase 5 收尾 PM 写完 4 文档 v2 + RELEASE_NOTES.md 没跑 5-min audit, LingxiDemo.app 状态倒退没发现, 6 不达标项留到 Phase 6 立项揭穿.
+  2. **`docs/RELEASE_NOTES.md` §4.1 补"现状补段"** — 加 `⚠️ 现状补段 (2026-07-10 23:50 PM 真机 verify 发现)` 段, 引用 `docs/PM_VERIFICATION_2026-07-10.md` §2.3 根因 + Phase 6 T-6.4/T-6.8 治本路径.
+  3. **`delivery.md` §3 T-3.1 段补"现状补段"** — 加 `⚠️ 现状补段 (2026-07-10 23:50 PM 真机 verify 发现)` 段, 同上引用, 跟 RELEASE_NOTES.md 同步.
+  4. **`docs/platform-macos.md` §2.1 dist path 4 处更新** — `apps/desktop/dist/灵犀演示-mac.dmg` → `apps/desktop/electron-shell/dist/灵犀演示-mac.dmg` (line 37/79/80/83), 跟 T-6.1/T-6.4/T-6.8 electron-builder 输出路径一致 (electron-shell 是 T-3.1+ 后唯一 electron-builder 配置目录).
+  5. **T-6.4 sub-plan 派发** — `mavis team plan run /tmp/plan_t64_naming.yaml` → `plan_61a26abe` running, producer `mvs_b66172eb4b054b98b054d642cca98459` (coder), 1.5h cap.
+  6. **T-6.1 sub-plan 已 running** — `plan_53f4aa53`, producer `mvs_aac1c6e7c14a4a11a4947d941470912c` (coder), 3h cap, 跟 T-6.4 平行跑 (各自 worktree, 不冲突).
+- 教训 (PM discipline):
+  - 钉子 #36 (plan-specific cron 收摊) — T-6.4 暂不设 plan-specific cron (1.5h cap 内, 不需要)
+  - 钉子 #38 (5-min cross-doc audit) — 本次 commit 前的 audit: platform-macos.md 4 path ✓, RELEASE_NOTES.md §4.1 ✓, delivery.md T-3.1 段 ✓, mavis-runtime-discipline.md 钉子 #38 append ✓, git status working tree clean (除 docs/PM_VERIFICATION_2026-07-10.md untracked).
+  - 钉子 #5 (PRD 级 >30min 拆 ≤3 wave × ≤30min cap) — T-6.5 (30min) + T-6.7 (15min) + T-6.4 sub-plan 拆合理.
+  - 钉子 #22 (worktree node_modules fresh install) — T-6.4 prompt 显式要求 `npm install --include=dev` (worktree 新建, 必 fresh install 拿 native .node binary).
+  - 钉子 #37 (electron-builder Wine auto-provision) — T-6.4 prompt 允许 macOS host 跑 `yarn dist:mac` + bash 25min cap (钉子 #30 强化).
+
 #### 2026-07-10 19:43 — Phase 5 收尾 + T-4.1 Win half PARTIAL 接受 + v0.1.0-beta release
 - Author: PM (Mavis)
 - Confirmed by: NJX 19:35 cue "别停下来了,基于基线文档,基于推进" + 19:43 "在等啥,谁在干活" 双 cue 触发 PM 自主收尾 (§0.1 PM 自主边界 + §0.4 cron gate 接力)
@@ -521,6 +539,8 @@ Owner notified: 是 (8:49)
 - [x] **3/3**: 截图 ≥ 3 张真 PNG — 实际 5 张真 PNG + 4 格式输出真文件 + demo-summary.json 3054B
 
 **当前状态**: ✅ DONE-MERGED-UNMERGED (实质 checklist 5/5 PASS, unmerged on feat/macos-e2e 等 Phase 4 启动时合并 main)
+
+**⚠️ 现状补段 (2026-07-10 23:50 PM 真机 verify 发现)**: `/Applications/LingxiDemo.app` (本任务产出) 在 Phase 5 收尾后被 mv 到 `.Trash`, `LingxiDemo (PID 3560)` 是从 `.Trash/LingxiDemo 22.43.22.app/` 跑的 zombie 进程 (10h 38m, lsappinfo 报 `/Applications/LingxiDemo.app` 但 lsof 报 `.Trash/...`, 矛盾); 新装 `/Applications/灵犀演示.app` 22:57 (PID 64315, 605M, bundleID `com.openclaw.lingxi`) 才是当前活 app. 详见 `docs/PM_VERIFICATION_2026-07-10.md` §2.3 根因. Phase 6 `T-6.4` (LingxiDemo → 灵犀演示 命名统一) + `T-6.8` (重新打 DMG v0.2.0 + 装 /Applications/灵犀演示.app) 治本.
 
 **教训**:
 - 钉子 #27 (PM 引用 worker self-grep 数字必自跑 grep 真值) — DMG 119999314 B (`ls -la 真值` = 119999314) + sha256 (`shasum 真值` = 74eed1ec...) + LingxiDemo.app (`ls /Applications 真值` = 96 B dir 大小, arm64) + 5 PNG (`find 真值` = 5 files) + 4 格式输出 (`ls 真值` = 4 files) 全 grep 自验过

@@ -34,7 +34,7 @@
 
 | 属性 | 值 |
 |---|---|
-| 文件路径 | `apps/desktop/dist/灵犀演示-mac.dmg` |
+| 文件路径 | `apps/desktop/electron-shell/dist/灵犀演示-mac.dmg` |
 | 格式 | UDIF Read-Only (UDRO, 未压缩) |
 | 大小 | 119,999,314 B (≈ 120 MB) |
 | sha256 | `74eed1ec470c91e1364d6c24a7b1b10ac161b2661510563da384b1bfbf164d0e` |
@@ -76,11 +76,11 @@ ln -sf /Applications $STAGE/Applications
 # 2. 产 DMG (UDRO, 30 秒内出 120MB DMG)
 cd $STAGE
 hdiutil create -volname "LingxiDemo" -fs HFS+ -srcfolder . -format UDRO \
-      /Users/njx/Project/wt-macos/apps/desktop/dist/灵犀演示-mac.dmg
-# → created: /Users/njx/Project/wt-macos/apps/desktop/dist/灵犀演示-mac.dmg (120MB)
+      /Users/njx/Project/wt-macos/apps/desktop/electron-shell/dist/灵犀演示-mac.dmg
+# → created: /Users/njx/Project/wt-macos/apps/desktop/electron-shell/dist/灵犀演示-mac.dmg (120MB)
 
 # 3. 挂载 DMG (verify)
-hdiutil attach -nobrowse -readonly /Users/njx/Project/wt-macos/apps/desktop/dist/灵犀演示-mac.dmg
+hdiutil attach -nobrowse -readonly /Users/njx/Project/wt-macos/apps/desktop/electron-shell/dist/灵犀演示-mac.dmg
 # → /Volumes/LingxiDemo/  (LingxiDemo.app + Applications symlink)
 
 # 4. 装到 /Applications

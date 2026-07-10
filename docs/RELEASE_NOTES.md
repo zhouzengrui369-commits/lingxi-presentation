@@ -58,6 +58,7 @@
 
 ### 4.1 macOS half ✅ DONE
 - 端到端 (T-3.1): `灵犀演示-mac.dmg` 120MB (sha256 `74eed1ec...`) + `LingxiDemo.app` 232MB arm64 安装 `/Applications/`
+- ⚠️ **现状补段 (2026-07-10 23:50 PM 真机 verify 发现)**: `/Applications/LingxiDemo.app` 已 mv 到 `.Trash` (Phase 5 收尾后清理), `LingxiDemo (PID 3560)` 是从 `.Trash/LingxiDemo 22.43.22.app/` 跑的 zombie 进程 (10h 38m, lsappinfo 显示在 /Applications, lsof 显示在 .Trash, 矛盾); 新装 `/Applications/灵犀演示.app` 22:57 (PID 64315, bundleID `com.openclaw.lingxi`, 605M) 在后台 detached 跑. 详见 `docs/PM_VERIFICATION_2026-07-10.md` §2.3 根因解释 + Phase 6 立项 `T-6.4` (LingxiDemo → 灵犀演示 命名统一) + `T-6.8` (重新打 DMG v0.2.0 + 装) 治本.
 - 北极星 (T-4.1): **10/10 PASS** 季度汇报 demo, 100% 成功率
 - 文档: `docs/platform-macos.md` 17KB
 - 截图: `screenshots/T-3.1-macos-e2e/` 5 真 PNG + `screenshots/T-4.1-north-star/` 11 真 PNG
