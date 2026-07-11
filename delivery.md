@@ -173,6 +173,17 @@
 | T-3.2 | Windows 端到端 | P0 | ✅ override_accept PARTIAL cycle 1 | 中 | session | 2026-07-10 | PM | commit 8ef9f44 / d8f9aea on feat/windows-e2e, 等 Win VM |
 | T-4.1 | 北极星 10 次 demo 验证 (macOS half done / Win half PARTIAL) | P0 | ✅ macOS half done (28aa5a4) / ⏸ Win half PARTIAL (52d31f7) | 中 | session | 2026-07-10 16:24 (macOS half) | PM | screenshots/T-4.1-north-star/ 11 真 PNG + docs/north_star_validation.md VERDICT PASS |
 | T-5.1 | Cron 清理 + 文档归档 | P0 | ✅ done (2026-07-10 19:43) | 短 | session | 2026-07-10 19:43 | PM | RELEASE_NOTES.md + lingxi-win-half-monitor deleted |
+| T-6.0 | zombie cleanup + 5-min audit | P0 | ✅ done (2026-07-11 00:01) | 短 | session | 2026-07-11 | PM | pgrep + find 全局 verify + LingxiDemo.app mv Trash |
+| T-6.1 | Electron ↔ RN renderer 5 路由桥接 | P0 | ⚠️ PARTIAL (10:03 PM 二次 verify: 5 路由真渲染, vite build 治本 done, renderer.jsx 5 路由占位 OK) | 中 | session | 2026-07-11 10:03 | PM | screenshots/PM-FINAL-ACCEPT/05-09_5_routes.png (5 PNG 5 路由 tabs 真显示) |
+| T-6.2 | LLM Wiki KB 真持久化 | P0 | ✅ done (1b244a6) | 中 | session | 2026-07-10 | PM | ~/Library/Application Support/灵犀演示/kb/ 真 7+7 JSON + manifest.json |
+| T-6.3 | 真 runtime 9 硬指标 10 次 demo | P0 | ❌ NOT-DONE (daemon 未跑 + Python 3.14 libexpat 阻塞) | 中 | session | 2026-07-11 10:01 (PM 二次 verify) | PM | full-demo.ts 第一步 FATAL: LINGXI_DAEMON_PORT not set |
+| T-6.4 | LingxiDemo → 灵犀演示 命名统一 | P0 | ✅ done (cdef551) | 短 | session | 2026-07-11 00:25 | PM | lsappinfo 1 个 bundle com.openclaw.lingxi |
+| T-6.5 | 钉子 #38 + 文档补段 | P0 | ✅ done (4eb292d) | 短 | session | 2026-07-11 00:25 | PM | mavis-runtime-discipline.md grep 命中 |
+| T-6.6 | git rm LingxiDemo.app + .gitignore | P0 | ✅ done (b649e1f) | 短 | session | 2026-07-11 00:25 | PM | git ls-files LingxiDemo.app = 0 |
+| T-6.7 | docs/platform-macos.md 路径更新 | P0 | ✅ done (4eb292d) | 短 | session | 2026-07-11 00:25 | PM | grep "electron-shell/dist" 命中 |
+| T-6.8 | 重新打 DMG v0.2.0 + 装 | P0 | ✅ done + v0.2.1 重打 (a1a7035 + 10:00) | 中 | session | 2026-07-11 10:00 | PM | /Applications/灵犀演示.app + 4 PID 跑 + dist/renderer.bundle.js 149605B (vite build 治本 done) |
+| T-G4-macos | Gate 4 北极星 10 次 (real-app) | P0 | ⚠️ PARTIAL (10/10 PASS 实为 cli mock, 4 格式 size 100% 相同; vite build 治本后 W3 重跑) | 中 | session | 2026-07-11 10:03 | PM | docs/north_star_validation.md (待 W3 重写) |
+| T-G4-win | Gate 4 Win half (Wine 模拟) | P0 | ⚠️ PARTIAL (edf8926) | 中 | session | 2026-07-11 | PM | docs/north_star_validation_win.md (Wine 模拟) |
 
 **状态枚举**：
 - `pending` — 已规划未开始
