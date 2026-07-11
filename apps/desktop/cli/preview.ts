@@ -16,7 +16,7 @@
  */
 import { buildPreviewPage, renderPreviewHtml, genUuid } from '../src/modules/preview/renderer.ts';
 import { createFsStore } from '../src/modules/preview/fs_store.ts';
-import type { PreviewSection } from '../src/modules/preview/types.ts';
+import type { PreviewSection, TemplateStyle } from '../src/modules/preview/types.ts';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
@@ -114,8 +114,17 @@ async function main(): Promise<void> {
   store.save(page);
 
   // 渲染 HTML + 延迟横幅
+  // T-6.10: --style <json-path> 让 preview 接收 template 子 CLI 的 style_analyzer 输出
+  let style: TemplateStyle | undefined = undefined;
+  if (args.style) {
+    try {
+      style = JSON.parse(fs.readFileSync(args.style, 'utf8')) as TemplateStyle;
+    } catch (e) {
+      console.error(`cli:preview --style 加载失败 (${args.style}): ${(e as Error).message}，用默认主题`);
+    }
+  }
   const html = injectBanner(
-    renderPreviewHtml(page, undefined, prompt),
+    renderPreviewHtml(page, style, prompt),
     latencyMs,
     String(data.provider ?? 'unknown'),
   );

@@ -27,6 +27,8 @@ import { detectFormat } from '../src/modules/file_kb/importer.ts';
 import { SCENARIO_TEMPLATES } from '../src/modules/advisor/questions.ts';
 import { dispatchExport, verifyOutputFile, toExportPayload } from '../src/modules/output/format_router.ts';
 import type { OutputFormat } from '../src/modules/output/types.ts';
+import { desktopDir, tsxBin, mapTemplateToStyle } from './paths.ts';  // T-6.10: 共享路径解析 + template style 适配器
+import type { TemplateStyle } from '../src/modules/preview/types.ts';
 type QuestionTemplate = (typeof SCENARIO_TEMPLATES)[number]['questions'][number];
 
 // ---- Args ----
@@ -160,11 +162,11 @@ async function main() {
   console.log('\n[3/5] template: 选择模板 ...');
   // 用 builtin dark 主题（不走 PPTX 提取 — Phase 1 cli.ts 的 extract_pptx.py 路径有 bug，
   //   而且我们 venv python 路径未注入 cli.ts 的 findPython。builtin 是同等的 MVP 验证路径）
-  const desktopDir = process.cwd();
+  // T-6.10: desktopDir 从 './paths.ts' 导入（不再用 process.cwd()）— 这样从 repo root 跑也能定位 apps/desktop/
   const templateInput = path.join(desktopDir, 'testdata/templates/business-dark.pptx');
   const templateOutputJson = path.join('/tmp', 'lingxi_template_business-dark.json');
   const step3Start = performance.now();
-  const tpl = run('node', [path.join(desktopDir, 'node_modules/tsx/dist/cli.mjs'), 'src/modules/template/cli.ts', '--input', templateInput, '--output', templateOutputJson, '--builtin', 'dark'], {
+  const tpl = run(tsxBin, ['src/modules/template/cli.ts', '--input', templateInput, '--output', templateOutputJson, '--builtin', 'dark'], {
     cwd: desktopDir,
     env: { LINGXI_DAEMON_PORT: process.env.LINGXI_DAEMON_PORT!, PATH: `${path.join(desktopDir, 'node_modules/.bin')}:${process.env.PATH ?? ''}` },
   });
@@ -179,10 +181,15 @@ async function main() {
   console.log(`      template_id: ${tplData.template_style.template_id}`);
   console.log(`      palette.primary: ${tplData.template_style.palette?.primary}`);
   console.log(`      layout_types: ${tplData.template_style.layout_types?.join(', ')}`);
+  // T-6.10: 适配 template style → TemplateStyle (5 字段 → 6 字段)，后面 preview + 4-format export 都用这份
+  const templateStyle: TemplateStyle = mapTemplateToStyle(tplData.template_style);
+  console.log(`      adapted palette.primary: ${templateStyle.palette.primary}`);
+  console.log(`      adapted palette.background: ${templateStyle.palette.background}`);
+  console.log(`      adapted fonts.heading: ${templateStyle.fonts.heading}`);
   pipelineLog.push({
     step: 'template_select',
     status: 'ok',
-    data: { template_id: tplData.template_style.template_id, palette: tplData.template_style.palette, layout_types: tplData.template_style.layout_types, source: 'builtin' },
+    data: { template_id: tplData.template_style.template_id, palette: tplData.template_style.palette, layout_types: tplData.template_style.layout_types, source: 'builtin', adapted: { primary: templateStyle.palette.primary, background: templateStyle.palette.background, heading: templateStyle.fonts.heading } },
     ms: step3Ms,
   });
 
@@ -190,8 +197,11 @@ async function main() {
   console.log('\n[4/5] preview: 生成 HTML 预览 ...');
   const previewOutDir = path.join(args.output, 'previews');
   await fs.mkdir(previewOutDir, { recursive: true });
+  // T-6.10: 把适配后的 template style 序列化到 tmp, --style 让 preview renderer 真的用上模板配色
+  const styleJsonPath = path.join('/tmp', 'lingxi_template_style.json');
+  await fs.writeFile(styleJsonPath, JSON.stringify(templateStyle, null, 2), 'utf-8');
   const step4Start = performance.now();
-  const preview = run('node', ['cli/preview.ts', '--prompt', '灵犀演示 Q1 2026 季度汇报', '--out', previewOutDir], {
+  const preview = run('node', ['cli/preview.ts', '--prompt', '灵犀演示 Q1 2026 季度汇报', '--out', previewOutDir, '--style', styleJsonPath], {
     cwd: desktopDir,
   });
   const step4Ms = Math.round(performance.now() - step4Start);
@@ -252,7 +262,8 @@ async function main() {
   const titleMatch = sourceHtml.match(/<h1 class="lx-doc-title"[^>]*>([\s\S]*?)<\/h1>/);
   const docTitle = titleMatch ? titleMatch[1].replace(/<[^>]+>/g, '').trim() : sections[0]?.heading ?? '灵犀演示季度汇报';
   const previewId = 'pm-demo';
-  const payload = toExportPayload({ preview_id: previewId, sections, html: sourceHtml }, undefined, docTitle);
+  // T-6.10: 把 template style 传给 4-format export (PPTX/PDF/DOCX/HTML) — 之前传 undefined 导致配色全部走默认蓝
+  const payload = toExportPayload({ preview_id: previewId, sections, html: sourceHtml }, templateStyle, docTitle);
 
   const exportResults: Record<string, any> = {};
   const step5Start = performance.now();
