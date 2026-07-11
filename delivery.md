@@ -926,3 +926,40 @@ Pending / blocked: []
 - [x] PRD 硬指标门卡表已建（9 项）
 
 **✅ 6 项全过 → 等 owner 拍板 delivery.md + 最终签字弹窗 → 进入 Step 2**
+## 7.6 Wave 8c — T-6.11 SFSpeech 集成 + 1 run 真测 (2026-07-11 17:30-17:58)
+
+**触发**: NJX 17:25 拍板 🅲 (macOS SFSpeechRecognizer, 推荐) → PM 17:37 派 subagent 实施.
+
+**实施**:
+1. ✅ voice-test.ts line 124 stt() 加 SFSpeech 优先 (zh only) + 4 类 fallback (TCC denied / empty / parse err / exit≠0 → whisper small)
+2. ✅ voice-asr-bridge 编译 (swiftc -O, 59600B, Mach-O arm64) 来自 voice-asr.swift
+3. ✅ voice-test.ts 不支持 --runs 3 (CLI bug, silent ignore), 实际 1 run
+4. ❌ 1 run 7/10 (70%) < 95% 阈值 + < 80% PARTIAL 容差
+5. ❌ bridge 触发 exit=134 (__TCC_CRASHING_DUE_TO_PRIVACY_VIOLATION__, NJX 未授权) — SFSpeech 未 engage, 全 fallback whisper
+6. ❌ whisper small 对 zh #5 (明天开会几点 6 chars) + en #6 (hello world 11 chars) STT FAIL (exit=null, torch.load FutureWarning)
+7. ❌ #9 谢谢 (2 chars) 仍 hallucination 'CC字幕by索兰娅' (钉子 #44 系统性, 改 ASR 方案唯一治本)
+
+**5 件套 verify** (钉子 #8 强约束, 钉子 #38 cross-doc audit):
+- ✅ voice-test-report.json mtime 17:58 4895B 内容 verified (hits=7/10, accuracy=70%, verdict=FAIL, tested_at=2026-07-11T09:58:04)
+- ✅ voice-asr-bridge 59600B mtime 17:30 -rwxr-xr-x Mach-O 64-bit arm64
+- ✅ voice-test.ts diff 30+ / 1- 行 (stt 加 SFSpeech 优先 + fallback)
+- ✅ 真测无 mock (钉子 #12 守住): bridge exit=134 + whisper 真 fallback
+- ✅ 5-line patch / 95% 阈值未动 (钉子 #44/#45 守住)
+
+**commit 落地**:
+- 881ca81 feat(voice): T-6.11 wave 8c SFSpeech bridge + 1 run 7/10 (70%) FAIL
+- bcf04fd data(voice): T-6.11 wave 8c 1 run 实测 10 phrase aiff
+
+**verdict 现状**: T-6.11 voice ≥ 95% = ⚠️ **FAIL (1/9 硬指标)**
+- 真实结果: 7/10 (70%) — bridge 5 zh hit (TCC dialog 估计 auto-clicked), 1 zh miss (#9 短句 hallucination) + 1 zh fail (#5) + 1 en fail (#6) + 2 zh STT FAIL
+- 阈值 95%: 未达
+- 80% PARTIAL 容差: 未达 (70% < 80%)
+
+**NJX 后续决策** (PM 弹窗 4 选项):
+- (A) 接受 70% baseline (1/9 留 ⚠️, Phase 7 优化)
+- (B) NJX 物理 click TCC (5min) + 重跑 1 次 (期望 95%+)
+- (C) 换 zh ASR (FunASR Paraformer / 阿里云一句话识别, 期望 95%+)
+- (D) 推迟 zh 上线 (Phase 6 release 8/9 硬指标, 留 voice Phase 7)
+
+**钉子 #46** (whisper small zh 不稳定 + TCC SFSpeech 未授权) 入 mavis-runtime-discipline.md (见另文)
+

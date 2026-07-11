@@ -441,3 +441,16 @@ whisper 短音频 (< 0.5s) hallucination 是已知 ASR 系统性缺陷:
 ---
 
 **VERDICT: ⚠️ PARTIAL (wave 7 revert done + wave 8 small 试过, 仍 80-90% < 95% 阈值, 待 NJX 拍 B/C/D ASR 方案)**
+## Wave 8c — SFSpeech 集成 + 1 run 7/10 (70%) FAIL (2026-07-11 17:30-17:58)
+
+**commit**: 881ca81 + bcf04fd
+**实测**: 1 run × 10 phrases = 7/10 (70%) < 95% 阈值 + < 80% PARTIAL 容差
+**5 件套 verify PASS**: bridge compiled (59600B) / report.json 4895B 17:58 / 真测无 mock / 5-line patch 未动 / 95% 阈值未改
+**bridge 触发 exit=134 (TCC __TCC_CRASHING_DUE_TO_PRIVACY_VIOLATION__)**: SFSpeech 未 engage, 全 fallback whisper
+**whisper small zh 仍不稳定**: #5 (明天开会几点 6 chars) + #6 (hello world 11 chars) STT FAIL (exit=null, torch.load FutureWarning)
+**#9 谢谢 短句 hallucination**: 仍 'CC字幕by索兰娅' (钉子 #44 系统性, ASR 方案选择是治本)
+**NJX 后续决策** (PM 弹窗 4 选项): (A) 接受 70% baseline / (B) NJX TCC click 重跑 / (C) 换 zh ASR / (D) 推迟 zh 上线
+**钉子 #46 入 mavis-runtime-discipline.md**
+
+**VERDICT: ⚠️ FAIL (1/9 硬指标 voice ≥ 95% 仍未达, 70% 真实结果)**
+
