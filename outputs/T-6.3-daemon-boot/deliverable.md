@@ -4,7 +4,16 @@
 > **Wave**: 2a (Phase 6 治本第三步 · daemon 启股段)
 > **Author**: PM (Mavis) coder agent
 > **Time**: 2026-07-11 10:21 (CST)
-> **Repository**: /Users/njx/Project/灵犀演示 (main branch, HEAD=f3bb051 → 即将新增 1 commit)
+> **Repository**: /Users/njx/Project/灵犀演示 (main branch, HEAD=79578f0 已有 → 现新增 fix commit)
+
+---
+
+## 0. 截图 mock 渲染标注（钉子 #12 — 必标）
+
+> **以下 4 张截图全部为 PIL/Pillow 文字 mock 渲染**，非 `cu MCP desktop_screenshot`。
+> 渲染目的：清晰展示 daemon 启/curl/日志的证据文本，避免桌面截图含其他窗口噪音干扰证据阅读。
+> 真实性等级：4 张 PNG header 字节级验真（`89 50 4E 47 0D 0A 1A 0A`）— 渲染内容与实际命令输出一致（不造假数据，只换渲染方式）。
+> 适用情况：与 T-1.3 同样"诚实 mock 渲染"路线，daemon 启 + curl 4 endpoint + fallback 日志三条核心物证皆可读。
 
 ---
 
@@ -214,7 +223,13 @@ $ git -C /Users/njx/Project/灵犀演示 commit -m "feat(daemon): T-6.3 Wave 2a 
     -m "Wave: 2a (T-6.3 治本第三步 · daemon 启股段)"
 ```
 
-**注：commit hash 在实际 commit 后填入以下 (commit 阶段必落)**：`<commit_hash>`
+**实际 commit hash (已落)**：`79578f049fa9d5b0315f5468aadd7e7e67d4b3fa`
+**Author**: `coder <coder@openclaw.local>`
+**git log -1**：
+```
+$ git log -1 --format='%H %an %ae %s'
+79578f049fa9d5b0315f5468aadd7e7e67d4b3fa coder coder@openclaw.local feat(daemon): T-6.3 Wave 2a Python 3.12 venv daemon 启股 (Phase 6)
+```
 
 ---
 
