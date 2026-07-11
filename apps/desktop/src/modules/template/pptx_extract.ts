@@ -15,7 +15,7 @@ import { dirname, resolve } from 'node:path';
 
 import type { PPTXExtractedJson } from './types';
 
-const PYTHON = process.env.LINGXI_TEST_PY || process.env.LINGXI_PYTHON || '/usr/bin/python3';
+const PYTHON = process.env.LINGXI_TEST_PY || process.env.LINGXI_PYTHON || (process.platform === 'win32' ? 'python' : '/usr/bin/python3');
 
 /** 找 backend/scripts/extract_pptx.py（用环境变量可覆盖） */
 export function findExtractorScript(): string {
