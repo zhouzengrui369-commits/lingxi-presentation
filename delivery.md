@@ -183,8 +183,15 @@
 | T-6.7 | docs/platform-macos.md 路径更新 | P0 | ✅ done (4eb292d) | 短 | session | 2026-07-11 00:25 | PM | grep "electron-shell/dist" 命中 |
 | T-6.8 | 重新打 DMG v0.2.0 + 装 | P0 | ✅ done + v0.2.1 重打 (a1a7035 + 10:00) | 中 | session | 2026-07-11 10:00 | PM | /Applications/灵犀演示.app + 4 PID 跑 + dist/renderer.bundle.js 149605B (vite build 治本 done) |
 | **T-6.11** | **voice revert 5-line patch + 真测 ≥ 95% + 钉子 #43-45** | P0 | ⚠️ **PARTIAL (revert done, 真测 BLOCKED)** — e49aed9 git revert 8a9ebc3 ✅, voice-test.ts (TTS→ASR) + voice-asr.swift (SFSpeechRecognizer) ✅, 1 次真跑 4-5/10 (40-50%) < 95% (whisper base 短中文差 + SFSpeechRecognizer TCC crash), 钉子 #43-45 入 mavis-runtime-discipline.md ✅ | 短 | session | 2026-07-11 14:20 | PM subagent (general) | outputs/T-6.11-voice-real-test/deliverable.md + apps/desktop/cli/voice-test.ts + apps/desktop/cli/voice-asr.swift |
-| T-G4-macos | Gate 4 北极星 10 次 (real-app) | P0 | ⚠️ PARTIAL (10/10 PASS 实为 cli mock, 4 格式 size 100% 相同; vite build 治本后 W3 重跑) | 中 | session | 2026-07-11 10:03 | PM | docs/north_star_validation.md (待 W3 重写) |
+| T-G4-macos | Gate 4 北极星 10 次 (real-app) | P0 | ✅ done (T-7.4 v2 校对 + §9 9 硬指标全表补段) | 中 | session | 2026-07-11 22:10 | PM | docs/north_star_validation_v2.md (6727B + §9 PRD 9 硬指标全表 7/9 ✅ + 2/9 ⚠️ 待 T-7.1/T-7.2) |
 | T-G4-win | Gate 4 Win half (Wine 模拟) | P0 | ⚠️ PARTIAL (edf8926) | 中 | session | 2026-07-11 | PM | docs/north_star_validation_win.md (Wine 模拟) |
+| T-7.0 | 100% 交付差距评估 + 下一轮 task list | P0 | ✅ done (22:04) | 短 | session | 2026-07-11 22:04 | PM subagent (general) | outputs/T-7.0-gap-assessment/deliverable.md (14916B, 8 行差距清单 + 7 行 task list + 8.5/10 = 85% 覆盖率) |
+| T-7.1 | H1 文件导入 56MB × 10 真测 | P0 | ⏳ 待派 (Wave 2, 拆 3 wave) | 中 | session | - | - | - |
+| T-7.2 | H5 模板 100% 匹配真验 | P0 | ⏳ 待派 (Wave 2, 拆 3 wave) | 中 | session | - | - | - |
+| T-7.3 | G3 macOS 平台正式收口 | P0 | ✅ done (22:15) — feat/macos-e2e Already up to date (Phase 6 收尾时已并入) + 5 spec-named 截图全在 (01_dmg / 02_launch / 03_source_files / 04_advisor_round / 05_output_files) | 短 | session | 2026-07-11 22:15 | PM | screenshots/T-3.1-macos-e2e/ 5 PNG (Phase 6 commit 6994e24 + 4266885) |
+| T-7.4 | G4 north_star_validation v2 补段 | P0 | ✅ done (22:18) — v2 已存在 13:51 (6727B) + 末尾 append §9 PRD 9 硬指标全表 (回填 wave 9 治本数据) + 钉子 #48 入 mavis-runtime-discipline.md | 短 | session | 2026-07-11 22:18 | PM | commit 6cc6c5a + docs/north_star_validation_v2.md §9 9 行 + 钉子 #48 1 hit |
+| T-7.5 | T-6.1 5 路由真组件 + 钉子 #47 | P0 | ⏳ subagent 跑中 (plan_34012248 22:08 started) | 30min | cron 30min | - | subagent (coder) | outputs/T-7.5-t61-real-routes/deliverable.md (待) |
+| T-7.6 | working tree 清理 + 归档 | P0 | ✅ done (22:13) — commit voice-test-report.json (4f22bb9) + mavis-trash stt_py_* + mavis-trash plans/plan_9b4aa168 + mv PM 验证截图到 docs/PM_VERIFICATION_2026-07-11-12_screenshots/ + git status 只剩 1 ?? (sub-agent deliverable 合规) | 15min | session | 2026-07-11 22:13 | PM | commit 4f22bb9 + 3 docs/PM_VERIFICATION_*.png |
 
 **状态枚举**：
 - `pending` — 已规划未开始
