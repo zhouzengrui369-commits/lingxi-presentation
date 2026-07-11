@@ -35,6 +35,12 @@ from typing import Any
 from pptx import Presentation
 from pptx.enum.shapes import MSO_SHAPE_TYPE
 
+# Force UTF-8 stdout on Windows (cp1252 default breaks Chinese chars in PPTX text)
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
+
 
 def _shape_bounding_emu(shape) -> tuple[int, int, int, int]:
     return (
