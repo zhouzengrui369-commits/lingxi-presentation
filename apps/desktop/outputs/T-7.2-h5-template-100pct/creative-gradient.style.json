@@ -1,0 +1,28 @@
+{
+  "template_id": "imported_creative-gradient",
+  "source": "imported",
+  "name": "creative-gradient",
+  "layout_types": [
+    "quote",
+    "content",
+    "title",
+    "summary"
+  ],
+  "palette": {
+    "primary": "#581C87",
+    "secondary": "#FFFFFF",
+    "accent": "#831843",
+    "background": "#FFFFFF",
+    "text": "#1A1A1A"
+  },
+  "fonts": {
+    "heading": "PingFang SC",
+    "body": "PingFang SC"
+  },
+  "decorations": [
+    "solid_block"
+  ],
+  "page_count": 10,
+  "analyzed_at": "2026-07-11T14:39:30.035Z",
+  "analyzer_version": "1.0.0"
+}

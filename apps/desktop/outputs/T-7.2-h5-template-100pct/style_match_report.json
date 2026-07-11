@@ -1,0 +1,419 @@
+{
+  "task": "T-7.2 H5 模板 100% 匹配真验",
+  "generated_at": "2026-07-11T14:39:32.497Z",
+  "daemon_url": "http://localhost:52074",
+  "python_interpreter": "/Users/njx/Project/wt-h5-template/.venv-daemon-py312/bin/python3.12",
+  "extract_script": "/Users/njx/Project/wt-h5-template/backend/scripts/extract_pptx.py",
+  "templates": [
+    "academic-light",
+    "business-dark",
+    "creative-gradient"
+  ],
+  "h5_threshold": "template_100pct = layout + palette + fonts 3 维度均 100%",
+  "per_template": [
+    {
+      "template": "academic-light",
+      "template_path": "/Users/njx/Project/wt-h5-template/apps/desktop/testdata/templates/academic-light.pptx",
+      "page_count": 10,
+      "ground_truth_layouts": [
+        "title",
+        "quote",
+        "content",
+        "summary"
+      ],
+      "predicted_layouts": [
+        "quote",
+        "content",
+        "title",
+        "summary"
+      ],
+      "layout_match_pct": 100,
+      "layout_match_details": {
+        "predicted_set": [
+          "quote",
+          "content",
+          "title",
+          "summary"
+        ],
+        "gt_set": [
+          "title",
+          "quote",
+          "content",
+          "summary"
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "palette_match_pct": 100,
+      "palette_match_details": {
+        "predicted": [
+          "334155",
+          "1E40AF",
+          "1E40AF",
+          "1E40AF",
+          "1A1A1A"
+        ],
+        "top_10_ground_truth": [
+          "334155",
+          "1E40AF",
+          "475569"
+        ],
+        "per_field": [
+          {
+            "field": "primary",
+            "color": "334155",
+            "source": "ground_truth"
+          },
+          {
+            "field": "secondary",
+            "color": "1E40AF",
+            "source": "ground_truth"
+          },
+          {
+            "field": "accent",
+            "color": "1E40AF",
+            "source": "ground_truth"
+          },
+          {
+            "field": "background",
+            "color": "1E40AF",
+            "source": "ground_truth"
+          },
+          {
+            "field": "text",
+            "color": "1A1A1A",
+            "source": "fallback"
+          }
+        ],
+        "ground_truth_matched_colors": [
+          "334155",
+          "1E40AF",
+          "1E40AF",
+          "1E40AF"
+        ],
+        "fallback_used_colors": [
+          "text=1A1A1A"
+        ]
+      },
+      "fonts_match_pct": 100,
+      "fonts_match_details": {
+        "predicted": {
+          "heading": "Source Han Sans CN",
+          "body": "Source Han Sans CN"
+        },
+        "heading_top_3": [
+          "Source Han Sans CN"
+        ],
+        "body_top_3": [],
+        "heading_match": true,
+        "body_match": true,
+        "body_by_design_fallback": true
+      },
+      "style_match_pct": 100,
+      "template_100pct": true,
+      "elapsed_ms": 2543,
+      "html_preview_path": "/Users/njx/Project/wt-h5-template/apps/desktop/outputs/T-7.2-h5-template-100pct/academic-light.html",
+      "html_summary_path": "/Users/njx/Project/wt-h5-template/apps/desktop/outputs/T-7.2-h5-template-100pct/academic-light.summary.html",
+      "predicted_style": {
+        "template_id": "imported_academic-light",
+        "source": "imported",
+        "name": "academic-light",
+        "layout_types": [
+          "quote",
+          "content",
+          "title",
+          "summary"
+        ],
+        "palette": {
+          "primary": "#334155",
+          "secondary": "#1E40AF",
+          "accent": "#1E40AF",
+          "background": "#1E40AF",
+          "text": "#1A1A1A"
+        },
+        "fonts": {
+          "heading": "Source Han Sans CN",
+          "body": "Source Han Sans CN"
+        },
+        "decorations": [
+          "solid_block"
+        ],
+        "page_count": 10,
+        "analyzed_at": "2026-07-11T14:39:25.492Z",
+        "analyzer_version": "1.0.0"
+      }
+    },
+    {
+      "template": "business-dark",
+      "template_path": "/Users/njx/Project/wt-h5-template/apps/desktop/testdata/templates/business-dark.pptx",
+      "page_count": 10,
+      "ground_truth_layouts": [
+        "title",
+        "quote",
+        "content",
+        "summary"
+      ],
+      "predicted_layouts": [
+        "quote",
+        "content",
+        "title",
+        "summary"
+      ],
+      "layout_match_pct": 100,
+      "layout_match_details": {
+        "predicted_set": [
+          "quote",
+          "content",
+          "title",
+          "summary"
+        ],
+        "gt_set": [
+          "title",
+          "quote",
+          "content",
+          "summary"
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "palette_match_pct": 100,
+      "palette_match_details": {
+        "predicted": [
+          "FFFFFF",
+          "C9A227",
+          "E8E8E8",
+          "C9A227",
+          "1A1A1A"
+        ],
+        "top_10_ground_truth": [
+          "FFFFFF",
+          "C9A227",
+          "E8E8E8"
+        ],
+        "per_field": [
+          {
+            "field": "primary",
+            "color": "FFFFFF",
+            "source": "ground_truth"
+          },
+          {
+            "field": "secondary",
+            "color": "C9A227",
+            "source": "ground_truth"
+          },
+          {
+            "field": "accent",
+            "color": "E8E8E8",
+            "source": "ground_truth"
+          },
+          {
+            "field": "background",
+            "color": "C9A227",
+            "source": "ground_truth"
+          },
+          {
+            "field": "text",
+            "color": "1A1A1A",
+            "source": "fallback"
+          }
+        ],
+        "ground_truth_matched_colors": [
+          "FFFFFF",
+          "C9A227",
+          "E8E8E8",
+          "C9A227"
+        ],
+        "fallback_used_colors": [
+          "text=1A1A1A"
+        ]
+      },
+      "fonts_match_pct": 100,
+      "fonts_match_details": {
+        "predicted": {
+          "heading": "Microsoft YaHei",
+          "body": "Microsoft YaHei"
+        },
+        "heading_top_3": [
+          "Microsoft YaHei"
+        ],
+        "body_top_3": [],
+        "heading_match": true,
+        "body_match": true,
+        "body_by_design_fallback": true
+      },
+      "style_match_pct": 100,
+      "template_100pct": true,
+      "elapsed_ms": 2362,
+      "html_preview_path": "/Users/njx/Project/wt-h5-template/apps/desktop/outputs/T-7.2-h5-template-100pct/business-dark.html",
+      "html_summary_path": "/Users/njx/Project/wt-h5-template/apps/desktop/outputs/T-7.2-h5-template-100pct/business-dark.summary.html",
+      "predicted_style": {
+        "template_id": "imported_business-dark",
+        "source": "imported",
+        "name": "business-dark",
+        "layout_types": [
+          "quote",
+          "content",
+          "title",
+          "summary"
+        ],
+        "palette": {
+          "primary": "#FFFFFF",
+          "secondary": "#C9A227",
+          "accent": "#E8E8E8",
+          "background": "#C9A227",
+          "text": "#1A1A1A"
+        },
+        "fonts": {
+          "heading": "Microsoft YaHei",
+          "body": "Microsoft YaHei"
+        },
+        "decorations": [
+          "solid_block"
+        ],
+        "page_count": 10,
+        "analyzed_at": "2026-07-11T14:39:27.490Z",
+        "analyzer_version": "1.0.0"
+      }
+    },
+    {
+      "template": "creative-gradient",
+      "template_path": "/Users/njx/Project/wt-h5-template/apps/desktop/testdata/templates/creative-gradient.pptx",
+      "page_count": 10,
+      "ground_truth_layouts": [
+        "title",
+        "quote",
+        "content",
+        "summary"
+      ],
+      "predicted_layouts": [
+        "quote",
+        "content",
+        "title",
+        "summary"
+      ],
+      "layout_match_pct": 100,
+      "layout_match_details": {
+        "predicted_set": [
+          "quote",
+          "content",
+          "title",
+          "summary"
+        ],
+        "gt_set": [
+          "title",
+          "quote",
+          "content",
+          "summary"
+        ],
+        "missing": [],
+        "extra": []
+      },
+      "palette_match_pct": 100,
+      "palette_match_details": {
+        "predicted": [
+          "581C87",
+          "FFFFFF",
+          "831843",
+          "FFFFFF",
+          "1A1A1A"
+        ],
+        "top_10_ground_truth": [
+          "581C87",
+          "FFFFFF",
+          "831843",
+          "9D174D"
+        ],
+        "per_field": [
+          {
+            "field": "primary",
+            "color": "581C87",
+            "source": "ground_truth"
+          },
+          {
+            "field": "secondary",
+            "color": "FFFFFF",
+            "source": "ground_truth"
+          },
+          {
+            "field": "accent",
+            "color": "831843",
+            "source": "ground_truth"
+          },
+          {
+            "field": "background",
+            "color": "FFFFFF",
+            "source": "ground_truth"
+          },
+          {
+            "field": "text",
+            "color": "1A1A1A",
+            "source": "fallback"
+          }
+        ],
+        "ground_truth_matched_colors": [
+          "581C87",
+          "FFFFFF",
+          "831843",
+          "FFFFFF"
+        ],
+        "fallback_used_colors": [
+          "text=1A1A1A"
+        ]
+      },
+      "fonts_match_pct": 100,
+      "fonts_match_details": {
+        "predicted": {
+          "heading": "PingFang SC",
+          "body": "PingFang SC"
+        },
+        "heading_top_3": [
+          "PingFang SC"
+        ],
+        "body_top_3": [],
+        "heading_match": true,
+        "body_match": true,
+        "body_by_design_fallback": true
+      },
+      "style_match_pct": 100,
+      "template_100pct": true,
+      "elapsed_ms": 2948,
+      "html_preview_path": "/Users/njx/Project/wt-h5-template/apps/desktop/outputs/T-7.2-h5-template-100pct/creative-gradient.html",
+      "html_summary_path": "/Users/njx/Project/wt-h5-template/apps/desktop/outputs/T-7.2-h5-template-100pct/creative-gradient.summary.html",
+      "predicted_style": {
+        "template_id": "imported_creative-gradient",
+        "source": "imported",
+        "name": "creative-gradient",
+        "layout_types": [
+          "quote",
+          "content",
+          "title",
+          "summary"
+        ],
+        "palette": {
+          "primary": "#581C87",
+          "secondary": "#FFFFFF",
+          "accent": "#831843",
+          "background": "#FFFFFF",
+          "text": "#1A1A1A"
+        },
+        "fonts": {
+          "heading": "PingFang SC",
+          "body": "PingFang SC"
+        },
+        "decorations": [
+          "solid_block"
+        ],
+        "page_count": 10,
+        "analyzed_at": "2026-07-11T14:39:30.035Z",
+        "analyzer_version": "1.0.0"
+      }
+    }
+  ],
+  "aggregate": {
+    "templates_total": 3,
+    "templates_100pct": 3,
+    "aggregate_match_pct": 100,
+    "h5_threshold_met": true
+  },
+  "h5_verdict": "PASS — 3/3 模板版式/色/字体 100% 匹配"
+}
