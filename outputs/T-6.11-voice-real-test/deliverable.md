@@ -402,16 +402,16 @@ whisper 短音频 (< 0.5s) hallucination 是已知 ASR 系统性缺陷:
 - ❌ 禁止 sign off 时不跑 5-min cross-doc audit → **跑 5 件套 verify 见 §12**
 - ❌ 禁止 mock 截图不标注 (钉子 #12) → **未做, 真 wav + 真 whisper 输出**
 
-### Wave 8 5 件套 verify
+### Wave 8 5 件套 verify (post-commit)
 
 | # | 检查 | 真值 | 状态 |
 |---|------|------|------|
-| 1 | line 124 'base' → 'small' 改完 | `grep -n "'small'" apps/desktop/cli/voice-test.ts` | ✅ |
-| 2 | small.pt downloaded | `ls -la ~/.cache/whisper/small.pt` 483M | ✅ |
-| 3 | voice-test-report.json 写盘 | `ls -la apps/desktop/outputs/T-6.11-voice-real-test/voice-test-report.json` | ✅ |
-| 4 | 10 wav (aiff) 写盘 | `ls apps/desktop/outputs/T-6.11-voice-real-test/*.aiff \| wc -l = 10` | ✅ |
+| 1 | line 124 'base' → 'small' 改完 | `grep -n "'small'" apps/desktop/cli/voice-test.ts` 命中 | ✅ |
+| 2 | small.pt downloaded | `ls -la ~/.cache/whisper/small.pt` 483M 14:26 mtime | ✅ |
+| 3 | voice-test-report.json 写盘 | `ls -la apps/desktop/outputs/T-6.11-voice-real-test/voice-test-report.json` 4218B 14:56 | ✅ |
+| 4 | 10 wav (aiff) 写盘 | `ls apps/desktop/outputs/T-6.11-voice-real-test/*.aiff \| wc -l = 10` 14:51-14:56 | ✅ |
 | 5 | deliverable.md wave 8 段新增 | 本段 §11 | ✅ |
-| 6 | commit (待) | git status --short 检 | ⏳ |
+| 6 | commit | `0cfe050 feat(voice): T-6.11 wave 8 升 whisper small + 真测 FAIL` 14:57 | ✅ |
 
 ### Wave 8 钉子 recall (NJX 强化)
 
