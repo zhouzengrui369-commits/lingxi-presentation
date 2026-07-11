@@ -44,6 +44,7 @@ jobs:
         run: npm test -- --watchAll=false
         env:
           CI: 'true'
+          NODE_OPTIONS: --experimental-vm-modules
 
       - name: Type check (tsc --noEmit)
         run: npx tsc --noEmit
