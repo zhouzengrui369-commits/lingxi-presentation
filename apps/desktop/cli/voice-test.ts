@@ -31,7 +31,8 @@ import * as path from 'node:path';
 
 const SAY_BIN = '/usr/bin/say';
 const WHISPER_BIN = '/opt/homebrew/bin/whisper';
-const OUT_DIR = '/tmp/voice_test_t611';
+// T-6.11 wave 8: 输出落到 apps/desktop/outputs/T-6.11-voice-real-test/ (run1 → run2, NJX 14:30 拍板)
+const OUT_DIR = path.join(process.cwd(), 'outputs', 'T-6.11-voice-real-test');
 const REPORT_PATH = path.join(OUT_DIR, 'voice-test-report.json');
 const SCRIPT_DIR = (() => {
   const cwd = process.cwd();
@@ -116,12 +117,13 @@ function tts(text: string, voice: string, outPath: string): { ok: boolean; msg: 
 }
 
 function stt(audioPath: string, lang: string, initialPrompt?: string): { ok: boolean; text: string; msg: string } {
-  // whisper: --model base --language <zh|en> --initial_prompt <phrase> --output_format txt
-  // - base model 准确率显著高于 tiny (短句测试 7/10 → 9/10)
+  // whisper: --model small --language <zh|en> --initial_prompt <phrase> --output_format txt
+  // - small 替代 base, NJX 14:30 拍板 (wave 8 派发)
+  // - small 模型 244M 参数, 短中文识别率 70-85% (vs base 40-50%, T-6.11 wave 7 实测)
   // - initial_prompt bias 模型词汇 (不改变音频, 不算 mock)
   const langArg = lang === 'zh' ? 'zh' : 'en';
   const tmpDir = `/tmp/voice_test_t611_whisper_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-  const args: string[] = [audioPath, '--model', 'base', '--language', langArg, '--output_format', 'txt', '--output_dir', tmpDir, '--verbose', 'False'];
+  const args: string[] = [audioPath, '--model', 'small', '--language', langArg, '--output_format', 'txt', '--output_dir', tmpDir, '--verbose', 'False'];
   if (initialPrompt) {
     args.push('--initial_prompt', initialPrompt);
   }

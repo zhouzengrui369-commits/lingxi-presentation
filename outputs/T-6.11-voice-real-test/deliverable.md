@@ -352,4 +352,92 @@ Plan-Id: T-6.11-voice-real-test
 
 ---
 
-**VERDICT: ⚠️ PARTIAL (revert done + 真测 BLOCKED, 待 NJX 拍板 ASR 方案)**
+## 11 · T-6.11 Wave 8 派发结果 (2026-07-11 14:42-14:56, NJX 14:30 拍板 🅰 whisper small)
+
+> **触发**: NJX 14:30 拍板 🅰 — 升 whisper small 模型 (替代 base). PM 14:41 派发 wave 8. Plan-Id: `T-6.11-voice-real-test/wave-8`.
+
+### Wave 8 验收口径 (8 件)
+
+1. ✅ `apps/desktop/cli/voice-test.ts` line 124 改 `'base'` → `'small'` (1 行)
+2. ✅ line 119-122 注释同步更新 ("small 替代 base, NJX 14:30 拍板")
+3. ✅ OUT_DIR 改 `path.join(process.cwd(), 'outputs', 'T-6.11-voice-real-test')` (从 `/tmp/voice_test_t611` 改, 落到 apps/desktop/outputs/)
+4. ✅ whisper small.pt 下载 (483MB, 14:26 落地 ~/.cache/whisper/)
+5. ⚠️ 重跑 3 次 — run1 9/10, run2 9/10, run3 8/10
+6. ⚠️ accuracy ≥ 0.95 (硬指标) — 最佳 90%, 最低 80%, 平均 86.7% — **未达 95% 阈值**
+7. ❌ VERDICT = PASS (明面写) — **FAIL (诚实写, 不藏)**
+8. ✅ 真实 whisper STT + 真实 macOS `say` TTS, 无 mock 无 patch (钉子 #44 强约束)
+9. ✅ wav (10 aiff) + voice-test-report.json 落到 `apps/desktop/outputs/T-6.11-voice-real-test/`
+10. ✅ commit + deliverable.md update (本 wave 8 段 + commit hash 待补)
+
+### Wave 8 实测数据 (3 次实跑)
+
+| Run | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 命中 | 准确率 | VERDICT |
+|-----|---|---|---|---|---|---|---|---|---|----|------|--------|---------|
+| 1   | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓  | 9/10  | 90%    | FAIL    |
+| 2   | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓  | 9/10  | 90%    | FAIL    |
+| 3   | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✗ | ✓  | 8/10  | 80%    | FAIL    |
+
+- **Run 1 (14:39-14:47)**: phrase #9 "谢谢" → "CC字幕by索兰娅" (whisper hallucination, 2-char 短句 < 0.5s 音频)
+- **Run 2 (14:47-14:51)**: phrase #9 "谢谢" → STT FAIL exit=null (同 hallucination)
+- **Run 3 (14:51-14:56)**: phrase #5 "明天开会几点" → STT FAIL exit=null + phrase #9 "谢谢" → "CC字幕by索兰娅"
+
+### Wave 8 根因 (whisper small 短中文 hallucination)
+
+whisper small 模型 (244M 参数) 对 2-5 字中文短句 (音频时长 0.3-0.8s) 有系统性 hallucination:
+- **#9 "谢谢" (2 chars, ~0.3s audio)**: 3 次全失败, 典型输出 "CC字幕by索兰娅" / exit=null (推测在长静音段推断字幕字符串)
+- **#5 "明天开会几点" (6 chars, ~0.8s audio)**: 1/3 失败 (run3), STT exit=null (类似 hallucination, 但非确定性)
+
+whisper 短音频 (< 0.5s) hallucination 是已知 ASR 系统性缺陷:
+- 短音频采样点太少, 声学特征不足以解码
+- 模型 fallback 到 "通用字幕字符串" 模式
+- 中文短句尤其敏感 (字节数 vs 字符数映射, 边际信息不足)
+
+### Wave 8 禁红线自查 (NJX 强化)
+
+- ❌ 禁止 voice-gate 5-line patch 之类回避测 (钉子 #44) → **未做, voice 真测未 mock**
+- ❌ 禁止 mock / 改 accuracy 公式 / 改 judge 条件 → **未做, accuracy 公式 unchanged (hits/total)**
+- ❌ 禁止用 harness 模式 0.96 默认值 → **未做, real-cli 真测**
+- ❌ 禁止改其他 ASR 方案 (medium/large/第三方 API) → **未做, 仅 small**
+- ❌ 禁止不动盘不 commit → **未做, 1 行代码改 + OUT_DIR 改, 待 commit**
+- ❌ 禁止 sign off 时不跑 5-min cross-doc audit → **跑 5 件套 verify 见 §12**
+- ❌ 禁止 mock 截图不标注 (钉子 #12) → **未做, 真 wav + 真 whisper 输出**
+
+### Wave 8 5 件套 verify
+
+| # | 检查 | 真值 | 状态 |
+|---|------|------|------|
+| 1 | line 124 'base' → 'small' 改完 | `grep -n "'small'" apps/desktop/cli/voice-test.ts` | ✅ |
+| 2 | small.pt downloaded | `ls -la ~/.cache/whisper/small.pt` 483M | ✅ |
+| 3 | voice-test-report.json 写盘 | `ls -la apps/desktop/outputs/T-6.11-voice-real-test/voice-test-report.json` | ✅ |
+| 4 | 10 wav (aiff) 写盘 | `ls apps/desktop/outputs/T-6.11-voice-real-test/*.aiff \| wc -l = 10` | ✅ |
+| 5 | deliverable.md wave 8 段新增 | 本段 §11 | ✅ |
+| 6 | commit (待) | git status --short 检 | ⏳ |
+
+### Wave 8 钉子 recall (NJX 强化)
+
+- ✅ #44 voice 真测 5 件套 (TTS 真 / STT 真 / 10 短句 / 95% 阈值 / 明面 VERDICT) — 全齐, 阈值未达 = 诚实写 FAIL
+- ✅ #45 ASR 选型 = 业务拍板 — 没自主换 medium/large/API
+- ✅ #29 sprint close 同步 commit — 准备 commit
+- ✅ #38 5-min cross-doc audit — 5 件套跑齐见上表
+- ✅ #12 mock 截图必标注 — 真 wav + 真 whisper 输出, 无 mock
+
+### Wave 8 结论
+
+**T-6.11 voice 95% 真测 = ⚠️ FAIL (诚实)**:
+- 1 行代码改完 (line 124 base→small)
+- small.pt 下载 + 3 次真跑 (run1 9/10, run2 9/10, run3 8/10)
+- 平均 86.7%, 最佳 90%, 最低 80% — **均 < 95% 阈值**
+- 根因: whisper small 短中文 (2-5 字, 0.3-0.8s 音频) 系统性 hallucination
+- steer 2/2 已用 (钉子 #24 race-loop), 仍 FAIL → 弹 NJX
+
+**NJX 拍板建议 (重提 4 方案)**:
+- **A) 升 whisper small** ← **已用, 仍 FAIL** (本次结果, NJX 14:30 拍板)
+- **B) 人工授权 TCC + SFSpeechRecognizer** (5min, 期望 99%+, **推荐**)
+- **C) 接 OpenAI Whisper API** (5min, 期望 95%+, 需 key+网络+钱)
+- **D) 接受 PARTIAL 收, voice 留 Phase 7 优化** (8/9 硬指标先收, 0 重写)
+
+**subagent 状态**: 30-40min cap 内 15min 跑完, 1 行代码改 + 1 行 OUT_DIR 改 + 3 次实跑 + 5 件套 verify, 不 spin 不 mock, 诚实写 FAIL 报告 PM. 等 NJX 拍 B/C/D.
+
+---
+
+**VERDICT: ⚠️ PARTIAL (wave 7 revert done + wave 8 small 试过, 仍 80-90% < 95% 阈值, 待 NJX 拍 B/C/D ASR 方案)**
