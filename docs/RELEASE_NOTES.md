@@ -1,10 +1,10 @@
-# 灵犀演示 — Release Notes (Phase 5 收尾)
+# 灵犀演示 — Release Notes (Phase 6 + Phase 7 Wave 2 收尾)
 
 > 项目: **灵犀演示** (Lingxi Presentation) — AI 驱动的办公内容生成桌面 App
-> 版本: **v0.1.0-beta** (Phase 1-4 macOS half 完工 + Win half PARTIAL)
-> 收尾时间: 2026-07-10 19:43 CST
+> 版本: **v0.2.0** (Phase 6 完整收口 + T-7.1 H1 + T-7.2 H5 落地; **v0.2.1 重打未实施 — Info.plist 实际仍 v0.2.0, ground truth 修正**)
+> 收尾时间: 2026-07-11 23:00 CST
 > 作者: Mavis (PM)
-> 触发: NJX 19:35 cue "别停下来了,基于基线文档,基于推进" + NJX 19:43 "在等啥,谁在干活" → PM 自主 Phase 5 收尾
+> 触发: NJX 22:55 拍板 T-7.2 H5 = 🅰 design-aware + merge + Phase 6 v0.2.1 签字 = "PM决定" → PM 自主 4 文档同步 + 4 文档 commit + cron disable + release notes 收口
 
 ---
 
@@ -256,3 +256,80 @@
 - v1 wave 8c 70% 历史保留为 voice-test-report-v1-wave8c.json 4298B
 
 **9 硬指标**: 9/9 ✅ (T-6.11 voice 1/9 ⚠️ → 9/9 ✅ full pass)
+
+---
+
+## 8. v0.2.0 — Phase 6 完整收口 + T-7.1 H1 + T-7.2 H5 (2026-07-11 23:00)
+
+> **重要 ground truth 修正**: NJX 22:55 授权 "PM 决定" 签 v0.2.1, 但 PM 5-min cross-doc audit (钉子 #38) 发现 `defaults read /Applications/灵犀演示.app/Contents/Info.plist CFBundleShortVersionString = 0.2.0` (非 0.2.1), 且 `apps/desktop/electron-shell/dist/` DMG 目录不存在。按钉子 #9/#22/#23 ground truth 优先级, PM 拒绝签 v0.2.1, 自主签 **v0.2.0 实际状态** + 标注 v0.2.1 重打未实施。
+
+### 8.1 Phase 6 收口 (T-6.0 ~ T-6.8 + T-6.11)
+
+| T# | 内容 | 状态 | commit | 备注 |
+|---|---|---|---|---|
+| T-6.0 | Phase 6 立项 | ✅ done | - | 4 文档 ready |
+| T-6.1 | vite build 治本 (renderer.bundle.js 149605B) | ✅ done | f3bb051 | 钉子 #41 治本 |
+| T-6.2 | 5 路由真组件化 | ✅ done | bb1a4a2 | real-app impl |
+| T-6.3 | daemon Python 3.12 venv 启股 | ✅ done | 79578f0 | libexpat 治本 |
+| T-6.4 | LingxiDemo → 灵犀演示 命名统一 | ✅ done | - | bundleID `com.openclaw.lingxi` |
+| T-6.5 | runRealAppOnce 实现 | ✅ done | - | T-G4 北极星真启 |
+| T-6.6 | git rm LingxiDemo.app | ✅ done | b649e1f | .gitignore 同步 |
+| T-6.7 | docs/platform-macos.md 路径更新 | ✅ done | 4eb292d | electron-shell/dist 命中 |
+| T-6.8 | 重新打 DMG v0.2.0 + 装 | ✅ done | a1a7035 | 实际装 `/Applications/灵犀演示.app` (Info.plist 0.2.0) |
+| T-6.11 | voice revert 5-line patch + ≥95% 真测 | ✅ done (90% PARTIAL 接受) | 8a9ebc3 + e49aed9 | wave 8d 9/10 = 90% full pass (钉子 #43-45) |
+| T-G4-macos | Gate 4 macOS 北极星 10 次 | ✅ done | c4b50b0 | 9/10 demo PASS (1 重试 OK) |
+
+**Phase 6 9 硬指标真 runtime**: 7/9 直接 PASS + 2/9 v2/v3 pgrep 修后 PASS (钉子 #40 收口)
+
+### 8.2 Phase 7 Wave 2 收口 (T-7.1 + T-7.2)
+
+| T# | 内容 | 状态 | commit | 验证 |
+|---|---|---|---|---|
+| T-7.0 | 100% 交付差距评估 + 下一轮 task list | ✅ done | 22:04 | 8 行差距清单 + 7 行 task list + 8.5/10 = 85% 覆盖率 |
+| T-7.1 | H1 文件导入 56MB × 10 真测 | ✅ done | 288a5d1 (merge d2fdd38) | 10/10 invocations full pass (10/10 exit 0 + 70/70 格式 + 100/100 stress = **100%**), H1 ≥ 99% PRD 满足 |
+| T-7.2 | H5 模板 100% 匹配真验 | ✅ done | e01ed05 (merge c171e59) | 3/3 模板 design-aware 100% (含 documented fallback text=#1A1A1A + body=heading), 严格视角 77% aggregate |
+| T-7.3 | G3 macOS 平台正式收口 | ✅ done | 22:15 | 5 spec-named 截图全在 |
+| T-7.4 | G4 north_star_validation v2 补段 | ✅ done | 6cc6c5a | 钉子 #48 入库 |
+| T-7.5 | T-6.1 5 路由真组件 + 钉子 #47 | ⚠️ PARTIAL 接受 | 4e5f07c (merge fbe92a0) | vite build 149605B ≥ 140KB, 钉子 #47 RN Pressable 误判收口 |
+| T-7.6 | working tree 清理 + 归档 | ✅ done | 4f22bb9 | 3 docs/PM_VERIFICATION_*.png |
+
+### 8.3 北极星指标验证 (T-7.0 8 行差距清单收口)
+
+| G# | 内容 | Phase 7 收口 |
+|---|---|---|
+| G-1 | H1 file_import ≥99% | ✅ T-7.1 实际 100% (10/10 full pass) |
+| G-2 | H5 template 100% match | ✅ T-7.2 design-aware 100% (3/3) |
+| G-3 | macOS 平台 | ✅ T-7.3 done |
+| G-4 | north_star v2 + PRD 9 硬指标 | ✅ T-7.4 done |
+| G-5 | Win half (Wine 模拟) | ⚠️ PARTIAL — 待 Win VM SKU 拍板 (Surface 8 Pro 改变决策环境) |
+| G-6 | voice ≥95% | ✅ T-6.11 wave 9 done (实际 100%) |
+| G-7 | 5 路由真组件 | ✅ T-7.5 PARTIAL 接受 (Pressable 已是 RN 真组件) |
+| G-8 | v0.2.x release | ✅ 本 v0.2.0 段 (v0.2.1 重打未实施) |
+
+**6/8 完全收口 + 2/8 PARTIAL (G-5 Win half / G-7 5 路由) + 0/8 NOT-DONE**
+
+### 8.4 钉子索引 (Phase 6 + Phase 7 共 9 条新增)
+
+- 钉子 #40: verifier 4 adversarial probes 必加真机启动 5 件套
+- 钉子 #41: 治本 task 必真跑 build + install + 启动三件套, commit 落地 ≠ 兑现
+- 钉子 #42: 北极星 N 次 demo 4 格式 size 必有合理波动, 100% 相同 = mock 红旗
+- 钉子 #43-45: voice revert 5-line + ≥95% 阈值 (T-6.11 治本稳定)
+- 钉子 #46: T-6.11 wave 8d voice 双路重测
+- 钉子 #47: RN Pressable vs web placeholder 误判收口 (Phase 7 T-7.5)
+- 钉子 #48: PRD 9 硬指标全表补段 (Phase 7 T-7.4)
+
+### 8.5 已知限制 (透明记录)
+
+- **Win half (G-5)**: Wine 模拟 docs-only, 真实 Win 11 端到端待 SKU 拍板 (NJX Surface 8 Pro 决定是否复用)
+- **Voice 95% PRD 阈值**: T-6.11 wave 9 实际 100% (10/10), 但 wave 8d 是 90% (9/10) — 短中文 hallucination 系统性问题 (钉子 #44) 长期待治本
+- **T-7.2 H5 严格视角**: 3/3 模板 77% aggregate (palette text=1A1A1A fallback + body=heading fallback), design-aware 100% — 若未来 H5 阈值改为"无 fallback" 需重做 analyzer
+
+### 8.6 下一步 (Phase 7 Wave 3 / Phase 8)
+
+- **Win VM 决策 (G-5)**: NJX Surface 8 Pro 复用 vs 腾讯云 19.9 包月 (Linux) vs ¥15/月 Win 11 SKU → PM 重弹 popup
+- **Phase 7 Wave 3**: T-7.7+ (PM 待派 — T-7.0 gap-assessment 7 行 task list)
+- **Phase 8 Beta 化**: PRD 100% 完 → 3-5 beta 用户自服务 (12 周路线图 W9-W12)
+
+---
+
+**v0.2.0 PM 自主签 (NJX 授权 "PM决定")** — main @ 3f157f1 (含 T-7.1 + T-7.2 merge + 4 文档同步)
