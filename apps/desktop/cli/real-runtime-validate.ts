@@ -320,41 +320,28 @@ export function evaluatePdfNoGarbledGate(cleanCount: number, totalRuns: number):
   };
 }
 
-// ---- N/A pass stub for real-cli mode (voice 在 Wave 2c real-app 补测) ----
-function voiceAccuracyNotMeasuredGate(): HardGateResult {
-  return {
-    index: 6,
-    name: 'voice 准确率',
-    threshold_desc: 'real-cli 不测 (Wave 2c 补)',
-    pass: true,
-    observed: 0,
-    unit: 'ratio',
-    detail: 'N/A (real-cli mode, voice tested in Wave 2c real-app)',
-  };
-}
-
-export function evaluateRunGates(m: RunMetrics, mode: 'harness' | 'real-cli' | 'real-app' = m.mode): HardGateResult[] {
+export function evaluateRunGates(m: RunMetrics): HardGateResult[] {
   return [
     evaluateImportGate(m.import_success_rate),
     evaluateAiLatencyGate(m.ai_latency_ms, m.ai_latency_ms),  // 单 run 不算 avg/max, 单值评估
     evaluateHtmlPreviewGate(m.html_preview_latency_ms, m.html_preview_latency_ms),
     evaluateAdvisorOptionRatioGate(m.advisor_option_ratio),
     evaluateTemplateMatchRateGate(m.template_match_rate, m.template_id),
-    mode === 'real-cli' ? voiceAccuracyNotMeasuredGate() : evaluateVoiceAccuracyGate(m.voice_accuracy, m.voice_accuracy, m.voice_pool_size),
+    evaluateVoiceAccuracyGate(m.voice_accuracy, m.voice_accuracy, m.voice_pool_size),
     evaluateMemoryGate(m.memory_peak_mb),
     evaluatePptxEditableGate(m.pptx_editable ? 1 : 0, 1),
     evaluatePdfNoGarbledGate(m.pdf_no_garbled ? 1 : 0, 1),
   ];
 }
 
-export function evaluateAggregateGates(agg: AggregateMetrics, mode: 'harness' | 'real-cli' | 'real-app' = agg.mode): HardGateResult[] {
+export function evaluateAggregateGates(agg: AggregateMetrics): HardGateResult[] {
   return [
     evaluateImportGate(agg.import_success_rate_avg),
     evaluateAiLatencyGate(agg.ai_latency_avg_ms, agg.ai_latency_max_ms),
     evaluateHtmlPreviewGate(agg.html_preview_avg_ms, agg.html_preview_max_ms),
     evaluateAdvisorOptionRatioGate(agg.advisor_option_ratio_avg),
     evaluateTemplateMatchRateGate(agg.template_match_rate_avg, 'builtin_business_dark'),
-    mode === 'real-cli' ? voiceAccuracyNotMeasuredGate() : evaluateVoiceAccuracyGate(agg.voice_accuracy_avg, agg.voice_accuracy_min, 10),
+    evaluateVoiceAccuracyGate(agg.voice_accuracy_avg, agg.voice_accuracy_min, 10),
     evaluateMemoryGate(agg.memory_peak_max_mb),
     evaluatePptxEditableGate(agg.pptx_editable_count, agg.total_runs),
     evaluatePdfNoGarbledGate(agg.pdf_no_garbled_count, agg.total_runs),
@@ -467,7 +454,7 @@ export async function runHarnessOnce(runNum: number): Promise<RunMetrics> {
     gates: [],  // 下面填充
     overall_pass: false,
   };
-  m.gates = evaluateRunGates(m, 'harness');
+  m.gates = evaluateRunGates(m);
   m.overall_pass = overallVerdict(m.gates) === 'PASS';
   return m;
 }
@@ -565,7 +552,7 @@ async function runRealCliOnce(
     gates: [],
     overall_pass: false,
   };
-  m.gates = evaluateRunGates(m, 'real-cli');
+  m.gates = evaluateRunGates(m);
   m.overall_pass = overallVerdict(m.gates) === 'PASS';
   return m;
 }
@@ -789,7 +776,7 @@ async function runRealAppOnce(
     gates: [],
     overall_pass: false,
   };
-  m.gates = evaluateRunGates(m, 'real-app');
+  m.gates = evaluateRunGates(m);
   m.overall_pass = overallVerdict(m.gates) === 'PASS';
 
   // 落 run 详情 (含 4 PID + 截图路径)
@@ -913,7 +900,7 @@ export function aggregate(runs: RunMetrics[]): AggregateMetrics {
     runs,
   };
 
-  agg.gates = evaluateAggregateGates(agg, agg.mode);
+  agg.gates = evaluateAggregateGates(agg);
   agg.overall_verdict = overallVerdict(agg.gates);
   return agg;
 }
