@@ -1,0 +1,132 @@
+{
+  "generated_at": "2026-07-11T06:24:43.492Z",
+  "platform": "darwin",
+  "tts_engine": "macOS say (zh_CN Eddy / en Samantha)",
+  "asr_engine": "openai-whisper (base model)",
+  "pool_size": 10,
+  "runs": 1,
+  "total_correct": 4,
+  "total_tests": 10,
+  "overall_accuracy": 0.4,
+  "threshold": 0.95,
+  "overall_pass": false,
+  "fallback_mode": "none",
+  "runs_detail": [
+    {
+      "run_num": 1,
+      "started_at": "2026-07-11T06:20:46.411Z",
+      "finished_at": "2026-07-11T06:24:43.491Z",
+      "total_duration_ms": 237079,
+      "pool_size": 10,
+      "correct_count": 4,
+      "accuracy": 0.4,
+      "threshold": 0.95,
+      "overall_pass": false,
+      "tests": [
+        {
+          "id": 1,
+          "text": "你好，灵犀演示",
+          "lang": "zh",
+          "wavPath": "/Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/wav/phrase_01_zh.wav",
+          "whisperOut": "[WHISPER_FAIL: whisper failed: Command failed: /opt/homebrew/bin/whisper /Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/wav/phrase_01_zh.wav --model base --language zh --output_dir /Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/whisper_out_run1 --output_format txt --fp16 False --verbose False\n/opt/homebrew/Cellar/openai-whisper/20240930_1/libexec/lib/python3.13/site-packages/whisper/__init__.py:150: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.\n  checkpoint = torch.load(fp, map_location=device)\n\r  0%|          | 0/209 [00:00<?, ?frames/s]]",
+          "pass": false,
+          "duration_ms": 735,
+          "whisper_ms": 60079
+        },
+        {
+          "id": 2,
+          "text": "今天天气真好",
+          "lang": "zh",
+          "wavPath": "/Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/wav/phrase_02_zh.wav",
+          "whisperOut": "先天天起针好",
+          "pass": false,
+          "duration_ms": 1513,
+          "whisper_ms": 15827
+        },
+        {
+          "id": 3,
+          "text": "帮我生成一份报告",
+          "lang": "zh",
+          "wavPath": "/Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/wav/phrase_03_zh.wav",
+          "whisperOut": "把火箱純離會不報告",
+          "pass": false,
+          "duration_ms": 1836,
+          "whisper_ms": 22964
+        },
+        {
+          "id": 4,
+          "text": "机器学习入门指南",
+          "lang": "zh",
+          "wavPath": "/Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/wav/phrase_04_zh.wav",
+          "whisperOut": "機器學習入門最難",
+          "pass": false,
+          "duration_ms": 650,
+          "whisper_ms": 15399
+        },
+        {
+          "id": 5,
+          "text": "人工智能改变世界",
+          "lang": "zh",
+          "wavPath": "/Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/wav/phrase_05_zh.wav",
+          "whisperOut": "更多最能改變世界",
+          "pass": false,
+          "duration_ms": 1474,
+          "whisper_ms": 22648
+        },
+        {
+          "id": 6,
+          "text": "Hello world",
+          "lang": "en",
+          "wavPath": "/Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/wav/phrase_06_en.wav",
+          "whisperOut": "Hello World.",
+          "pass": true,
+          "duration_ms": 2049,
+          "whisper_ms": 18591
+        },
+        {
+          "id": 7,
+          "text": "Good morning everyone",
+          "lang": "en",
+          "wavPath": "/Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/wav/phrase_07_en.wav",
+          "whisperOut": "Good morning everyone.",
+          "pass": true,
+          "duration_ms": 1357,
+          "whisper_ms": 16628
+        },
+        {
+          "id": 8,
+          "text": "Python programming is fun",
+          "lang": "en",
+          "wavPath": "/Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/wav/phrase_08_en.wav",
+          "whisperOut": "Hython programming is fun.",
+          "pass": false,
+          "duration_ms": 2449,
+          "whisper_ms": 17880
+        },
+        {
+          "id": 9,
+          "text": "Data analysis best practices",
+          "lang": "en",
+          "wavPath": "/Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/wav/phrase_09_en.wav",
+          "whisperOut": "data analysis best practices.",
+          "pass": true,
+          "duration_ms": 1096,
+          "whisper_ms": 13478
+        },
+        {
+          "id": 10,
+          "text": "Project status update",
+          "lang": "en",
+          "wavPath": "/Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/wav/phrase_10_en.wav",
+          "whisperOut": "Project Status Update.",
+          "pass": true,
+          "duration_ms": 2220,
+          "whisper_ms": 18193
+        }
+      ],
+      "whisper_model": "base",
+      "tts_voice": "zh=Eddy (中文（中国大陆）),en=Samantha",
+      "fallback_mode": "none"
+    }
+  ]
+}

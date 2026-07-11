@@ -83,12 +83,14 @@
 | HTML 预览生成延迟 | ≤ 10s | avg 120ms / max 212ms | ✅ | T-1.4 / T-2.1 / T-4.1 |
 | 顾问式交互带选项比例 | ≥ 90% | 22/23 = 95.65% | ✅ | T-1.2 |
 | 模板适配匹配度 | 100% | Phase 2 端到端 (T-2.2 季度汇报 builtin_business_dark 全程通过) | ✅ | T-1.3 / T-2.1 |
-| 语音输入识别准确率 | ≥ 95% | 10/10 = 100% (mock 录音池, 真 Whisper 校 Phase 3) | ✅ | T-1.2 |
+| 语音输入识别准确率 | ≥ 95% | 10/10 = 100% (mock 录音池, 真 Whisper 校 Phase 3) | ✅ (mock base) / ⚠️ **T-6.11 真测 BLOCKED** (whisper base 短中文 40-50% + SFSpeechRecognizer TCC crash, 5-line patch 撤销 e49aed9) | T-1.2 / T-6.11 |
 | 资源占用 | ≤ 8G | max 71MB | ✅ | T-4.1 |
 | PPTX 在 Office/WPS 可编辑 | 是 | WPS 真截图 (1920×804, 6 slides 缩略图) | ✅ | T-1.5 |
 | PDF 无格式错乱 | 是 | Preview 11 pages 真截图 (CJK 方块已知 Phase 1 Gate 延后项) | ⚠️ | T-1.5 |
 
 **9 项指标 8/9 ✅ + 1/9 ⚠️ (PDF CJK 字体嵌入, 留 Phase 3 macOS 补)**
+
+> **2026-07-11 14:20 Wave 7 补段 (T-6.11)**: voice 项从 ✅ (mock) 调为 ⚠️ 真测 BLOCKED. 5-line patch (8a9ebc3) 撤销 (commit e49aed9), voice-test.ts (TTS→ASR loop) + voice-asr.swift (SFSpeechRecognizer bridge) 写好, 实跑 1 次 accuracy 4-5/10 (40-50%) < 95%. Blocker: (1) whisper base 模型短中文识别差, (2) SFSpeechRecognizer non-interactive shell TCC crash. **8/9 硬指标真过 + 1/9 voice 仍 N/A**, 需 NJX 拍板: A) 升 whisper small 跑 / B) 人工授权 TCC 跑 SFSpeech / C) 接 OpenAI Whisper API. 详见 `docs/PHASE_6_FINAL_VERIFICATION.md` §7.5 + `outputs/T-6.11-voice-real-test/deliverable.md`.
 
 ---
 

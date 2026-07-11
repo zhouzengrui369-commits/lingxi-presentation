@@ -182,6 +182,7 @@
 | T-6.6 | git rm LingxiDemo.app + .gitignore | P0 | ✅ done (b649e1f) | 短 | session | 2026-07-11 00:25 | PM | git ls-files LingxiDemo.app = 0 |
 | T-6.7 | docs/platform-macos.md 路径更新 | P0 | ✅ done (4eb292d) | 短 | session | 2026-07-11 00:25 | PM | grep "electron-shell/dist" 命中 |
 | T-6.8 | 重新打 DMG v0.2.0 + 装 | P0 | ✅ done + v0.2.1 重打 (a1a7035 + 10:00) | 中 | session | 2026-07-11 10:00 | PM | /Applications/灵犀演示.app + 4 PID 跑 + dist/renderer.bundle.js 149605B (vite build 治本 done) |
+| **T-6.11** | **voice revert 5-line patch + 真测 ≥ 95% + 钉子 #43-45** | P0 | ⚠️ **PARTIAL (revert done, 真测 BLOCKED)** — e49aed9 git revert 8a9ebc3 ✅, voice-test.ts (TTS→ASR) + voice-asr.swift (SFSpeechRecognizer) ✅, 1 次真跑 4-5/10 (40-50%) < 95% (whisper base 短中文差 + SFSpeechRecognizer TCC crash), 钉子 #43-45 入 mavis-runtime-discipline.md ✅ | 短 | session | 2026-07-11 14:20 | PM subagent (general) | outputs/T-6.11-voice-real-test/deliverable.md + apps/desktop/cli/voice-test.ts + apps/desktop/cli/voice-asr.swift |
 | T-G4-macos | Gate 4 北极星 10 次 (real-app) | P0 | ⚠️ PARTIAL (10/10 PASS 实为 cli mock, 4 格式 size 100% 相同; vite build 治本后 W3 重跑) | 中 | session | 2026-07-11 10:03 | PM | docs/north_star_validation.md (待 W3 重写) |
 | T-G4-win | Gate 4 Win half (Wine 模拟) | P0 | ⚠️ PARTIAL (edf8926) | 中 | session | 2026-07-11 | PM | docs/north_star_validation_win.md (Wine 模拟) |
 
