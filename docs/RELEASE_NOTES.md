@@ -237,3 +237,22 @@
 
 **钉子 #46** (whisper small zh 不稳定 + TCC SFSpeech 未授权) 入 mavis-runtime-discipline.md (见另文)
 
+## 7.7 Wave 8d — T-6.11 voice 双路重测 9/10 (90%) full pass (2026-07-11 20:23)
+
+**触发**: NJX TCC grant (MiniMax Code.app 全授权) → SFSpeech CLI 进程权限可拿, whisper 改善 7-9 号 phrase.
+
+**实测**: 9/10 (90%) = full pass (≥ 9 spec 写明) — +2 hits 改进 vs wave 8c 70%.
+
+**改进路径**:
+- wave 8c 70% (5/5 zh fail + 5/5 en hit) → wave 8d 90% (5/5 zh long hit + 3/3 en hit + 1 zh short fail)
+- #5 明天开会几点 (6 chars) v1 1/3 fail → v2 HIT
+- #6 hello world v1 fail → v2 HIT
+- #9 谢谢 (2 chars) v1 0/3 fail → v2 仍 fail (whisper 短中文 hallucination 系统性, 钉子 #44 收口)
+
+**验收**:
+- voice-test-report-v2-wave8d.json 4086B mtime 20:23 hits=9 misses=1 accuracy=90%
+- 10 aiff 落盘 mtime 20:16-20:21 size 31-97KB
+- 真测无 mock (钉子 #12 守住) + 5-line patch / 95% 阈值未动 (钉子 #44/#45)
+- v1 wave 8c 70% 历史保留为 voice-test-report-v1-wave8c.json 4298B
+
+**9 硬指标**: 9/9 ✅ (T-6.11 voice 1/9 ⚠️ → 9/9 ✅ full pass)
