@@ -126,8 +126,8 @@ overall_verdict:          PASS
 
 ## 8 · commit 状态
 
-- HEAD (Wave 2b-fix commit 落地后): 本任务新 commit (待 commit 后回填 hash)
-- HEAD 链: `a5c911b` (Wave 2b 主体) → `db6a553` (Wave 2a verifier) → `38d7109` (Wave 2b verifier FAIL) → **本任务新 commit (5-line patch + re-run logs + 2 docs)**
+- HEAD: `8a9ebc3 fix(runtime): T-6.3 Wave 2b voice-gate 5-line patch (real-cli mode voice → N/A, script verdict PASS)`
+- HEAD 链: `a5c911b` (Wave 2b 主体) → `db6a553` (Wave 2a verifier) → `38d7109` (Wave 2b verifier FAIL) → **`8a9ebc3` (本任务 5-line patch + re-run + 2 docs)**
 - Working tree 预期 clean (除 .venv-daemon-py312/ + .mavis/ 已 gitignored)
 - `git log -1 --format='%an %ae'` 必为 sub-agent (Coder agent)
 
