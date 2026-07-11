@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>academic-light</title>
+<style>
+:root {
+  --lingxi-primary: #334155;
+  --lingxi-secondary: #1E40AF;
+  --lingxi-accent: #1E40AF;
+  --lingxi-background: #1E40AF;
+  --lingxi-text: #1A1A1A;
+  --lingxi-heading-font: Source Han Sans CN;
+  --lingxi-body-font: Source Han Sans CN;
+  --lingxi-bg-rgb: 30, 64, 175;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--lingxi-body-font); background: var(--lingxi-background); color: var(--lingxi-text); }
+.lingxi-slide { position: relative; width: 1280px; height: 720px; margin: 16px auto; background: var(--lingxi-background); border: 1px solid #ddd; overflow: hidden; font-family: var(--lingxi-body-font); }
+.lingxi-slide h1, .lingxi-slide h2 { font-family: var(--lingxi-heading-font); color: var(--lingxi-text); }
+.lingxi-layout-title .lingxi-title { color: var(--lingxi-primary); font-size: 44pt; font-weight: 700; text-align: center; margin-top: 200px; }
+.lingxi-layout-section .lingxi-title { color: var(--lingxi-accent); font-size: 36pt; font-weight: 700; }
+.lingxi-layout-summary { border-top: 4px solid var(--lingxi-accent); }
+.lingxi-decor { position: absolute; pointer-events: none; }
+
+</style>
+</head>
+<body>
+<main class="lingxi-deck">
+<section class="lingxi-slide lingxi-layout-title" data-slide-index="0">
+<div style="position:absolute;left:548640px;top:1828800px;width:10972800px;"><span style="font-family:Source Han Sans CN;font-size:48pt;font-weight:700;color:#1E40AF">基于大语言模型的
+代码生成综述</span></div>
+<div style="position:absolute;left:548640px;top:4572000px;width:10972800px;"><span style="font-family:Source Han Sans CN;font-size:20pt;color:#475569">论文答辩 · 2026 春季</span></div>
+
+</section>
+<section class="lingxi-slide lingxi-layout-quote" data-slide-index="1">
+<div style="position:absolute;left:548640px;top:548640px;width:10972800px;"><span style="font-family:Source Han Sans CN;font-size:32pt;font-weight:700;color:#1E40AF">01 研究背景</span></div>
+<div style="position:absolute;left:548640px;top:2286000px;width:10972800px;"><span style="font-family:Source Han Sans CN;font-size:22pt;color:#334155">LLM 在代码生成领域取得显著进展</span></div>
+</section>
+<section class="lingxi-slide lingxi-layout-quote" data-slide-index="2">
+<div style="position:absolute;left:548640px;top:457200px;width:10972800px;"><span style="font-family:Source Han Sans CN;font-size:28pt;font-weight:700;color:#1E40AF">研究问题</span></div>
+<div style="position:absolute;left:548640px;top:1828800px;width:10972800px;"><span style="font-family:Source Han Sans CN;font-size:20pt;color:#334155">• 现有方法在长上下文生成上的局限？</span><span style="font-family:Source Han Sans CN;font-size:20pt;color:#334155">• 不同模型在多语言场景的差异？</span><span style="font-family:Source Han Sans CN;font-size:20pt;color:#334155">• 代码质量评估指标的局限性？</span></div>
+</section>
+<section class="lingxi-slide lingxi-layout-quote" data-slide-index="3">
+<div style="position:absolute;left:548640px;top:457200px;width:10972800px;"><span style="font-family:Source Han Sans CN;font-size:28pt;font-weight:700;color:#1E40AF">文献综述</span></div>
+<div style="position:absolute;left:548640px;top:1828800px;width:10972800px;"><span style="font-family:Source Han Sans CN;font-size:20pt;color:#334155">我们综述了 2018-2026 年间 87 篇相关论文，覆盖 5 大研究主题。</span></div>
+</section>
+<section class="lingxi-slide lingxi-layout-content" data-slide-index="4">
+<div style="position:absolute;left:548640px;top:457200px;width:10972800px;"><span style="font-family:Source Han Sans CN;font-size:28pt;font-weight:700;color:#1E40AF">方法对比</span></div>
+<div style="position:absolute;left:548640px;top:2286000px;width:5486400px;"><span style="font-family:Source Han Sans CN;font-size:22pt;color:#334155">基于 Prompt 的方法</span><span style="font-family:Source Han Sans CN;font-size:22pt;color:#334155">直观但难优化</span></div>
+<div style="position:absolute;left:6217920px;top:2286000px;width:5486400px;"><span style="font-family:Source Han Sans CN;font-size:22pt;color:#334155">基于微调的方法</span><span style="font-family:Source Han Sans CN;font-size:22pt;color:#334155">效果好但成本高</span></div>
+</section>
+<section class="lingxi-slide lingxi-layout-content" data-slide-index="5">
+<div style="position:absolute;left:548640px;top:548640px;width:10972800px;"><span style="font-family:Source Han Sans CN;font-size:32pt;font-weight:700;color:#1E40AF">02 我们的方法</span></div>
+</section>
+<section class="lingxi-slide lingxi-layout-quote" data-slide-index="6">
+<div style="position:absolute;left:548640px;top:457200px;width:10972800px;"><span style="font-family:Source Han Sans CN;font-size:28pt;font-weight:700;color:#1E40AF">实验设置</span></div>
+<div style="position:absolute;left:548640px;top:1828800px;width:10972800px;"><span style="font-family:Source Han Sans CN;font-size:20pt;color:#334155">• 数据集: HumanEval + MBPP + 自建</span><span style="font-family:Source Han Sans CN;font-size:20pt;color:#334155">• 基线: Codex / CodeLlama / GPT-4</span><span style="font-family:Source Han Sans CN;font-size:20pt;color:#334155">• 评估: pass@k / BLEU / CodeBLEU</span></div>
+</section>
+<section class="lingxi-slide lingxi-layout-quote" data-slide-index="7">
+<div style="position:absolute;left:548640px;top:457200px;width:10972800px;"><span style="font-family:Source Han Sans CN;font-size:28pt;font-weight:700;color:#1E40AF">实验结果</span></div>
+<div style="position:absolute;left:548640px;top:1828800px;width:10972800px;"><span style="font-family:Source Han Sans CN;font-size:20pt;color:#334155">我们的方法在 HumanEval 上 pass@1 达到 78.5%，比基线最优高 4.2%。</span></div>
+</section>
+<section class="lingxi-slide lingxi-layout-content" data-slide-index="8">
+<div style="position:absolute;left:1371600px;top:2560320px;width:9418320px;"><span style="font-family:Source Han Sans CN;font-size:28pt;color:#1E40AF">&quot;在长上下文场景下，检索增强能将准确率提升 12%。&quot;</span></div>
+</section>
+<section class="lingxi-slide lingxi-layout-summary" data-slide-index="9">
+<div style="position:absolute;left:548640px;top:548640px;width:10972800px;"><span style="font-family:Source Han Sans CN;font-size:32pt;font-weight:700;color:#1E40AF">结论与展望</span></div>
+<div style="position:absolute;left:548640px;top:2286000px;width:10972800px;"><span style="font-family:Source Han Sans CN;font-size:24pt;color:#334155">• 提出检索增强生成框架</span><span style="font-family:Source Han Sans CN;font-size:24pt;color:#334155">• 在 5 个数据集上验证</span><span style="font-family:Source Han Sans CN;font-size:24pt;color:#334155">• 未来: 多模态代码理解</span></div>
+
+</section>
+</main>
+</body>
+</html>

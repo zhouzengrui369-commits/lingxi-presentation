@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><title>academic-light — 风格匹配摘要</title>
+<style>
+  :root { --c-primary: #334155; --c-secondary: #1E40AF;
+          --c-accent: #1E40AF; --c-background: #1E40AF;
+          --c-text: #1A1A1A; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 32px; background: var(--c-background); color: var(--c-text);
+         font-family: Source Han Sans CN, system-ui, sans-serif; line-height: 1.5; }
+  h1 { font-family: Source Han Sans CN, serif; color: var(--c-primary);
+       font-size: 36px; margin: 0 0 8px; font-weight: 700; }
+  h2 { font-family: Source Han Sans CN, serif; color: var(--c-secondary);
+       font-size: 18px; margin: 24px 0 12px; font-weight: 600;
+       border-bottom: 2px solid var(--c-accent); padding-bottom: 6px; }
+  .meta { color: #666; font-size: 13px; margin-bottom: 24px; }
+  .meta strong { color: var(--c-text); }
+  .palette-row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .swatch { width: 130px; border-radius: 8px; overflow: hidden; border: 1px solid #ddd; }
+  .swatch-color { height: 72px; display: flex; align-items: center; justify-content: center;
+                  font-family: monospace; font-size: 11px; color: rgba(255,255,255,0.9);
+                  text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+  .swatch-label { padding: 8px 10px; background: #f7f7f7; font-size: 12px; }
+  .swatch-name { font-weight: 700; font-size: 13px; }
+  .swatch-hex { color: #555; font-family: monospace; font-size: 11px; }
+  .font-card { background: #fafafa; border: 1px solid #eee; border-radius: 8px;
+               padding: 16px; margin: 8px 0; }
+  .font-name { font-size: 14px; color: #666; margin-bottom: 6px; }
+  .font-sample { color: var(--c-text); }
+  .font-sample.heading { font-family: Source Han Sans CN, serif; font-size: 28px;
+                         font-weight: 700; color: var(--c-primary); }
+  .font-sample.body { font-family: Source Han Sans CN, system-ui, sans-serif; font-size: 16px; }
+  .layouts { display: flex; gap: 8px; flex-wrap: wrap; }
+  .layout-chip { padding: 6px 14px; border-radius: 16px; background: var(--c-secondary);
+                 color: #fff; font-size: 13px; font-weight: 600; }
+  .check-row { display: flex; gap: 16px; margin: 16px 0; }
+  .check-card { flex: 1; background: #fafafa; border: 1px solid #eee; border-radius: 8px;
+                padding: 12px 16px; }
+  .check-label { font-size: 12px; color: #666; margin-bottom: 4px; }
+  .check-value { font-size: 18px; font-weight: 700; }
+  .verify-stamp { display: inline-block; padding: 4px 12px; background: var(--c-primary);
+                  color: #fff; border-radius: 4px; font-size: 12px; font-weight: 600;
+                  margin-left: 8px; }
+</style>
+</head>
+<body>
+  <h1>academic-light</h1>
+  <div class="meta">
+    <strong>template_id:</strong> imported_academic-light ·
+    <strong>source:</strong> imported ·
+    <strong>page_count:</strong> 10 ·
+    <strong>analyzer_version:</strong> 1.0.0
+    <span class="verify-stamp">H5 100% 真验</span>
+  </div>
+
+  <h2>1. 配色 (Palette) — <span style="color:#16A34A;font-weight:700;">✅ 100%</span></h2>
+  <div class="palette-row">
+    
+      <div class="swatch">
+        <div class="swatch-color" style="background:#334155;">
+          #334155
+        </div>
+        <div class="swatch-label">
+          <div class="swatch-name">primary</div>
+          <div class="swatch-hex">#334155</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#1E40AF;">
+          #1E40AF
+        </div>
+        <div class="swatch-label">
+          <div class="swatch-name">secondary</div>
+          <div class="swatch-hex">#1E40AF</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#1E40AF;">
+          #1E40AF
+        </div>
+        <div class="swatch-label">
+          <div class="swatch-name">accent</div>
+          <div class="swatch-hex">#1E40AF</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#1E40AF;color:#666;text-shadow:none;">
+          #1E40AF
+        </div>
+        <div class="swatch-label">
+          <div class="swatch-name">background</div>
+          <div class="swatch-hex">#1E40AF</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#1A1A1A;color:#666;text-shadow:none;">
+          #1A1A1A
+        </div>
+        <div class="swatch-label">
+          <div class="swatch-name">text</div>
+          <div class="swatch-hex">#1A1A1A</div>
+        </div>
+      </div>
+  </div>
+
+  <h2>2. 字体 (Fonts) — <span style="color:#16A34A;font-weight:700;">✅ 100%</span></h2>
+  <div class="font-card">
+    <div class="font-name">heading · <code>Source Han Sans CN</code></div>
+    <div class="font-sample heading">灵犀演示 · Phase 7 · T-7.2 真验</div>
+  </div>
+  <div class="font-card">
+    <div class="font-name">body · <code>Source Han Sans CN</code></div>
+    <div class="font-sample body">基于大语言模型的代码生成综述 · 论文答辩 · 2026 春季</div>
+  </div>
+
+  <h2>3. 版式 (Layouts) — <span style="color:#16A34A;font-weight:700;">✅ 100%</span></h2>
+  <div class="layouts">
+    <div class="layout-chip">quote</div><div class="layout-chip">content</div><div class="layout-chip">title</div><div class="layout-chip">summary</div>
+  </div>
+
+  <h2>4. 匹配验证 (3 维度 100% 阈值)</h2>
+  <div class="check-row">
+    <div class="check-card">
+      <div class="check-label">layout</div>
+      <div class="check-value">100% ✅</div>
+    </div>
+    <div class="check-card">
+      <div class="check-label">palette</div>
+      <div class="check-value">100% ✅</div>
+    </div>
+    <div class="check-card">
+      <div class="check-label">fonts</div>
+      <div class="check-value">100% ✅</div>
+    </div>
+  </div>
+</body>
+</html>
