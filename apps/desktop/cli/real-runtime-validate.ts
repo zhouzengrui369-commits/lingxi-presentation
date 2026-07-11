@@ -38,15 +38,39 @@ import * as path from 'node:path';
 import { performance } from 'node:perf_hooks';
 
 // CJS 兼容: ts-jest 把 import.meta.url 编译成 magic, 不能 declare __filename (__filename 是 CJS 隐式全局)
-// 优先 __dirname (CJS 隐式全局, ts-jest + tsx 都正常), 兜底 process.cwd()
+// 优先 cwd 检查 (钉子 #69: tsx ESM mode 下 __dirname 解析为 apps/ 而非 apps/desktop/cli/),
+// 再回退到 __dirname, 兜底 process.cwd()
 function getScriptDir(): string {
+  // 1. cwd 优先: 如果从 apps/desktop 跑, 直接返回 (最准, 钉子 #69 修复)
+  const cwd = process.cwd();
+  if (cwd.endsWith('/apps/desktop')) return cwd;
+  if (cwd.endsWith('/apps/desktop/cli')) return cwd;
+  // 2. __dirname (CJS 隐式全局, ts-jest + tsx 大多正常)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const d = (global as any).__dirname;
-  if (typeof d === 'string' && d.length > 0) return d;
-  return process.cwd();
+  if (typeof d === 'string' && d.length > 0 && d.endsWith('/apps/desktop/cli')) return d;
+  // 3. 兜底: process.cwd() (从 repo root 跑时, 假定 cwd=apps/desktop/../apps/desktop)
+  return cwd;
 }
 
-const desktopDir = path.resolve(getScriptDir(), '..');
+/** 解析 desktopDir (apps/desktop/) — 不论从哪跑都返回正确的 apps/desktop/ 路径 */
+function resolveDesktopDir(): string {
+  const sd = getScriptDir();
+  if (sd.endsWith('/apps/desktop/cli')) return path.resolve(sd, '..');
+  if (sd.endsWith('/apps/desktop')) return sd;
+  // 兜底: 从 cwd 找 apps/desktop (覆盖 repo root + 任意子目录)
+  const cwd = process.cwd();
+  // 1. cwd/apps/desktop
+  const candidate1 = path.join(cwd, 'apps', 'desktop');
+  if (existsSync(path.join(candidate1, 'cli', 'full-demo.ts'))) return candidate1;
+  // 2. cwd 上一层/apps/desktop (从 apps/ 跑)
+  const candidate2 = path.join(cwd, '..', 'apps', 'desktop');
+  if (existsSync(path.join(candidate2, 'cli', 'full-demo.ts'))) return candidate2;
+  // 3. 兜底返回 cwd
+  return cwd;
+}
+
+const desktopDir = resolveDesktopDir();
 
 // ---- 9 硬指标阈值 (与 phase6_plan.md T-6.3 line 130-139 完全一致) ----
 
@@ -496,7 +520,8 @@ async function runRealCliOnce(
 
   const importSuccess = importStep?.data?.failed === 0 && (importStep?.data?.files ?? 0) > 0;
   const importRate = importSuccess ? 1.0 : 0.0;
-  const aiLatency = advisorStep?.data?.daemon_chat_elapsed_ms ?? 0;
+  // 钉子 #69b: advisor step 没有 daemon_chat_elapsed_ms 字段, 回退 step.ms (T-6.8 worktree fix)
+  const aiLatency = advisorStep?.ms ?? advisorStep?.data?.daemon_chat_elapsed_ms ?? 0;
   const htmlLatency = previewStep?.data?.latency_ms ?? 0;
   const advisorRatio = 1.0;  // quarterly_review scenario 9 questions, all have options
   const tplRate = templateStep?.data?.template_id === 'builtin_business_dark' ? 1.0 : 0.0;
