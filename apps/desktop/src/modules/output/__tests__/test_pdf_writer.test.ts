@@ -83,7 +83,6 @@ test('test_pdf_writer_fonts_preserved', async () => {
   expect(result.size_bytes).toBeGreaterThan(512);
 
   // PDF 文档信息（Title, Author）应被 pdfkit 写入
-  const buf = fs.readFileSync(outPath, 'utf8');
   // pdfkit 把 info 写入 PDF trailer，不一定在开头 — 但文件应包含 /Title
   // 这里只验证文件大小合理 + 文件首部正确
   expect(metadata.format).toBe('pdf');

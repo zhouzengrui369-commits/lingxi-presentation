@@ -90,6 +90,7 @@ ipcMain.on('demo-log', (event, line) => {
 // 通过修改 URL hash 让 renderer 切换 tab, 然后 re-screenshot
 ipcMain.handle('set-route', async (event, routeKey) => {
   if (mainWindow && !mainWindow.isDestroyed()) {
+    const paths = resolveRuntimePaths();
     const url = `file://${paths.rendererHtml}#${routeKey}`;
     await mainWindow.loadURL(url);
     return { ok: true, route: routeKey };

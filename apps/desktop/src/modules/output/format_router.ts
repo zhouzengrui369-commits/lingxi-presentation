@@ -169,7 +169,7 @@ function fail(request: OutputRequest, msg: string): OutputResult {
 function metaFailed(
   payload: ExportPayload,
   format: OutputFormat,
-  err: string,
+  _err: string,
 ): OutputMetadata {
   return {
     request_id: '',

@@ -12,7 +12,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const PKG_PATH = path.resolve(__dirname, '..', 'package.json');
-const WORKSPACE_ROOT = path.resolve(__dirname, '..', '..', '..', '..');
 const LINGXI_DEMO_ARTIFACT = path.resolve(
   __dirname,
   '..',

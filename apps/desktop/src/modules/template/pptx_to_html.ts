@@ -107,7 +107,7 @@ body { font-family: var(--lingxi-body-font); background: var(--lingxi-background
 }
 
 /** 把 slide 渲染成 <section> */
-function renderSlide(slide: { index: number; layout_type_guess: string; shapes: ShapeJson[] }, style: TemplateStyle): string {
+function renderSlide(slide: { index: number; layout_type_guess: string; shapes: ShapeJson[] }, _style: TemplateStyle): string {
   const layoutClass = `lingxi-layout-${slide.layout_type_guess}`;
   const shapesHtml = slide.shapes.map(renderShape).join('\n');
   return `<section class="lingxi-slide ${layoutClass}" data-slide-index="${slide.index}">

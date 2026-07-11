@@ -46,7 +46,7 @@ export async function organizeToWiki(
   if (!opts.forceLocal) {
     try {
       llmResult = await callDaemonForWiki(record, text, opts);
-    } catch (err) {
+    } catch {
       // 兜底：本地启发式
       llmResult = null;
     }

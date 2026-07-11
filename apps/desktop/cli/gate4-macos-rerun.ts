@@ -28,7 +28,7 @@
  */
 
 import { spawn, spawnSync } from 'node:child_process';
-import { promises as fs, existsSync, statSync } from 'node:fs';
+import { promises as fs, existsSync } from 'node:fs';
 import * as path from 'node:path';
 import { performance } from 'node:perf_hooks';
 
@@ -347,9 +347,8 @@ async function runOnce(
     },
   );
 
-  let stdout = '';
   let stderr = '';
-  child.stdout?.on('data', (d) => { stdout += d.toString(); });
+  child.stdout?.on('data', () => { /* drain to prevent backpressure */ });
   child.stderr?.on('data', (d) => { stderr += d.toString(); });
 
   // 监控 app 进程 RSS — 找 main app PID

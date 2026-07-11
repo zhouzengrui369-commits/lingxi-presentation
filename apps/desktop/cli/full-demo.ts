@@ -23,7 +23,6 @@ import { spawnSync } from 'child_process';
 import { performance } from 'perf_hooks';
 
 import { FileKbManager } from '../src/modules/file_kb/manager.ts';
-import { detectFormat } from '../src/modules/file_kb/importer.ts';
 import { SCENARIO_TEMPLATES } from '../src/modules/advisor/questions.ts';
 import { dispatchExport, verifyOutputFile, toExportPayload } from '../src/modules/output/format_router.ts';
 import type { OutputFormat } from '../src/modules/output/types.ts';

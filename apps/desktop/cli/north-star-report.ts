@@ -12,7 +12,7 @@
 
 import { promises as fs } from 'node:fs';
 import * as path from 'node:path';
-import type { AggregateMetrics, RunMetrics } from './north-star.ts';
+import type { AggregateMetrics } from './north-star.ts';
 
 function parseArgs(argv: string[]): { recordDir: string; output: string; runsDir?: string } {
   const out: Record<string, string> = {};

@@ -31,8 +31,8 @@
  *   - ❌ 禁止 简化跳过 (e.g. 只测 1 个 phrase 10 次)
  */
 
-import { spawn, spawnSync } from 'node:child_process';
-import { promises as fs, readFileSync, mkdirSync, existsSync, writeFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { promises as fs, readFileSync, mkdirSync, existsSync } from 'node:fs';
 import * as path from 'node:path';
 
 const SAY_BIN = '/usr/bin/say';
@@ -159,7 +159,7 @@ function sttBatchPython(requests: Array<{ audio: string; lang: string; initial_p
         ms: r.ms || 0,
         hallucination_retry: !!r.hallucination_retry,
       });
-    } catch (e) {
+    } catch {
       // ignore
     }
   }

@@ -261,7 +261,7 @@ export function writePdfWeasyprint(
 function metaFailed(
   payload: ExportPayload,
   format: 'pdf',
-  err: string,
+  _err: string,
 ): OutputMetadata {
   return {
     request_id: '',

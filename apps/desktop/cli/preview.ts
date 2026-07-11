@@ -159,11 +159,6 @@ async function main(): Promise<void> {
   // ---- Wave 9 治本: 5 章节并发 ----
   // 拆骨架 (instant) + 并发生成 (parallel, 4 limit)
   const started = Date.now();
-  const skeletonSections: PreviewSection[] = SECTION_SCHEMAS.map(s => ({
-    heading: `${prompt} · ${s.heading}`,
-    content_html: '<p class="lx-muted">（生成中...）</p>',
-    image_urls: [],
-  }));
 
   let finalSections: PreviewSection[];
   let provider = 'unknown';

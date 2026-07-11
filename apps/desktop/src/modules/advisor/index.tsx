@@ -24,20 +24,12 @@ import { useTheme } from '../../theme';
 
 import type {
   AdvisorQuestion,
-  AnswerRecord,
   InputMode,
   ScenarioId,
 } from './types';
 import {
-  SCENARIO_TEMPLATES,
-  getScenarioTemplate,
   listScenarios,
-  renderQuestionFromTemplate,
 } from './questions';
-import {
-  autocompleteForAnswers,
-  annotateQuestionsWithKB,
-} from './kb_linker';
 import { AIClient, getDefaultAIClient } from './ai_client';
 import { transcribe, VoiceInputOptions } from './voice_input';
 
@@ -76,7 +68,7 @@ export interface AdvisorControllerActions {
 import type { AdvisorControllerState } from './controller';
 
 export function useAdvisorController(
-  client: AIClient = getDefaultAIClient()
+  _client: AIClient = getDefaultAIClient()
 ): [AdvisorControllerState, AdvisorControllerActions] {
   const [state, setState] = useState<AdvisorControllerState>(initialAdvisorState);
 

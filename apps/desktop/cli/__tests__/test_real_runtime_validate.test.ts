@@ -11,10 +11,6 @@
  *   - 钉子 #1 weasyprint adapter 接口契约
  */
 
-import * as fs from 'node:fs';
-import * as os from 'node:os';
-import * as path from 'node:path';
-
 import {
   parseArgs,
   evaluateImportGate,
@@ -27,7 +23,6 @@ import {
   evaluatePptxEditableGate,
   evaluatePdfNoGarbledGate,
   evaluateRunGates,
-  evaluateAggregateGates,
   overallVerdict,
   runHarnessOnce,
   runValidationLoop,
@@ -36,7 +31,6 @@ import {
   HARD_GATE_THRESHOLDS,
   type CliArgs,
   type RunMetrics,
-  type AggregateMetrics,
 } from '../real-runtime-validate';
 
 import {

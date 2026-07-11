@@ -134,7 +134,7 @@ export async function importFile(filePath: string, opts: ImporterOptions = {}): 
 export async function parseBuffer(
   buf: Buffer,
   format: SupportedFormat,
-  name = 'unknown',
+  _name = 'unknown',
 ): Promise<{ text: string; meta: Record<string, unknown> }> {
   switch (format) {
     case 'md':
@@ -161,14 +161,6 @@ export async function parseBuffer(
 // md handled in parseBuffer switch
 
 // ---- ZIP reader (minimal, supports stored + deflate) ----
-
-interface ZipEntry {
-  name: string;
-  method: number; // 0=stored, 8=deflate
-  compressedSize: number;
-  uncompressedSize: number;
-  dataOffset: number; // byte offset in zipBuf where file data starts
-}
 
 /**
  * Minimal ZIP reader — supports stored (0) + deflate (8), no encryption, no ZIP64.
@@ -223,7 +215,7 @@ async function readZip(buf: Buffer): Promise<Map<string, Buffer>> {
         if (content.length === 0 && uncompressedSize > 0) {
           content = await inflate(data);
         }
-      } catch (err) {
+      } catch {
         // 跳过坏 entry
         p += 46 + fnameLen + extraLen + commentLen;
         continue;

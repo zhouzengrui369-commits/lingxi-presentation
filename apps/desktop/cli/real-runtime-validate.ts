@@ -33,7 +33,7 @@
  */
 
 import { spawn, spawnSync } from 'node:child_process';
-import { promises as fs, existsSync, statSync } from 'node:fs';
+import { promises as fs, existsSync } from 'node:fs';
 import * as path from 'node:path';
 import { performance } from 'node:perf_hooks';
 
@@ -355,7 +355,7 @@ export function overallVerdict(gates: HardGateResult[]): 'PASS' | 'FAIL' {
 // ---- 9 指标 mock 采集 (harness 模式) ----
 
 /** mock 9 指标: 模拟 5 文件导入, 全部 OK */
-function mockImportBatch(runNum: number): { total: number; failed: number; successRate: number } {
+function mockImportBatch(): { total: number; failed: number; successRate: number } {
   // 10 次跑, 期望 5 文件全部成功 (success_rate = 1.0)
   // 钉子 #30: 不要每跑都随机, 用确定性数据, 跑 10 次全 OK
   return { total: 5, failed: 0, successRate: 1.0 };
@@ -370,15 +370,6 @@ function mockAiLatency(runNum: number): number {
 function mockHtmlPreviewLatency(runNum: number): number {
   // 模拟 1-4s 范围 (远低于 10s 阈值)
   return 1_000 + (runNum * 200) % 3_000;  // 1000, 1200, ..., 3900
-}
-
-function mockAdvisorOptionRatio(runNum: number): number {
-  // 9 个问题, 8 个带选项, 第 9 个是开放问
-  return 8 / 9;  // 88.89% — **故意低于 90% 阈值, 看 gate 评估是否正确触发 FAIL**
-  // **不对**, 钉子 #30 — 跑 10 次 demo 验证 PASS, mock 应该 ≥ 90%
-  // 改: 8/9 = 88.89% < 90% → 验证 harness 能正确判定 FAIL
-  // 等等, 这会让整体 VERDICT FAIL, 但 task 要求 PASS
-  // 重新设计: 9/9 = 100% 一定 PASS, 但如果 owner 想验证 harness 能 fail, 可以加一个失败 case
 }
 
 /** 真正的 mock: 模拟 ≥ 90% 顾问带选项, 同时支持 test 文件里的边界 case (88.89% FAIL) */
@@ -419,7 +410,7 @@ export async function runHarnessOnce(runNum: number): Promise<RunMetrics> {
   const t0 = performance.now();
 
   // 9 指标 mock 采集 (顺序模拟真实 pipeline, 但全 deterministic)
-  const importBatch = mockImportBatch(runNum);
+  const importBatch = mockImportBatch();
   const aiLatency = mockAiLatency(runNum);
   const htmlPreviewLatency = mockHtmlPreviewLatency(runNum);
   const advisorRatio = mockAdvisorOptionRatioDefault();
@@ -486,19 +477,17 @@ async function runRealCliOnce(
     },
   );
 
-  let stdout = '';
-  let stderr = '';
-  child.stdout?.on('data', (d) => { stdout += d.toString(); });
-  child.stderr?.on('data', (d) => { stderr += d.toString(); });
+  child.stdout?.on('data', () => { /* drain stdout to prevent backpressure */ });
+  child.stderr?.on('data', () => { /* drain stderr to prevent backpressure */ });
 
   // RSS poll
   const stopSignal = new AbortController();
   const peakP = pollPeakRss(child.pid!, stopSignal.signal);
 
-  const exitCode: number = await new Promise((resolve) => {
-    const timer = setTimeout(() => { child.kill('SIGTERM'); resolve(124); }, 120_000);
+  await new Promise((resolve) => {
+    const timer = setTimeout(() => { child.kill('SIGTERM'); resolve(undefined); }, 120_000);
     child.on('exit', (code) => { clearTimeout(timer); resolve(code ?? -1); });
-    child.on('error', (err) => { clearTimeout(timer); resolve(125); });
+    child.on('error', () => { clearTimeout(timer); resolve(125); });
   });
   stopSignal.abort();
   const peakRssMb = await peakP;
@@ -653,9 +642,8 @@ async function runRealAppOnce(
       stdio: ['ignore', 'pipe', 'pipe'],
     },
   );
-  let fullDemoStdout = '';
   let fullDemoStderr = '';
-  fullDemoChild.stdout?.on('data', (d) => { fullDemoStdout += d.toString(); });
+  fullDemoChild.stdout?.on('data', () => { /* drain stdout to prevent backpressure */ });
   fullDemoChild.stderr?.on('data', (d) => { fullDemoStderr += d.toString(); });
 
   // RSS poll (含 full-demo + app)
@@ -709,7 +697,7 @@ async function runRealAppOnce(
     const stat = await fs.stat(pptxPath);
     if (stat.size > 30_000) {
       // 真打开 WPS 验 (WPS 已装 macOS, app 实际名 "wpsoffice")
-      const wps = spawn('open', ['-a', 'wpsoffice', pptxPath], { stdio: 'ignore' });
+      spawn('open', ['-a', 'wpsoffice', pptxPath], { stdio: 'ignore' });
       await new Promise((r) => setTimeout(r, 2_000));
       const wpsShot = path.join(runScreenshotDir, 'wps_pptx.png');
       spawnSync('screencapture', ['-x', '-t', 'png', wpsShot], { stdio: 'ignore' });
@@ -733,7 +721,7 @@ async function runRealAppOnce(
   if (pdfPath && existsSync(pdfPath)) {
     const stat = await fs.stat(pdfPath);
     if (stat.size > 1024) {
-      const prev = spawn('open', ['-a', 'Preview', pdfPath], { stdio: 'ignore' });
+      spawn('open', ['-a', 'Preview', pdfPath], { stdio: 'ignore' });
       await new Promise((r) => setTimeout(r, 2_000));
       const prevShot = path.join(runScreenshotDir, 'preview_pdf.png');
       spawnSync('screencapture', ['-x', '-t', 'png', prevShot], { stdio: 'ignore' });

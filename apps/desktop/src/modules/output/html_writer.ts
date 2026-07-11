@@ -154,7 +154,7 @@ function countParagraphs(payload: ExportPayload): number {
   return total;
 }
 
-function metaFailed(payload: ExportPayload, format: 'html', err: string): OutputMetadata {
+function metaFailed(payload: ExportPayload, format: 'html', _err: string): OutputMetadata {
   return {
     request_id: '',
     preview_id: payload.preview_id,

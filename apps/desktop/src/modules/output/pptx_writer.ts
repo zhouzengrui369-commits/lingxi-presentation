@@ -227,7 +227,6 @@ export async function writePptxSync(
     const p = payload.style.palette;
     const primary = hex(p.primary);
     const text = hex(p.text);
-    const muted = hex(p.muted);
 
     const coverSlide = pptx.addSlide();
     coverSlide.background = { color: hex(p.background).replace('#', '') };
@@ -317,7 +316,7 @@ function failResult(previewId: string, msg: string): OutputResult {
 function metaFailed(
   payload: ExportPayload,
   format: 'pptx' | 'pdf' | 'docx' | 'html',
-  err: string,
+  _err: string,
 ): OutputMetadata {
   return {
     request_id: '',

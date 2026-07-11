@@ -11,10 +11,6 @@
  *   - 钉子 #30 阈值与 goal.md §5 一致
  */
 
-import * as fs from 'node:fs';
-import * as os from 'node:os';
-import * as path from 'node:path';
-
 import {
   parseArgs,
   evaluateSuccessRateGate,
@@ -23,7 +19,6 @@ import {
   evaluateMemoryGate,
   evaluateMultiFormatGate,
   evaluateRunGates,
-  evaluateAggregateGates,
   overallVerdict,
   aggregate,
   renderSummaryDashboard,
@@ -31,7 +26,6 @@ import {
   GATE4_THRESHOLDS,
   type CliArgs,
   type RunMetrics,
-  type AggregateMetrics,
 } from '../gate4-macos-rerun';
 
 // ---- helpers ----

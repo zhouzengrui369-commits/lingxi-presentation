@@ -108,7 +108,7 @@ function hex(c: string): string {
 export async function writeDocx(
   payload: ExportPayload,
   outputPath: string,
-  opts: { page_size?: 'A4' | 'Letter' } = {},
+  _opts: { page_size?: 'A4' | 'Letter' } = {},
 ): Promise<{ result: OutputResult; metadata: OutputMetadata }> {
   if (!payload.sections || payload.sections.length < 1) {
     return {
@@ -328,7 +328,7 @@ export async function writeDocx(
 function metaFailed(
   payload: ExportPayload,
   format: 'docx',
-  err: string,
+  _err: string,
 ): OutputMetadata {
   return {
     request_id: '',

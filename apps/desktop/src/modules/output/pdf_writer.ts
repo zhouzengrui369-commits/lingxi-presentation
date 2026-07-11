@@ -61,7 +61,9 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const b = parseInt(h.slice(4, 6), 16);
   return { r: r || 0, g: g || 0, b: b || 0 };
 }
-
+// NOTE: hexToRgb is a public utility exported below for callers that need hex→rgb conversion.
+// pdfkit takes 6-digit hex strings via fill() so the doc.pipe() path doesn't call it directly.
+export { hexToRgb };
 /**
  * 主入口：写 PDF 文件（流式，回调式 API）。
  * Jest 用 done() 等待 'end' 事件。
@@ -104,10 +106,6 @@ export function writePdf(
       doc.pipe(stream);
 
       const palette = payload.style.palette;
-      const primary = hexToRgb(palette.primary);
-      const text = hexToRgb(palette.text);
-      const muted = hexToRgb(palette.muted);
-      const bg = hexToRgb(palette.background);
 
       // 背景色（仅文档首页用 — 后面页白底以省墨）
       doc.rect(0, 0, doc.page.width, doc.page.height).fill(`#${palette.background.replace('#', '')}`);
@@ -219,7 +217,7 @@ export function writePdf(
 function metaFailed(
   payload: ExportPayload,
   format: 'pdf',
-  err: string,
+  _err: string,
 ): OutputMetadata {
   return {
     request_id: '',

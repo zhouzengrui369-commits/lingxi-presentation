@@ -17,7 +17,6 @@
  */
 
 import * as fs from 'node:fs';
-import * as path from 'node:path';
 import { dispatchExport, verifyOutputFile, toExportPayload } from '../src/modules/output/format_router';
 import type { OutputFormat } from '../src/modules/output/types';
 

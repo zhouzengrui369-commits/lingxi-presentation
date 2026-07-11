@@ -125,15 +125,6 @@ async function fileExists(p: string): Promise<boolean> {
   try { await fs.access(p); return true; } catch { return false; }
 }
 
-async function fileSize(p: string): Promise<number> {
-  try {
-    const s = await fs.stat(p);
-    return s.size;
-  } catch {
-    return 0;
-  }
-}
-
 /** 用 /v1/chat 探测 advisor 延迟 — 不依赖 full-demo 的 stdout 解析 */
 export async function probeAdvisor(
   port: number,
@@ -279,7 +270,7 @@ async function readDemoSummary(outputDir: string): Promise<{
   let summary: any;
   try {
     summary = JSON.parse(await fs.readFile(summaryPath, 'utf-8'));
-  } catch (e) {
+  } catch {
     return { ok: false, preview_html_latency_ms: 0, formats: emptyFormats(), total_ms: 0 };
   }
 
