@@ -150,6 +150,19 @@
 
 ## Changelog
 
+### 2026-07-11 23:00
+- Author: PM (Mavis)
+- Action: Phase 7 Wave 2 收口 — T-7.1 H1 10/10 full pass (merge 288a5d1) + T-7.2 H5 3/3 模板 design-aware 100% (merge e01ed05)
+- Reason: Phase 7 Plan 2 (PRD 9 硬指标补段) Wave 2 全部 PASS — H1 (file_import ≥99%) + H5 (template 100% match design-aware) 两个 P0 硬指标达成
+- Confirmed by: NJX 22:55 拍板 T-7.2 = 🅰 design-aware + merge (T-7.1 无需拍, 严格指标 100%)
+- 关键决策记录:
+  - T-7.1 H1 严格 100% (10/10 invocations exit 0 + 70/70 格式 + 100/100 stress) — verifier PASS, 无 fallback
+  - T-7.2 H5 design-aware 100% (3/3 模板 layout/palette/fonts) + 严格视角 77% aggregate (documented fallback text=#1A1A1A + body=heading) — verifier PASS, NJX 拍 design-aware 视角
+  - 钉子 #38 cross-doc audit 全 5/5 verify (worktree / git log / server port / mtime / 5 件套)
+  - 4 文档同步: delivery.md (T-7.1/T-7.2 行 → done + merge SHA) / goal.md (本 changelog) / board.md (append done 行) / plan.yaml (T-7.1/T-7.2 状态 done)
+  - cron t72-verifier-watch disabled (使命终结)
+  - Phase 6 v0.2.1 签字 = NJX 22:55 授权 "PM 决定" → PM 自主签 (含 Phase 6 收口 + T-7.1 H1 + T-7.2 H5 一起进 release notes)
+
 ### 2026-07-09 08:24
 - Author: PM (Mavis)
 - Action: 新建 goal.md
