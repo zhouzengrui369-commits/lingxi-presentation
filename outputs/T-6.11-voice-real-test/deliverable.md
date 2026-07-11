@@ -256,7 +256,29 @@ docs/PM_VERIFICATION_2026-07-11-12.md:233: ### Wave 7 执行结果 (2026-07-11 1
 
 ---
 
-## 8 · Commit 状态 (待 commit)
+## 8 · Commit 状态 (✅ done)
+
+**Commit hash**: `468132b46c3a4d6cd7e07f85a63c71a5b9897929` (2026-07-11 14:32:13 +0800, 1284 insertions / 4 deletions, 29 files)
+
+```bash
+$ git log -1 --oneline
+468132b feat(voice): T-6.11 voice revert 5-line patch + 真测 + 钉子 #43-45
+
+$ git status --short
+?? plans/
+?? screenshots/PM-VERIFICATION-2026-07-11-12/
+```
+
+**待 commit 命令 (已 commit, hash 见上)**:
+
+**5 件套 verify (post-commit)**:
+| # | 检查 | 真值 | 状态 |
+|---|------|------|------|
+| 1 | HEAD = 468132b (T-6.11 commit) | `git log -1 --oneline` | ✅ |
+| 2 | HEAD = e49aed9 (revert) 也 in chain | `git log --oneline -2` | ✅ |
+| 3 | voice-test.ts / voice-asr.swift / voice-recognizer.swift / voice-test-report.json tracked | `git ls-files` 29 个新增 | ✅ |
+| 4 | 4 文档同步 (delivery / PHASE_6 / RELEASE_NOTES / PM_VERIFICATION) | `grep T-6.11 <4 docs> \| wc -l = 13` | ✅ |
+| 5 | working tree clean (除 plans/ + screenshots/ 沿用) | `git status --short` | ✅ |
 
 **Staged 准备**:
 ```bash
