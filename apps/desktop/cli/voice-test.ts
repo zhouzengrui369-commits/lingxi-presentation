@@ -34,6 +34,11 @@ const WHISPER_BIN = '/opt/homebrew/bin/whisper';
 // T-6.11 wave 8: 输出落到 apps/desktop/outputs/T-6.11-voice-real-test/ (run1 → run2, NJX 14:30 拍板)
 const OUT_DIR = path.join(process.cwd(), 'outputs', 'T-6.11-voice-real-test');
 const REPORT_PATH = path.join(OUT_DIR, 'voice-test-report.json');
+// T-6.11 wave 8b: macOS SFSpeechRecognizer 优先 (NJX 17:25 拍板 C)
+//   - voice-asr-bridge 由 voice-asr.swift 编译而来 (TCC: 语音识别 + 麦克风)
+//   - 仅 lang=zh 调用 (en 仍走 whisper)
+//   - swift bridge 失败 (TCC denied / crash / empty) 自动 fallback whisper small
+const SFSR_BRIDGE_BIN = 'voice-asr-bridge';
 const SCRIPT_DIR = (() => {
   const cwd = process.cwd();
   if (cwd.endsWith('/apps/desktop')) return cwd;
@@ -117,10 +122,34 @@ function tts(text: string, voice: string, outPath: string): { ok: boolean; msg: 
 }
 
 function stt(audioPath: string, lang: string, initialPrompt?: string): { ok: boolean; text: string; msg: string } {
+  // T-6.11 wave 8b: 优先 macOS SFSpeechRecognizer (zh only), fallback whisper small
+  // NJX 17:25 拍板 C — 解决 #9 谢谢 / #5 明天开会几点 短中文 hallucination
+  if (lang === 'zh') {
+    const bridgePath = path.join(SCRIPT_DIR, SFSR_BRIDGE_BIN);
+    if (existsSync(bridgePath)) {
+      const res = spawnSync(bridgePath, [audioPath], { encoding: 'utf-8', timeout: 30_000 });
+      if (res.status === 0) {
+        try {
+          const json = JSON.parse(res.stdout);
+          if (json.ok && typeof json.text === 'string' && json.text.length > 0) {
+            return { ok: true, text: json.text, msg: 'SFSpeechRecognizer' };
+          }
+          // TCC denied / empty → fallback whisper
+          console.warn(`SFSpeech fallback: ${json.err || 'empty'} → whisper`);
+        } catch (e) {
+          console.warn(`SFSpeech fallback: parse err ${(e as Error).message} → whisper`);
+        }
+      } else {
+        console.warn(`SFSpeech fallback: exit=${res.status} stderr=${res.stderr?.slice(0, 100)} → whisper`);
+      }
+    }
+  }
+
   // whisper: --model small --language <zh|en> --initial_prompt <phrase> --output_format txt
   // - small 替代 base, NJX 14:30 拍板 (wave 8 派发)
   // - small 模型 244M 参数, 短中文识别率 70-85% (vs base 40-50%, T-6.11 wave 7 实测)
   // - initial_prompt bias 模型词汇 (不改变音频, 不算 mock)
+  // - 短中文 < 0.5s 系统性 hallucination (wave 8 3 次 fail 实证), SFSpeech 失败时作 fallback
   const langArg = lang === 'zh' ? 'zh' : 'en';
   const tmpDir = `/tmp/voice_test_t611_whisper_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
   const args: string[] = [audioPath, '--model', 'small', '--language', langArg, '--output_format', 'txt', '--output_dir', tmpDir, '--verbose', 'False'];
@@ -136,7 +165,7 @@ function stt(audioPath: string, lang: string, initialPrompt?: string): { ok: boo
   const txtPath = path.join(tmpDir, `${basename}.txt`);
   try {
     const text = readFileSync(txtPath, 'utf-8').trim();
-    return { ok: true, text, msg: '' };
+    return { ok: true, text, msg: 'whisper' };
   } catch (e) {
     return { ok: false, text: '', msg: `read txt failed: ${(e as Error).message}` };
   }
