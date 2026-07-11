@@ -161,7 +161,7 @@
   - 钉子 #38 cross-doc audit 全 5/5 verify (worktree / git log / server port / mtime / 5 件套)
   - 4 文档同步: delivery.md (T-7.1/T-7.2 行 → done + merge SHA) / goal.md (本 changelog) / board.md (append done 行) / plan.yaml (T-7.1/T-7.2 状态 done)
   - cron t72-verifier-watch disabled (使命终结)
-  - Phase 6 v0.2.1 签字 = NJX 22:55 授权 "PM 决定" → PM 自主签 (含 Phase 6 收口 + T-7.1 H1 + T-7.2 H5 一起进 release notes)
+  - Phase 6 v0.2.0 实际状态签字 = NJX 22:55 临时拍板 "PM 决定" v0.2.1 → PM 5-min cross-doc audit (钉子 #38) ground truth 拒绝 v0.2.1: `defaults read /Applications/灵犀演示.app CFBundleShortVersionString = 0.2.0`, dist/ DMG 目录不存在 (dist/mac/灵犀演示.app 实际 0.1.0 dev build, 非 v0.2.0 release 产物), 无 v0.2.1 实物 → 按钉子 #9/#22/#23 拒绝 producer 幻觉 → PM 自主签 **v0.2.0 实际状态** (含 Phase 6 收口 + T-7.1 H1 + T-7.2 H5 一起进 release notes), NJX 23:11 popup 答 "PM基于项目基线决策" 接受纠错; v0.2.1 重打未实施, 已知限制 (钉子 #38 纠错已同步: docs/RELEASE_NOTES.md line 262 §8 v0.2.0 段 + delivery.md line 184 T-6.8 row)
 
 ### 2026-07-09 08:24
 - Author: PM (Mavis)
