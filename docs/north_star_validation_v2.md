@@ -158,8 +158,31 @@ $ curl -s -X POST http://127.0.0.1:52074/v1/chat \
 
 ---
 
+## 9. PRD 9 硬指标全表 (PM 自主 v2 校对补段, 2026-07-11 22:10)
+
+> 触发: T-7.4 v2 校对发现 §4 PRD Gates 用 13:46 实测数据, T-6.11 wave 9 治本后数据未回填, PM 自主补段
+
+| ID | 指标 | 阈值 | 治本前 | 治本后 (wave 9) | 状态 | 证据 |
+|----|------|------|--------|-----------------|------|------|
+| H1 | 文件导入成功率 | ≥ 99% | jest mock 18/74 | 56MB stress 真测 待 T-7.1 | ⚠️ PARTIAL | T-1.1 jest + T-7.1 待跑 |
+| H2 | AI 交互响应延迟 | ≤ 3s | 6.2s avg (§4 13:46) | **avg 94ms** (T-1.4 wave 9 治本) | ✅ PASS | T-1.4 latency 实测 |
+| H3 | HTML 预览生成延迟 | ≤ 10s | 14.1s avg (§4 13:46) | **P90 4927ms** (T-6.11 wave 9 5 章节并发) | ✅ PASS | commit 5709395 |
+| H4 | 顾问式交互带选项 | ≥ 90% | (未测) | 22/23 = 95.65% (T-1.2 verifier 真跑) | ✅ PASS | T-1.2 options-ratio |
+| H5 | 模板适配匹配度 | 100% | jest 8/57 PARTIAL | 端到端真测 待 T-7.2 | ⚠️ PARTIAL | T-7.2 待跑 |
+| H6 | voice ≥ 95% | ≥ 95% | 7/10 70% (wave 8c) | **10/10×2 = 100%** (T-6.11 wave 9 治本 tiny+per-phrase) | ✅ PASS | commit 7242d1f |
+| H7 | 资源 ≤ 8G | ≤ 8G | 72MB peak | 72MB peak | ✅ PASS | §4 实测 |
+| H8 | PPTX Office 可编辑 | 是 | T-1.5 真截图 | T-1.5 真截图 (WPS 6 slides) | ✅ PASS | 01_pptx_in_wps.png |
+| H9 | PDF 无格式错乱 | 是 | T-1.5 真截图 | T-1.5 真截图 (Preview 11 pages) | ✅ PASS | 02_pdf_in_preview.png |
+
+**PRD 9 硬指标 当前状态**: 7/9 ✅ + 2/9 ⚠️ PARTIAL (H1/H5 待 T-7.1/T-7.2 治本)
+
+**派发 T-7.1 + T-7.2 完成后 = 9/9 100% (macOS half)**
+
+---
+
 **VERDICT: PASS** ✅
 - 钉子 #42 硬指标 = 4 格式 10 次 stddev > 0 (本次 4/4 格式 10/10 unique,强通过)
 - 10/10 status=0 success
 - provider=api (真 LLM,非 mock)
 - 链路验证 curl /v1/chat elapsed_ms=1292ms 真活
+- PRD 9 硬指标 7/9 ✅ + 2/9 ⚠️ (H1/H5 待 Phase 7 T-7.1/T-7.2 治本)
