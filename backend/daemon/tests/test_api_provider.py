@@ -22,6 +22,8 @@ class TestApiProviderNoKey:
     async def test_no_env_key_uses_mock(self, monkeypatch):
         """env 没 MiniMax_API_KEY → is_mock=True，chat 返回 mock。"""
         monkeypatch.delenv("MiniMax_API_KEY", raising=False)
+        # 关闭 ps 抓 token（避免测试环境拉到 mavis daemon 的 token → is_mock=False）
+        monkeypatch.setenv("LINGXI_API_PROVIDER_ALLOW_PS_TOKEN", "0")
         p = MiniMaxAPIProvider()
         assert p.is_mock is True
         assert await p.health() is True
@@ -30,12 +32,14 @@ class TestApiProviderNoKey:
     async def test_empty_key_treated_as_missing(self, monkeypatch):
         """key 设成空串也算 mock。"""
         monkeypatch.setenv("MiniMax_API_KEY", "   ")
+        monkeypatch.setenv("LINGXI_API_PROVIDER_ALLOW_PS_TOKEN", "0")
         p = MiniMaxAPIProvider()
         assert p.is_mock is True
 
     async def test_custom_mock_reply(self, monkeypatch):
         """直接显式传 api_key=None 强制 mock 路径。"""
         monkeypatch.delenv("MiniMax_API_KEY", raising=False)
+        monkeypatch.setenv("LINGXI_API_PROVIDER_ALLOW_PS_TOKEN", "0")
         p = MiniMaxAPIProvider(api_key=None)
         assert p.is_mock is True
 
@@ -62,7 +66,11 @@ class TestApiProviderWithKey:
         """注入 httpx MockTransport，验证真实 HTTP 路径。"""
         monkeypatch.setenv("MiniMax_API_KEY", "sk-test-abc123")
         transport = httpx.MockTransport(_mock_transport_handler("hello api"))
-        p = MiniMaxAPIProvider(client=httpx.AsyncClient(transport=transport, base_url="https://api.example"))
+        # base_url 显式给 OpenAI 风格（不含 mavis），同时给 httpx client（让 transport 命中）
+        p = MiniMaxAPIProvider(
+            base_url="https://api.example",
+            client=httpx.AsyncClient(transport=transport, base_url="https://api.example"),
+        )
         assert p.is_mock is False
         assert await p.health() is True
         out = await p.chat("hi")
