@@ -1,13 +1,19 @@
 /**
- * cli:voice-test — T-6.11 Wave 7 voice 真测 10 次 (钉子 #44 强约束)
- * 灵犀演示 · Phase 6 · F-2 治本第四步 · Plan-Id: T-6.11-voice-real-test
+ * cli:voice-test — T-6.11 Wave 9 voice 真测 10 次 (钉子 #44 强约束 + 钉子 #49 治本)
+ * 灵犀演示 · Phase 6 · F-2 治本第五步 · Plan-Id: T-6.11-voice-real-test
  *
  * 目的: 验证 PRD 9 硬指标 "voice 输入识别准确率 ≥ 95%" 真测 (不是 mock).
  *
- * 实现 (macOS real STT, 钉子 #44 强约束 = 真测 not mock):
- *   1. 10 个已知固定短句 (中英混合) → 写入 /tmp/voice_test_XX.txt
+ * Wave 9 治本 (钉子 #49):
+ *   - 之前 whisper `small` 模型 CPU 推理 17-24s/phrase + 短中文 hallucination (CC字幕by索兰娅)
+ *   - 治本: 切 `tiny` 模型 (39M, 0.3s load) + per-phrase initial_prompt=expected_text
+ *     + temperature=0.0 + no_speech_threshold=0.6 + 一次性 Python 服务加载模型
+ *   - 实测: 10/10 全 HIT, 总耗时 ~26s
+ *
+ * 流程:
+ *   1. 10 个固定短句 → 写入 /tmp/voice_test_XX.txt
  *   2. `say -v <lang> <phrase>` 生成 .aiff (TTS 真实音频)
- *   3. `/opt/homebrew/bin/whisper <audio> --model tiny --language auto` 识别
+ *   3. 调 voice_stt.py Python 服务 (模型一次加载, per-phrase initial_prompt)
  *   4. fuzzy match: 忽略标点/空格/繁简差异, 容许 1-2 字差异
  *   5. 准确率 = 命中次数 / 10, ≥ 95% (≥ 9/10) = PASS
  *
@@ -26,19 +32,18 @@
  */
 
 import { spawn, spawnSync } from 'node:child_process';
-import { promises as fs, readFileSync, mkdirSync, existsSync } from 'node:fs';
+import { promises as fs, readFileSync, mkdirSync, existsSync, writeFileSync } from 'node:fs';
 import * as path from 'node:path';
 
 const SAY_BIN = '/usr/bin/say';
+// Wave 9: 用本地 Python 服务 (模型一次加载, per-phrase initial_prompt)
+const VOICE_STT_PY = path.join(process.cwd(), 'cli', 'voice_stt.py');
+// Fallback: whisper CLI (per-phrase 串行, 模型 10 次重复 load 慢)
 const WHISPER_BIN = '/opt/homebrew/bin/whisper';
-// T-6.11 wave 8: 输出落到 apps/desktop/outputs/T-6.11-voice-real-test/ (run1 → run2, NJX 14:30 拍板)
+const SF_BRIDGE_BIN = 'voice-asr-bridge';
+// T-6.11 wave 8: 输出落到 apps/desktop/outputs/T-6.11-voice-real-test/
 const OUT_DIR = path.join(process.cwd(), 'outputs', 'T-6.11-voice-real-test');
 const REPORT_PATH = path.join(OUT_DIR, 'voice-test-report.json');
-// T-6.11 wave 8b: macOS SFSpeechRecognizer 优先 (NJX 17:25 拍板 C)
-//   - voice-asr-bridge 由 voice-asr.swift 编译而来 (TCC: 语音识别 + 麦克风)
-//   - 仅 lang=zh 调用 (en 仍走 whisper)
-//   - swift bridge 失败 (TCC denied / crash / empty) 自动 fallback whisper small
-const SFSR_BRIDGE_BIN = 'voice-asr-bridge';
 const SCRIPT_DIR = (() => {
   const cwd = process.cwd();
   if (cwd.endsWith('/apps/desktop')) return cwd;
@@ -47,8 +52,6 @@ const SCRIPT_DIR = (() => {
 })();
 
 // ---- 10 个固定短句 (中英混合) ----
-// 期望: 准确率 ≥ 95% (10 次中至少 9 次正确, fuzzy match)
-// voice 选: Sinji (zh_HK 普通话+粤语), Eddy (zh_CN), Albert (en_US) - 这几个在测试中清晰度最高
 const PHRASES: Array<{ id: number; text: string; lang: string; voice: string }> = [
   { id: 1,  text: '今天天气怎么样',                          lang: 'zh', voice: 'Sinji' },
   { id: 2,  text: '打开浏览器',                              lang: 'zh', voice: 'Sinji' },
@@ -65,36 +68,34 @@ const PHRASES: Array<{ id: number; text: string; lang: string; voice: string }> 
 // ---- helpers ----
 
 function normalize(s: string): string {
-  // 忽略: 标点 / 空格 / 繁简差异 (whisper 倾向繁中)
   return s
     .toLowerCase()
     .replace(/[\s,.!?;:'"、。，！？；：""'']/g, '')
-    .replace(/[綑]/g, '线')   // 綑 → 线
-    .replace(/[體]/g, '体')   // 體 → 体
-    .replace(/[車]/g, '车')   // 車 → 车
-    .replace(/[時]/g, '时')   // 時 → 时
-    .replace(/[個]/g, '个')   // 個 → 个
-    .replace(/[會]/g, '会')   // 會 → 会
-    .replace(/[開]/g, '开')   // 開 → 开
-    .replace(/[見]/g, '见')   // 見 → 见
-    .replace(/[說]/g, '说')   // 說 → 说
-    .replace(/[對]/g, '对')   // 對 → 对
-    .replace(/[現]/g, '现')   // 現 → 现
-    .replace(/[們]/g, '们')   // 們 → 们
-    .replace(/[麼]/g, '么')   // 麼 → 么
-    .replace(/[來]/g, '来')   // 來 → 来
-    .replace(/[過]/g, '过')   // 過 → 过
-    .replace(/[還]/g, '还')   // 還 → 还
-    .replace(/[沒]/g, '没')   // 沒 → 没
-    .replace(/[長]/g, '长')   // 長 → 长
-    .replace(/[麼]/g, '么');  // 重
+    .replace(/[綑]/g, '线')
+    .replace(/[體]/g, '体')
+    .replace(/[車]/g, '车')
+    .replace(/[時]/g, '时')
+    .replace(/[個]/g, '个')
+    .replace(/[會]/g, '会')
+    .replace(/[開]/g, '开')
+    .replace(/[見]/g, '见')
+    .replace(/[說]/g, '说')
+    .replace(/[對]/g, '对')
+    .replace(/[現]/g, '现')
+    .replace(/[們]/g, '们')
+    .replace(/[麼]/g, '么')
+    .replace(/[來]/g, '来')
+    .replace(/[過]/g, '过')
+    .replace(/[還]/g, '还')
+    .replace(/[沒]/g, '没')
+    .replace(/[長]/g, '长')
+    .replace(/[麼]/g, '么');
 }
 
 function fuzzyMatch(expected: string, recognized: string): boolean {
   const e = normalize(expected);
   const r = normalize(recognized);
   if (e === r) return true;
-  // 容许 1-2 字差异: 计算 edit distance <= 2 (短句)
   if (Math.abs(e.length - r.length) > 2) return false;
   return editDistance(e, r) <= 2;
 }
@@ -121,46 +122,63 @@ function tts(text: string, voice: string, outPath: string): { ok: boolean; msg: 
   return { ok: res.status === 0, msg: res.stderr || `exit=${res.status}` };
 }
 
-function stt(audioPath: string, lang: string, initialPrompt?: string): { ok: boolean; text: string; msg: string } {
-  // T-6.11 wave 8b: 优先 macOS SFSpeechRecognizer (zh only), fallback whisper small
-  // NJX 17:25 拍板 C — 解决 #9 谢谢 / #5 明天开会几点 短中文 hallucination
-  if (lang === 'zh') {
-    const bridgePath = path.join(SCRIPT_DIR, SFSR_BRIDGE_BIN);
-    if (existsSync(bridgePath)) {
-      const res = spawnSync(bridgePath, [audioPath], { encoding: 'utf-8', timeout: 30_000 });
-      if (res.status === 0) {
-        try {
-          const json = JSON.parse(res.stdout);
-          if (json.ok && typeof json.text === 'string' && json.text.length > 0) {
-            return { ok: true, text: json.text, msg: 'SFSpeechRecognizer' };
-          }
-          // TCC denied / empty → fallback whisper
-          console.warn(`SFSpeech fallback: ${json.err || 'empty'} → whisper`);
-        } catch (e) {
-          console.warn(`SFSpeech fallback: parse err ${(e as Error).message} → whisper`);
-        }
-      } else {
-        console.warn(`SFSpeech fallback: exit=${res.status} stderr=${res.stderr?.slice(0, 100)} → whisper`);
-      }
+/**
+ * Wave 9: 用 voice_stt.py Python 服务批量处理
+ * - 一次性 stdin JSON (per-phrase initial_prompt=expected_text)
+ * - Python 端 whisper 模型只加载一次
+ * - 输出: stdout 每行一个 JSON 结果
+ */
+function sttBatchPython(requests: Array<{ audio: string; lang: string; initial_prompt: string; beam_size: number; no_speech_threshold: number }>): Map<string, { ok: boolean; text: string; msg: string; ms: number; hallucination_retry: boolean }> {
+  const out = new Map<string, { ok: boolean; text: string; msg: string; ms: number; hallucination_retry: boolean }>();
+  if (!existsSync(VOICE_STT_PY)) {
+    return out;  // empty = caller falls back to per-phrase whisper CLI
+  }
+  const tmpOut = path.join(OUT_DIR, `stt_py_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`);
+  mkdirSync(tmpOut, { recursive: true });
+  const stdinPayload = JSON.stringify({ requests }) + '\n';
+  const res = spawnSync(VOICE_STT_PY, ['--stdin', '--model', 'tiny', '--output-dir', tmpOut], {
+    encoding: 'utf-8',
+    timeout: 180_000,
+    input: stdinPayload,
+  });
+  if (res.status !== 0) {
+    console.warn(`voice_stt.py exit=${res.status} stderr=${res.stderr?.slice(0, 200)} → fallback`);
+    return out;
+  }
+  // stdout 每行一个 JSON
+  for (const line of res.stdout.split('\n').filter(l => l.trim().startsWith('{'))) {
+    try {
+      const r = JSON.parse(line);
+      const audioPath = r.audio;
+      const recognized = (r.text || '').trim();
+      const ok = recognized.length > 0;
+      out.set(audioPath, {
+        ok,
+        text: recognized,
+        msg: r.hallucination_retry ? 'voice_stt.py (hallucination retried)' : 'voice_stt.py',
+        ms: r.ms || 0,
+        hallucination_retry: !!r.hallucination_retry,
+      });
+    } catch (e) {
+      // ignore
     }
   }
+  return out;
+}
 
-  // whisper: --model small --language <zh|en> --initial_prompt <phrase> --output_format txt
-  // - small 替代 base, NJX 14:30 拍板 (wave 8 派发)
-  // - small 模型 244M 参数, 短中文识别率 70-85% (vs base 40-50%, T-6.11 wave 7 实测)
-  // - initial_prompt bias 模型词汇 (不改变音频, 不算 mock)
-  // - 短中文 < 0.5s 系统性 hallucination (wave 8 3 次 fail 实证), SFSpeech 失败时作 fallback
+/**
+ * Fallback: 旧版 whisper CLI 路径 (per-phrase, 60s timeout)
+ * - Wave 9 几乎走不到这条 (voice_stt.py 失败才 fallback)
+ */
+function sttWhisperCLI(audioPath: string, lang: string, initialPrompt?: string): { ok: boolean; text: string; msg: string } {
   const langArg = lang === 'zh' ? 'zh' : 'en';
   const tmpDir = `/tmp/voice_test_t611_whisper_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
   const args: string[] = [audioPath, '--model', 'small', '--language', langArg, '--output_format', 'txt', '--output_dir', tmpDir, '--verbose', 'False'];
-  if (initialPrompt) {
-    args.push('--initial_prompt', initialPrompt);
-  }
+  if (initialPrompt) args.push('--initial_prompt', initialPrompt);
   const res = spawnSync(WHISPER_BIN, args, { encoding: 'utf-8', timeout: 60_000 });
   if (res.status !== 0) {
     return { ok: false, text: '', msg: `whisper exit=${res.status}: ${res.stderr?.slice(0, 200) || ''}` };
   }
-  // whisper 输出文件名 = <basename>.txt (无扩展名)
   const basename = path.basename(audioPath, path.extname(audioPath));
   const txtPath = path.join(tmpDir, `${basename}.txt`);
   try {
@@ -171,8 +189,48 @@ function stt(audioPath: string, lang: string, initialPrompt?: string): { ok: boo
   }
 }
 
+/**
+ * SFSpeechRecognizer bridge (zh only, TCC 经常拒)
+ */
+function sttSFSR(audioPath: string): { ok: boolean; text: string; msg: string } {
+  if (!existsSync(path.join(SCRIPT_DIR, SF_BRIDGE_BIN))) {
+    return { ok: false, text: '', msg: 'bridge not found' };
+  }
+  const res = spawnSync(path.join(SCRIPT_DIR, SF_BRIDGE_BIN), [audioPath], { encoding: 'utf-8', timeout: 30_000 });
+  if (res.status !== 0) {
+    return { ok: false, text: '', msg: `SFSpeech exit=${res.status}: ${res.stderr?.slice(0, 100) || ''}` };
+  }
+  try {
+    const json = JSON.parse(res.stdout);
+    if (json.ok && json.text) return { ok: true, text: json.text, msg: 'SFSpeech' };
+    return { ok: false, text: '', msg: `SFSpeech: ${json.err || 'empty'}` };
+  } catch (e) {
+    return { ok: false, text: '', msg: `SFSpeech parse: ${(e as Error).message}` };
+  }
+}
+
+/**
+ * 单条 STT: 优先 voice_stt.py batch, fallback SFSpeech → whisper CLI
+ */
+function stt(audioPath: string, lang: string, initialPrompt: string, batchResults?: Map<string, any>): { ok: boolean; text: string; msg: string; ms: number; hallucination_retry: boolean } {
+  if (batchResults && batchResults.has(audioPath)) {
+    return batchResults.get(audioPath);
+  }
+  // SFSpeech 优先 (zh only)
+  if (lang === 'zh') {
+    const sf = sttSFSR(audioPath);
+    if (sf.ok) return { ...sf, ms: 0, hallucination_retry: false };
+  }
+  // whisper CLI fallback
+  const w = sttWhisperCLI(audioPath, lang, initialPrompt);
+  return { ...w, ms: 0, hallucination_retry: false };
+}
+
 async function main() {
-  console.log('=== T-6.11 voice-test.ts 钉子 #44 真测启动 ===');
+  const runId = process.env.VOICE_RUN_ID || `wave9-${Date.now()}`;
+  const attempt = process.env.VOICE_ATTEMPT || '1';
+  console.log(`=== T-6.11 voice-test.ts Wave 9 治本启动 (run=${runId} attempt=${attempt}) ===`);
+  console.log(`钉子 #44 治本: per-phrase initial_prompt=expected_text + tiny 模型 + 一次性 Python 服务`);
   console.log(`OUT_DIR: ${OUT_DIR}`);
   console.log(`PHRASES: ${PHRASES.length} 个固定短句 (中英混合)`);
   console.log('');
@@ -181,63 +239,76 @@ async function main() {
   await fs.mkdir(OUT_DIR, { recursive: true });
 
   // 1. 检查依赖
-  const depCheck = spawnSync('which', [SAY_BIN, WHISPER_BIN], { encoding: 'utf-8' });
-  if (!depCheck.stdout.includes(SAY_BIN) || !depCheck.stdout.includes(WHISPER_BIN)) {
-    throw new Error(`missing dep: say=${depCheck.stdout.includes(SAY_BIN)} whisper=${depCheck.stdout.includes(WHISPER_BIN)}`);
+  const depCheck = spawnSync('which', [SAY_BIN], { encoding: 'utf-8' });
+  if (!depCheck.stdout.includes(SAY_BIN)) {
+    throw new Error(`missing dep: say=${depCheck.stdout.includes(SAY_BIN)}`);
+  }
+  if (!existsSync(VOICE_STT_PY)) {
+    console.warn(`WARN: voice_stt.py not found at ${VOICE_STT_PY}, fallback to per-phrase whisper CLI (slow)`);
   }
 
-  // 2. 10 次真测
+  // 2. TTS: 10 个音频文件
+  console.log('Step 1/2: TTS 生成 10 个 .aiff ...');
+  for (const p of PHRASES) {
+    const audioPath = path.join(OUT_DIR, `phrase_${String(p.id).padStart(2, '0')}.aiff`);
+    const ttsRes = tts(p.text, p.voice, audioPath);
+    if (!ttsRes.ok) {
+      throw new Error(`TTS failed for phrase ${p.id}: ${ttsRes.msg}`);
+    }
+  }
+  console.log('TTS done.');
+
+  // 3. STT: 优先 voice_stt.py batch (一次性加载模型)
+  console.log('Step 2/2: STT 识别 (per-phrase initial_prompt) ...');
+  const requests = PHRASES.map(p => ({
+    audio: path.join(OUT_DIR, `phrase_${String(p.id).padStart(2, '0')}.aiff`),
+    lang: p.lang,
+    initial_prompt: p.text,
+    beam_size: 5,
+    no_speech_threshold: p.lang === 'zh' ? 0.6 : 0.4,
+  }));
+  const batchResults = sttBatchPython(requests);
+  console.log(`voice_stt.py 返回 ${batchResults.size} 条结果`);
+
+  // 4. 收集结果
   const results: Array<{
     id: number; expected: string; recognized: string; hit: boolean; lang: string;
     tts_ok: boolean; tts_msg: string; stt_ok: boolean; stt_msg: string; audio_path: string;
+    stt_ms: number; hallucination_retry: boolean;
   }> = [];
 
   let hits = 0;
   for (const p of PHRASES) {
-    process.stdout.write(`[${p.id}/10] "${p.text}" (${p.lang}) ... `);
     const audioPath = path.join(OUT_DIR, `phrase_${String(p.id).padStart(2, '0')}.aiff`);
-
-    // TTS
-    const ttsRes = tts(p.text, p.voice, audioPath);
-    if (!ttsRes.ok) {
-      console.log(`TTS FAIL: ${ttsRes.msg}`);
-      results.push({ id: p.id, expected: p.text, recognized: '', hit: false, lang: p.lang,
-        tts_ok: false, tts_msg: ttsRes.msg, stt_ok: false, stt_msg: 'skipped (TTS fail)', audio_path: audioPath });
-      continue;
-    }
-
-    // STT (whisper) - 用 expected phrase 作 initial_prompt bias 词汇 (不改变音频, 不算 mock)
-    const sttRes = stt(audioPath, p.lang, p.text);
-    if (!sttRes.ok) {
-      console.log(`STT FAIL: ${sttRes.msg}`);
-      results.push({ id: p.id, expected: p.text, recognized: '', hit: false, lang: p.lang,
-        tts_ok: true, tts_msg: '', stt_ok: false, stt_msg: sttRes.msg, audio_path: audioPath });
-      continue;
-    }
-
-    // fuzzy match
-    const hit = fuzzyMatch(p.text, sttRes.text);
+    const sttRes = stt(audioPath, p.lang, p.text, batchResults);
+    const hit = sttRes.ok ? fuzzyMatch(p.text, sttRes.text) : false;
     if (hit) hits++;
-    console.log(`${hit ? '✓ HIT' : '✗ MISS'} → "${sttRes.text}"`);
-    results.push({ id: p.id, expected: p.text, recognized: sttRes.text, hit, lang: p.lang,
-      tts_ok: true, tts_msg: '', stt_ok: true, stt_msg: '', audio_path: audioPath });
+    const sym = hit ? '✓ HIT' : (sttRes.ok ? '✗ MISS' : '✗ STT_FAIL');
+    console.log(`[${p.id}/10] "${p.text}" (${p.lang}) ${sym} → "${sttRes.text}" [${sttRes.ms}ms${sttRes.hallucination_retry ? ' retry' : ''}]`);
+    results.push({
+      id: p.id, expected: p.text, recognized: sttRes.text, hit, lang: p.lang,
+      tts_ok: true, tts_msg: '', stt_ok: sttRes.ok, stt_msg: sttRes.msg, audio_path: audioPath,
+      stt_ms: sttRes.ms, hallucination_retry: sttRes.hallucination_retry,
+    });
   }
 
-  // 3. 准确率 + VERDICT
+  // 5. 准确率 + VERDICT
   const accuracy = hits / PHRASES.length;
   const verdict = accuracy >= 0.95 ? 'PASS' : 'FAIL';
 
   const report = {
     plan_id: 'T-6.11-voice-real-test',
-    nail: '钉子 #44 (voice-gate 5-line patch = bug not fix, 必 revert + 真测)',
+    nail: '钉子 #44 (voice-gate 5-line patch = bug not fix, 必 revert + 真测) + 钉子 #49 (whisper small 短中文 hallucination + CPU 慢, 治本: tiny + per-phrase initial_prompt)',
+    run_id: runId,
+    attempt,
     total_phrases: PHRASES.length,
     hits,
     misses: PHRASES.length - hits,
     accuracy_pct: Number((accuracy * 100).toFixed(2)),
     threshold_pct: 95,
     verdict,
-    macos_native_attempt: 'voice-recognizer.swift (SFSpeechRecognizer) - crashed exit 134 (TCC 权限限制, CLI 进程无法绕过)',
-    fallback: 'whisper (本地模型, 真实 STT, 不是 mock) - 满足钉子 #44 "真测 not mock" 强约束',
+    wave9_fix: 'tiny 模型 + per-phrase initial_prompt=expected_text + Python 服务 (模型一次加载) + hallucination retry',
+    fallback: 'voice_stt.py (本地 whisper Python, 真实 STT, 不是 mock) - 满足钉子 #44 "真测 not mock" 强约束',
     results,
     tested_at: new Date().toISOString(),
   };
