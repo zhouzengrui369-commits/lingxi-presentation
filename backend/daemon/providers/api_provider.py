@@ -1,6 +1,7 @@
 """MiniMax API provider + Mock provider.
 
-读 env $MiniMax_API_KEY 决定模式：
+读 env $MiniMax_API_KEY / $MINIMAX_API_KEY / $minimax_API_KEY 决定模式
+（大小写兜底，Wave 5a 加）：
   - 有 key → 真实 HTTP 调用 MiniMax API（也允许测试里注入 mock transport）
   - 无 key → 降级为 MockProvider，返回固定 "hello" 串
 
@@ -16,6 +17,27 @@ from typing import Any
 import httpx
 
 from ..ai_provider import AIProvider, ProviderCallError
+
+
+# API key 环境变量名候选（大小写变体，Wave 5a 加 minimax_API_KEY 兜底）
+_API_KEY_ENV_NAMES: tuple[str, ...] = (
+    "MiniMax_API_KEY",
+    "MINIMAX_API_KEY",
+    "minimax_API_KEY",
+)
+
+
+def _resolve_api_key() -> str | None:
+    """从 env 读 API key（大小写兜底，优先级：原 MiniMax_API_KEY > MINIMAX_API_KEY > minimax_API_KEY）。
+
+    Returns:
+        第一个非空值；若都没设或全为空串，返回 None。
+    """
+    for env_name in _API_KEY_ENV_NAMES:
+        val = os.environ.get(env_name)
+        if val and val.strip():
+            return val
+    return None
 
 
 class MockProvider(AIProvider):
@@ -39,7 +61,8 @@ class MockProvider(AIProvider):
 class MiniMaxAPIProvider(AIProvider):
     """MiniMax API provider。
 
-    - 有 MiniMax_API_KEY → 走真实 HTTP（默认 endpoint 可被 base_url / endpoint 覆盖）
+    - 有 MiniMax_API_KEY (或 MINIMAX_API_KEY / minimax_API_KEY，大小写兜底)
+      → 走真实 HTTP（默认 endpoint 可被 base_url / endpoint 覆盖）
     - 无 key → 实际是 MockProvider（保持接口一致）
     """
 
@@ -58,8 +81,8 @@ class MiniMaxAPIProvider(AIProvider):
         timeout: float = 30.0,
         client: httpx.AsyncClient | None = None,
     ) -> None:
-        # key 缺省从 env 读
-        self._api_key = api_key if api_key is not None else os.environ.get("MiniMax_API_KEY")
+        # key 缺省从 env 读（大小写兜底，Wave 5a）
+        self._api_key = api_key if api_key is not None else _resolve_api_key()
         self._base_url = (base_url or self.DEFAULT_BASE_URL).rstrip("/")
         self._endpoint = endpoint or self.DEFAULT_ENDPOINT
         self._model = model

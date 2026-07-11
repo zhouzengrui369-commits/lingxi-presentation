@@ -1,0 +1,42 @@
+=== 5 件套 VERIFY · T-6.9a provider_router 接 CLI provider ===
+
+[1] pwd: /Users/njx/Project/灵犀演示
+[2] git top-level: /Users/njx/Project/灵犀演示
+[3] git status:
+ M backend/daemon/providers/api_provider.py
+ M backend/daemon/providers/cli_provider.py
+?? docs/PM_VERIFICATION_2026-07-11-12.md
+?? screenshots/PM-VERIFICATION-2026-07-11-12/
+?? screenshots/T-6.9a-provider-cli-detect/
+[4] git log -3:
+0eaa015 docs(verify): T-6.3 Wave 2b-fix verifier PASS 报告 (7 步验证 + 6 verdict 全 PASS)
+53da2e4 docs(verify): T-6.3 Wave 2b-fix backfill commit hash 8a9ebc3
+8a9ebc3 fix(runtime): T-6.3 Wave 2b voice-gate 5-line patch (real-cli mode voice → N/A, script verdict PASS)
+[5] daemon LISTEN 52074:
+COMMAND   PID USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+Python  51721  njx    6u  IPv4 0xc6d72bce2e7cfaa7      0t0  TCP 127.0.0.1:52074 (LISTEN)
+
+=== curl /v1/health ===
+{"status":"ok","providers":["cli","api"]}
+HTTP_CODE:200
+
+=== curl /v1/providers (核心验证) ===
+{"active":"cli","available":["cli","api"]}
+
+=== curl /v1/chat 真试 primary CLI ===
+{"content":"hello (mock)","provider":"api","fell_back":true,"elapsed_ms":0.012417003745213151}
+
+=== /Users/njx/.mavis/bin/minimax 真路径探测 ===
+lrwxr-xr-x@ 1 njx  staff  73 Jun  3 08:58 /Users/njx/.mavis/bin/minimax -> /Applications/MiniMax Code.app/Contents/Resources/resources/daemon/cli.js
+3.0.47
+
+=== daemon 启动日志（router ready + fallback 链路） ===
+51721
+52074
+[startup] router ready: primary=cli fallback=api
+[12:54:35] [router] primary=cli FAILED ([cli] CLI exited 1: error: unknown option '--format'
+(Did you mean --port?)); falling back to api
+[12:54:35] [router] fallback=api ok (0.0ms) after cli failure
+[12:54:58] [router] primary=cli FAILED ([cli] CLI exited 1: error: unknown option '--format'
+(Did you mean --port?)); falling back to api
+[12:54:58] [router] fallback=api ok (0.0ms) after cli failure

@@ -1,9 +1,12 @@
 """MiniMax CLI provider.
 
 调用 MiniMax Code CLI（一个本地命令行工具），路径走：
-  - $MiniMax_CLI 显式覆盖
-  - shutil.which("MiniMax") 找 PATH
-  - fallback 到几个常见固定路径
+  - $MiniMax_CLI / $minimax_CLI 显式覆盖（大小写兜底）
+  - shutil.which 试 MiniMax / minimax / MINIMAX 三种大小写
+  - fallback 到几个常见固定路径（含 minimax 真路径）
+
+注意：mavis 真实 CLI 二进制在 /Users/njx/.mavis/bin/minimax（小写），
+不是 MiniMax（大写）。Wave 5a 修大小写兼容问题（钉子 #43 + T-6.9a）。
 """
 
 from __future__ import annotations
@@ -17,7 +20,10 @@ from ..ai_provider import AIProvider, ProviderCallError
 
 
 # fallback 路径（macOS + Linux 常见位置）
+# 注：minimax 真路径放最前（Wave 5a 加），MiniMax (大写) 兼容保留
 _FALLBACK_PATHS = [
+    "/Users/njx/.mavis/bin/minimax",  # mavis 默认安装位置（小写）
+    os.path.expanduser("~/.mavis/bin/minimax"),
     "/opt/homebrew/bin/MiniMax",
     "/usr/local/bin/MiniMax",
     os.path.expanduser("~/.local/bin/MiniMax"),
@@ -25,22 +31,35 @@ _FALLBACK_PATHS = [
 ]
 
 
+# CLI 二进制名候选（大小写变体）—— shutil.which 逐个试
+_CLI_WHICH_NAMES: tuple[str, ...] = ("MiniMax", "minimax", "MINIMAX")
+
+
+# 环境变量名候选（大小写变体）—— 优先级 MiniMax_CLI > minimax_CLI
+_CLI_ENV_NAMES: tuple[str, ...] = ("MiniMax_CLI", "minimax_CLI")
+
+
 def _resolve_cli_path() -> str | None:
     """按优先级解析 CLI 路径。
 
     优先级：
-      1. $MiniMax_CLI 环境变量
-      2. shutil.which("MiniMax")
+      1. $MiniMax_CLI / $minimax_CLI 环境变量（大小写兜底）
+      2. shutil.which(MiniMax / minimax / MINIMAX)（大小写兜底）
       3. _FALLBACK_PATHS 中第一个存在的
     """
-    env_path = os.environ.get("MiniMax_CLI")
-    if env_path and os.path.isfile(env_path) and os.access(env_path, os.X_OK):
-        return env_path
+    # 1. env override（大小写都试）
+    for env_name in _CLI_ENV_NAMES:
+        env_path = os.environ.get(env_name)
+        if env_path and os.path.isfile(env_path) and os.access(env_path, os.X_OK):
+            return env_path
 
-    which = shutil.which("MiniMax")
-    if which:
-        return which
+    # 2. shutil.which（大小写都试）
+    for name in _CLI_WHICH_NAMES:
+        which = shutil.which(name)
+        if which:
+            return which
 
+    # 3. fallback paths
     for p in _FALLBACK_PATHS:
         if os.path.isfile(p) and os.access(p, os.X_OK):
             return p
