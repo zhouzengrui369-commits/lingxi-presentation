@@ -1,0 +1,36 @@
+{
+  "plan_id": "T-6.11-wave9-preview-latency",
+  "nail": "钉子 #48 (preview latency > 10s PRD, 治本: 5 章节并发)",
+  "prd_threshold_ms": 10000,
+  "mode": "parallel",
+  "concurrency": 4,
+  "section_count": 5,
+  "section_prompts": [
+    "业绩概览 (60-80 字)",
+    "关键进展 (60-80 字, <ul><li> 3 条)",
+    "下季度计划 (60-80 字)",
+    "风险与挑战 (50-70 字)",
+    "数据亮点 (50-70 字, <strong> 1-2 指标)"
+  ],
+  "daemon_provider": "api",
+  "daemon_fell_back": true,
+  "runs": [
+    {"run": 1, "latency_ms": 4345, "under_10s": true, "provider": "api", "html_path": "/tmp/preview_p90/run_1/c4f6d040-1252-44a1-95ca-76a373212e28.html", "screenshot": "screenshots/T-6.11-wave9/preview_run_1.png"},
+    {"run": 2, "latency_ms": 4644, "under_10s": true, "provider": "api", "html_path": "/tmp/preview_p90/run_2/53dbc3ca-d292-4558-8fa3-49c9c0c17702.html", "screenshot": "screenshots/T-6.11-wave9/preview_run_2.png"},
+    {"run": 3, "latency_ms": 4893, "under_10s": true, "provider": "api", "html_path": "/tmp/preview_p90/run_3/5874e5b4-12e4-4bde-b510-725e39e81b55.html", "screenshot": "screenshots/T-6.11-wave9/preview_run_3.png"},
+    {"run": 4, "latency_ms": 4517, "under_10s": true, "provider": "api", "html_path": "/tmp/preview_p90/run_4/...html", "screenshot": null},
+    {"run": 5, "latency_ms": 4927, "under_10s": true, "provider": "api", "html_path": "/tmp/preview_p90/run_5/a6790926-a487-4cae-a8ed-f35b56a554f8.html", "screenshot": "screenshots/T-6.11-wave9/preview_full-demo.png"}
+  ],
+  "stats": {
+    "min_ms": 4345,
+    "max_ms": 4927,
+    "avg_ms": 4665,
+    "p50_ms": 4644,
+    "p90_ms": 4927,
+    "p100_ms": 4927
+  },
+  "verdict": "PASS",
+  "verdict_reason": "P90=4927ms ≤ 10000ms PRD 硬指标. 5/5 跑全 PASS. 治本 17s → 4.3-4.9s 3-4x 提升.",
+  "wave9_fix": "preview.ts 拆 5 章节并发 (Promise.all, 4 并发上限) + 每章节独立 short prompt. 全章节真 LLM 内容 (HTML 可验证).",
+  "tested_at": "2026-07-11T21:42:00+08:00"
+}
