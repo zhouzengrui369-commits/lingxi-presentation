@@ -36,13 +36,17 @@ jobs:
         run: python -m pip install --quiet python-pptx
         shell: pwsh
 
-      - name: Install vite for renderer build (no-save + ignore-scripts, avoids dmg-license win32 postinstall)
-        working-directory: apps/desktop/electron-shell
-        run: npm install --ignore-scripts --no-save vite@^5.4.10 @vitejs/plugin-react@^4.3.3
+      - name: Install vite for renderer build (no-save, in apps/desktop to avoid dmg-license in electron-shell)
+        # electron-shell/package.json has dmg-license@1.0.11 (darwin-only) as devDep;
+        # any 'npm install' inside electron-shell/ on win32 fails with EBADPLATFORM.
+        # Workaround: install vite into apps/desktop/ (no dmg-license there), then
+        # invoke it from electron-shell/ via npx (parent node_modules lookup).
+        working-directory: apps/desktop
+        run: npm install --no-save vite@^5.4.10 @vitejs/plugin-react@^4.3.3
 
       - name: Build electron-shell renderer bundle (for naming.test.ts test_workspace_layout)
         working-directory: apps/desktop/electron-shell
-        run: npx vite build
+        run: npx --prefix ../ vite build
 
       - name: Lint (eslint)
         run: npm run lint
