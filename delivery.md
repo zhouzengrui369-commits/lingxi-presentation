@@ -989,3 +989,38 @@ Pending / blocked: []
 - v1 wave 8c 70% 历史保留为 voice-test-report-v1-wave8c.json 4298B
 
 **9 硬指标**: 9/9 ✅ (T-6.11 voice 1/9 ⚠️ → 9/9 ✅ full pass)
+
+---
+
+## T-lint-fix-2026-07-12 (Phase 3 Gate 3 Win half 前置) — ✅ done (2026-07-12)
+
+**NJX 7/12 13:09 拍板**: Win CI green 必达 (PARTIAL_PASS 不合格, 重做 wave 2)
+
+**Phase**: Phase 3 Gate 3 (双平台端到端) + plan.md line 19 Win half 前置
+**基线**: goal.md §5 北极星 + R-1 风险 (Windows 路径/编码) + 硬底线"Gate 不过 = 不进下一阶段"
+
+**Wave 1 (06:30)**: lint 60→0 源 errors + main.js paths 真 bug fix + 4 CI infra 修复 → PARTIAL_PASS (40/41 suites)
+**Wave 2 (13:14-14:00)**: 5 commits (0ea0db8/36a2675/e7f5bd2/2aa233e/66e1eaf) → **PASS (41/41 + 237/237)**
+
+**CI Run URL** (最终 green): https://github.com/zhouzengrui369-commits/lingxi-presentation/actions/runs/29181936209 (sha=66e1eaf, conclusion=success)
+
+**Commits on main (8 total, 13:14-13:55 wave 2)**:
+- 1c66726 fix(lint): 60 unused-vars/undef cleanup for win CI Gate 3 (24 files +35/-96)
+- c60e527 fix(template): cross-platform Python path for windows-latest CI
+- 89b44c4 ci(win): install python-pptx for test_template_export_schema
+- 1862e3e fix(extract_pptx): force UTF-8 stdout on Windows for Chinese text
+- fae03c2 ci(win): set NODE_OPTIONS=--experimental-vm-modules for jest
+- e024557 ci(win): revert renderer build step (out of scope, see deliverable)
+- 0ea0db8 ci(win): build renderer via npm install --no-save (fixes naming.test.ts test_workspace_layout)
+- 36a2675 ci(win): add --ignore-scripts to npm install (dmg-license postinstall blocks even --no-save)
+- e7f5bd2 ci(win): install vite in apps/desktop (no dmg-license), run from electron-shell
+- 2aa233e ci(win): also install react + react-dom in apps/desktop (renderer.jsx needs them)
+- 66e1eaf ci(win): add .eslintignore to exclude dist/ build artifacts from lint
+
+**Deliverable**: outputs/lint-fix-2026-07-12/deliverable.md (VERDICT: PASS, full 5-step debug trail)
+
+**Wave 2 踩坑 (5 失败 1 成功) → 跨项目可复用**:
+1. dmg-license@1.0.11 (darwin-only devDep) blocks `npm install` in any dir that has it in package.json, regardless of `--no-save` / `--ignore-scripts` (npm checks os field in metadata, not just postinstall)
+2. vite build needs `react` + `react-dom` installed where vite lives (rollup can't resolve `react-dom/client` otherwise)
+3. CI build artifacts in `dist/` need `.eslintignore` exclusion (browser globals like `performance`/`MSApp`/`reportError` all trigger no-undef in eslint default)
+4. **5-step workflow order** = 依赖顺序: pip install → vite build → lint (skip dist) → jest (needs dist)
