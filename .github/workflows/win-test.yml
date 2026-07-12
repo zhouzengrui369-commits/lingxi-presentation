@@ -36,6 +36,14 @@ jobs:
         run: python -m pip install --quiet python-pptx
         shell: pwsh
 
+      - name: Install vite for renderer build (no-save, avoids dmg-license win32 postinstall)
+        working-directory: apps/desktop/electron-shell
+        run: npm install --no-save vite@^5.4.10 @vitejs/plugin-react@^4.3.3
+
+      - name: Build electron-shell renderer bundle (for naming.test.ts test_workspace_layout)
+        working-directory: apps/desktop/electron-shell
+        run: npx vite build
+
       - name: Lint (eslint)
         run: npm run lint
         continue-on-error: false
