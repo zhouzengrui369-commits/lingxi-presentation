@@ -1,7 +1,7 @@
 {
   "plan_id": "T-6.11-voice-real-test",
   "nail": "钉子 #44 (voice-gate 5-line patch = bug not fix, 必 revert + 真测) + 钉子 #49 (whisper small 短中文 hallucination + CPU 慢, 治本: tiny + per-phrase initial_prompt)",
-  "run_id": "wave9-1783778118238",
+  "run_id": "wave9-1783899091228",
   "attempt": "1",
   "total_phrases": 10,
   "hits": 10,
@@ -23,7 +23,7 @@
       "stt_ok": true,
       "stt_msg": "voice_stt.py",
       "audio_path": "/Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/phrase_01.aiff",
-      "stt_ms": 2577,
+      "stt_ms": 4972,
       "hallucination_retry": false
     },
     {
@@ -37,7 +37,7 @@
       "stt_ok": true,
       "stt_msg": "voice_stt.py",
       "audio_path": "/Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/phrase_02.aiff",
-      "stt_ms": 2565,
+      "stt_ms": 4167,
       "hallucination_retry": false
     },
     {
@@ -51,7 +51,7 @@
       "stt_ok": true,
       "stt_msg": "voice_stt.py",
       "audio_path": "/Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/phrase_03.aiff",
-      "stt_ms": 1672,
+      "stt_ms": 6178,
       "hallucination_retry": false
     },
     {
@@ -65,7 +65,7 @@
       "stt_ok": true,
       "stt_msg": "voice_stt.py",
       "audio_path": "/Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/phrase_04.aiff",
-      "stt_ms": 3039,
+      "stt_ms": 6914,
       "hallucination_retry": false
     },
     {
@@ -79,7 +79,7 @@
       "stt_ok": true,
       "stt_msg": "voice_stt.py",
       "audio_path": "/Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/phrase_05.aiff",
-      "stt_ms": 1882,
+      "stt_ms": 3773,
       "hallucination_retry": false
     },
     {
@@ -93,7 +93,7 @@
       "stt_ok": true,
       "stt_msg": "voice_stt.py",
       "audio_path": "/Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/phrase_06.aiff",
-      "stt_ms": 1826,
+      "stt_ms": 3406,
       "hallucination_retry": false
     },
     {
@@ -107,7 +107,7 @@
       "stt_ok": true,
       "stt_msg": "voice_stt.py",
       "audio_path": "/Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/phrase_07.aiff",
-      "stt_ms": 2062,
+      "stt_ms": 5745,
       "hallucination_retry": false
     },
     {
@@ -121,7 +121,7 @@
       "stt_ok": true,
       "stt_msg": "voice_stt.py",
       "audio_path": "/Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/phrase_08.aiff",
-      "stt_ms": 2480,
+      "stt_ms": 4495,
       "hallucination_retry": false
     },
     {
@@ -135,7 +135,7 @@
       "stt_ok": true,
       "stt_msg": "voice_stt.py (hallucination retried)",
       "audio_path": "/Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/phrase_09.aiff",
-      "stt_ms": 1434,
+      "stt_ms": 3222,
       "hallucination_retry": true
     },
     {
@@ -149,9 +149,9 @@
       "stt_ok": true,
       "stt_msg": "voice_stt.py",
       "audio_path": "/Users/njx/Project/灵犀演示/apps/desktop/outputs/T-6.11-voice-real-test/phrase_10.aiff",
-      "stt_ms": 1985,
+      "stt_ms": 6289,
       "hallucination_retry": false
     }
   ],
-  "tested_at": "2026-07-11T13:55:51.115Z"
+  "tested_at": "2026-07-12T23:32:36.746Z"
 }
