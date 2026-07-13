@@ -153,6 +153,30 @@
 
 ## Changelog
 
+### 2026-07-13 09:35 — Phase 7.5 基线扩展（T-MVP-2 v3 · H2 架构升级）
+- Author: PM (Mavis)
+- Confirmed by: NJX 2026-07-13 09:30 拍板 🅰 T-MVP-2 v3 全部（流式 + 多 provider + 用户切 UI + H2 重新定义，3-4 天）+ ✅ 纳入基线
+- 触发链: H2 真 LLM 延迟 avg=7259ms / max=9297ms（超 PRD 2.4x/1.9x）→ 4 选 1 弹窗 → NJX 9:30 选 🅰 纳入基线
+- 基线扩展内容:
+  - **H2 指标语义升级**: 旧 = "AI 交互响应延迟 ≤ 3s avg / ≤ 5s max" (full response 计时) → 新候选 = "AI 响应流式首 token 延迟 P50 ≤ 1.2s" (流式架构下首 token 才是用户感知延迟, full response 计时无意义)
+  - **架构升级**: 引入流式响应 (SSE/WebSocket) + 多 provider 路由 (6 provider 动态切换) + 用户切模型 UI (设置页 provider 列表)
+  - **provider 列表**: OpenAI / Claude / Gemini / MiniMax / Ollama (本地) / 自定义 OpenAI 兼容
+  - **3 wave 拆解**: W1 调研+设计 (1-2h) / W2 流式+多 provider (2d) / W3 UI+阈值+验证 (1d)
+  - **4 文档同步**: goal.md H2 重定义 + plan.md 验收口径 + delivery.md 状态 + rules.md 约束 (W3 收口)
+  - **钉子 #50 准备**: W3 收口时 append mavis-runtime-discipline.md (provider 切换 + 流式架构最佳实践)
+- 关键决策记录:
+  - 弹窗 "H2 真 LLM 延迟 avg=7259ms / max=9297ms（超阈 2.4x/1.9x），v0.2.0 怎么走？" → NJX Others: "以minimax api调用的官方数据评估如何优化，还要考虑后续用户自行切换模型也要api可用，这个AI 交互响应延迟需要合理且智能，搜索有没有成熟方案"
+  - 弹窗 "H2 阈值 + 架构一起升级（流式 + 多 provider + 用户切模型），纳入基线吗？" → NJX 选 🅰 T-MVP-2 v3 全部（推荐 - 流式 + 多 provider + 用户切 UI + H2 重新定义，3-4 天）
+- 教训 (PM discipline):
+  - 钉子 #5 PRD 级 >30min 拆 ≤3 wave × ≤30min cap
+  - 钉子 #38 5-min cross-doc audit 必跑 (主分支 / delivery / plan / goal 4 件套)
+  - §0.6.6 PM 自主派发基线对应项 (不弹 NJX 路由器)
+  - §0.1 业主沉默 = 授权 (NJX 拍板后 PM 立刻派, 不再问"接下来做什么")
+- 北极星对齐: 仍为"季度汇报 PPT 端到端 demo 100% 成功率" (H2 重定义是手段, 不是目的)
+- 4 个质量 Gate: 仍为 G1/G2/G3/G4 (新增 Gate 6 = H2 架构升级 W1/W2/W3 全 done)
+- 8 风险保留 + 新增 6 风险 (R-7.5-1~6) 见 phase7_v3_mvp_h2_v3_plan.md §4
+- 下一步: W1 subagent 派发 (worktree `feat/mvp-h2-v3`, 30min PM cap)
+
 ### 2026-07-11 23:00
 - Author: PM (Mavis)
 - Action: Phase 7 Wave 2 收口 — T-7.1 H1 10/10 full pass (merge 288a5d1) + T-7.2 H5 3/3 模板 design-aware 100% (merge e01ed05)
