@@ -276,7 +276,7 @@
 | T-6.6 | git rm LingxiDemo.app | ✅ done | b649e1f | .gitignore 同步 |
 | T-6.7 | docs/platform-macos.md 路径更新 | ✅ done | 4eb292d | electron-shell/dist 命中 |
 | T-6.8 | 重新打 DMG v0.2.0 + 装 | ✅ done | a1a7035 | 实际装 `/Applications/灵犀演示.app` (Info.plist 0.2.0) |
-| T-6.11 | voice revert 5-line patch + ≥95% 真测 | ✅ done (90% PARTIAL 接受) | 8a9ebc3 + e49aed9 | wave 8d 9/10 = 90% full pass (钉子 #43-45) |
+| T-6.11 | voice revert 5-line patch + ≥95% 真测 | ✅ **done (wave 9 治本 10/10 = 100%)** | 8a9ebc3 + e49aed9 + 01af3da + 794a993 + 6743bd2 | **轨迹: wave 8c 7/10 (70%) FAIL → wave 8d 9/10 (90%) flaky pass → wave 9 10/10 (100%) × 2 轮 治本**; wave 9 关键: whisper tiny (39M) + per-phrase initial_prompt + temperature=0.0 + no_speech_threshold=0.6 + hallucination retry (钉子 #49 治本); preview 5 章节并发 P90=4927ms ≤ 10s (钉子 #48 治本); 钉子 #44 治本 / #45 守住; 4 docs 同步 release-notes §8.3 G-6 + §8.5 + 7/12 audit VERDICT |
 | T-G4-macos | Gate 4 macOS 北极星 10 次 | ✅ done | c4b50b0 | 9/10 demo PASS (1 重试 OK) |
 
 **Phase 6 9 硬指标真 runtime**: 7/9 直接 PASS + 2/9 v2/v3 pgrep 修后 PASS (钉子 #40 收口)

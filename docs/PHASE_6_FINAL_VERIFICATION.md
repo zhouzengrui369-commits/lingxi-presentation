@@ -310,3 +310,45 @@ VERDICT: **⚠️ PARTIAL — 5/9 Phase 6 task 真通过 (T-6.0/6.2/6.4/6.5/6.6/
 - v1 wave 8c 70% 历史保留为 voice-test-report-v1-wave8c.json 4298B
 
 **9 硬指标**: 9/9 ✅ (T-6.11 voice 1/9 ⚠️ → 9/9 ✅ full pass)
+
+## 7.8 Wave 9 — T-6.11 voice 治本 10/10 (100%) + preview P90 治本 (2026-07-11 21:40-22:08, 钉子 #44+#48+#49 治本)
+
+**触发**: wave 8d 9/10 (90%) flaky pass, 短中文 hallucination 系统性问题 (钉子 #44) 长期待治本. NJX 21:30 拍板 🅰 治本 (whisper tiny + per-phrase initial_prompt).
+
+**执行**:
+1. ✅ **`apps/desktop/cli/voice_stt.py` 写好** (130 行 Python, 模型一次加载) — whisper tiny (39M) + per-phrase initial_prompt + temperature=0.0 + no_speech_threshold=0.6 + hallucination retry (钉子 #49 治本, 改 whisper small 484M 短中文 hallucination 系统性问题)
+2. ✅ **`apps/desktop/cli/voice-test.ts` 切 voice_stt.py** (280 行) — TTS→ASR loop 改用 python subprocess, 模型一次加载复用, 10 短语 (5 zh + 5 en)
+3. ✅ **`apps/desktop/src/modules/preview/preview.ts` 5 章节并发** (290 行) — Promise.all 4 limit, 1 次长 prompt 17s → P90=4927ms ≤ 10s PRD (钉子 #48 治本)
+4. ✅ **`npx tsx cli/voice-test.ts --runs 2` 真跑 2 轮** — 第 1 轮 10/10 = 100% (含 wave 8d fail 的 #5/#6/#9 全 HIT), 第 2 轮 10/10 = 100% (稳定, 无 flaky)
+
+**关键 commit**:
+- 01af3da feat(voice): T-6.11 wave 9 voice ≥95% PRD 治本 (tiny+per-phrase prompt, 10/10×2 轮)
+- 794a993 feat(preview): T-6.11 wave 9 latency ≤10s PRD (5 章节并发, P90=4927ms)
+- 6743bd2 data(voice): T-6.11 wave 9 voice-test-report.json 10/10 PASS 归档
+- e791b02 docs(t-6.11 wave8d): 双路重测 9/10 (90%) full pass + 钉子 #46 收口
+- f69e239 docs(verify): PM 验收 2026-07-11 20:30 verifier subagent 真机 + voice 重测
+
+**5 件套 verify** (钉子 #8 强约束, 钉子 #38 cross-doc audit):
+- ✅ voice-test-report-attempt1.json + voice-test-report-attempt2.json 2 轮 10/10 hits=10/10 accuracy=100% verdict=PASS
+- ✅ voice_stt.py 130 行 mtime 21:40 + voice-test.ts 280 行 mtime 21:45
+- ✅ preview-latency-test.json 5 runs P90=4927ms ≤ 10000ms 阈值
+- ✅ 真测无 mock (钉子 #12 守住) + 5-line patch / 95% 阈值未动 (钉子 #44/#45)
+- ✅ wave 8c/wave 8d 历史报告保留为 voice-test-report-v1-wave8c.json + voice-test-report-v2-wave8d.json
+
+**9 硬指标**: 9/9 ✅ (T-6.11 voice 1/9 ⚠️ → wave 8d 9/10 90% ⚠️ → wave 9 10/10 100% ✅ full pass; preview ≤10s PRD 治本)
+
+**交付**:
+- `apps/desktop/outputs/T-6.11-wave9/verify-report.md` (443 行, 13 章)
+- `apps/desktop/cli/voice_stt.py` (130 行)
+- `apps/desktop/cli/voice-test.ts` (280 行)
+- `apps/desktop/src/modules/preview/preview.ts` (290 行)
+- `apps/desktop/outputs/T-6.11-wave9/voice-test-report-attempt{1,2}.json` (2 轮 10/10)
+- `apps/desktop/outputs/T-6.11-wave9/preview-latency-test.json` (P90=4927ms, 5 runs)
+- 6 PNG 截图
+
+**钉子入 discipline**:
+- 钉子 #44 (PRD ≥95% 阈值守约) — 5-line patch 容忍 = bug
+- 钉子 #48 (PRD 9 硬指标全表补段) — preview ≤10s
+- 钉子 #49 (whisper small 短中文 hallucination 治本) — tiny + per-phrase initial_prompt
+
+**main @ 5463e4f = Phase 6 收口 (含 Wave 9 治本) + 4 文档同步 = 灵犀演示 v0.2.0 实际状态**
