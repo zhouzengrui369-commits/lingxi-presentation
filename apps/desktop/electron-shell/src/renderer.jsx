@@ -16,6 +16,11 @@
  *   - 显示 provider_status (live / mock / unavailable) 让用户知道当前是 mock 还是真活
  *   - 5 路由真业务组件 + Loading/Success/Error/ProviderWarning 4 状态共享组件
  *
+ * 【W2】关键改动:
+ *   - §1.9 解析 data.fell_back 字段, 显式标 "⚠ LLM 降级" UI 警告 (Wave 1 verifier 报告 #4 PARTIAL)
+ *   - 显示 provider_status (live / mock / unavailable) 让用户知道当前是 mock 还是真活
+ *   - 5 路由真业务组件 + Loading/Success/Error/ProviderWarning 4 状态共享组件
+ *
  * 设计取舍:
  *   - 不直接 import './router' 那个 RN router (它依赖 react-native 组件 + 业务模块的 fs/os)
  *   - 改成 web-native React + react-dom 渲染 5 个真业务 screen + tab 导航
@@ -332,8 +337,16 @@ function OutputScreen({ appendLog }) {
       const htmlPath = previewLoad?.data?.html_path ?? '/tmp/lingxi_w1_4format_outputs/w1.html';
       const outputPath = `/tmp/lingxi_w2_output_test/Q1_2026_季度汇报.${format}`;
       const r = await window.electronAPI.output.generate(format, htmlPath, outputPath);
-      setState({ kind: 'success', data: r, format });
-      appendLog(`[output] ${format} OK: ${r?.data?.output_path ?? '?'}`);
+      // 【W3 §3.2 治本】解析 /v1/output 返的 provider_status 字段, 显式标 mock 警告
+      // Wave 1 verifier #4 + Wave 2 钉子 #40 #5 PARTIAL 治本:
+      // - provider_status='mock' → 显式 mock 模式 (W2 §1.9 effective_name)
+      // - provider_status='unavailable' → 无 provider, 必然是降级
+      // - provider_status='degraded' → 降级过 (e.g. CLI 失败后 API 真活)
+      // - fell_back=true → 任何降级过
+      const providerStatus = r?.data?.provider_status ?? r?.provider_status ?? 'live';
+      const fellBack = r?.data?.fell_back ?? r?.fell_back ?? false;
+      setState({ kind: 'success', data: r, format, providerStatus, fellBack });
+      appendLog(`[output] ${format} OK: ${r?.data?.output_path ?? '?'} provider=${providerStatus} fell_back=${fellBack}`);
     } catch (e) {
       setState({ kind: 'error', error: e?.error ?? e?.message ?? 'unknown', errorCode: e?.error_code });
       appendLog(`[output] FAIL: ${e?.error_code ?? e?.message}`);
@@ -359,8 +372,31 @@ function OutputScreen({ appendLog }) {
         <SuccessBlock
           title={`.${state.format} 已生成 ✓`}
           summary={`${state.data?.data?.size_bytes ?? 0}B · ${state.data?.data?.elapsed_ms ?? 0}ms`}
+          providerStatus={state.providerStatus}
+          fellBack={state.fellBack}
+          provider={state.data?.data?.provider ?? 'unknown'}
         >
           <div className="output-path">📁 {state.data?.data?.output_path ?? '?'}</div>
+          {/* 【W3 §3.2 治本】PDF mock 显式警告 — Wave 1 verifier #4 + Wave 2 钉子 #40 #5 PARTIAL 治本 */}
+          {state.format === 'pdf' && state.providerStatus === 'mock' && (
+            <div className="output-pdf-mock-warning" data-testid="pdf-mock-warning" style={{
+              background: '#FFF3CD', border: '1px solid #FFC107', padding: '8px 12px',
+              marginTop: '8px', borderRadius: '4px', fontSize: '13px', color: '#856404',
+            }}>
+              ⚠ <b>PDF 内容是 mock</b> (provider 降级): 当前 provider_status=<code>mock</code>, 
+              fell_back=<code>{String(state.fellBack)}</code>. 
+              真活 LLM 输出需 <code>MiniMax_API_KEY</code> + <code>LINGXI_API_PROVIDER_ALLOW_PS_TOKEN=1</code> 或 CLI 可达.
+            </div>
+          )}
+          {state.format === 'pdf' && state.fellBack && state.providerStatus !== 'mock' && (
+            <div className="output-pdf-fallback-warning" data-testid="pdf-fallback-warning" style={{
+              background: '#FFF3CD', border: '1px solid #FFC107', padding: '8px 12px',
+              marginTop: '8px', borderRadius: '4px', fontSize: '13px', color: '#856404',
+            }}>
+              ⚠ <b>PDF 生成降级过</b>: provider_status=<code>{state.providerStatus}</code>, 
+              fell_back=true. 当前 PDF 不是最优路径, 检查 daemon 日志.
+            </div>
+          )}
         </SuccessBlock>
       )}
       {state.kind === 'error' && <ErrorBlock title="生成失败" error={state.error} errorCode={state.errorCode} onRetry={() => doGenerate('pptx')} />}

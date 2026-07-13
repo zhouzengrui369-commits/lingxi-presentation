@@ -32,8 +32,8 @@
  *   - screenshots/T-6.3-runtime/    (≥ 11 张: 10 demo + 1 dashboard)
  */
 
-import { spawn, spawnSync } from 'node:child_process';
-import { promises as fs, existsSync } from 'node:fs';
+import { spawn, spawnSync, execSync } from 'node:child_process';
+import { promises as fs, existsSync, openSync, readSync, closeSync, statSync, readFileSync } from 'node:fs';
 import * as path from 'node:path';
 import { performance } from 'node:perf_hooks';
 
@@ -778,7 +778,7 @@ async function runRealAppOnce(
     // 5. MD5 check
     if (existsSync(routeShot)) {
       try {
-        const { execSync } = require('child_process');
+        // 【W3】用 top-level import 的 execSync, 避免 ESM 边界 require
         const md5 = execSync(`md5 -q "${routeShot}"`, { encoding: 'utf-8' }).trim();
         routeMd5s.push(md5);
       } catch (e) {
@@ -890,12 +890,11 @@ function isValidPptx(filePath: string, minSizeBytes: number = 30_000): { valid: 
   if (!existsSync(filePath)) return { valid: false, reason: 'file_not_found' };
   // 1. ZIP magic: PK\x03\x04 (50 4B 03 04)
   try {
-    // 【W2】用 node:fs 的 sync API (不是 promises 版本)
-    const fsSync = require('node:fs');
-    const fd = fsSync.openSync(filePath, 'r');
+    // 【W3】用 top-level import 的 node:fs sync API, 避免 ESM 边界 require is not defined
+    const fd = openSync(filePath, 'r');
     const buf = Buffer.alloc(4);
-    fsSync.readSync(fd, buf, 0, 4, 0);
-    fsSync.closeSync(fd);
+    readSync(fd, buf, 0, 4, 0);
+    closeSync(fd);
     if (buf[0] !== 0x50 || buf[1] !== 0x4B || buf[2] !== 0x03 || buf[3] !== 0x04) {
       return { valid: false, reason: 'not_zip_magic' };
     }
@@ -903,13 +902,12 @@ function isValidPptx(filePath: string, minSizeBytes: number = 30_000): { valid: 
     return { valid: false, reason: `read_error:${(e as Error).message}` };
   }
   // 2. size check
-  const stat = require('node:fs').statSync(filePath);
+  const stat = statSync(filePath);
   if (stat.size < minSizeBytes) {
     return { valid: false, reason: `size_too_small:${stat.size}<${minSizeBytes}` };
   }
   // 3. slide XML check (pptx 是 zip, 里面有 ppt/slides/slide*.xml)
   try {
-    const { execSync } = require('child_process');
     const list = execSync(`unzip -l "${filePath}" 2>/dev/null | grep -E "ppt/slides/slide[0-9]+\\.xml" | wc -l`, { encoding: 'utf-8' });
     const slideCount = parseInt(list.trim(), 10);
     if (!Number.isFinite(slideCount) || slideCount < 1) {
@@ -925,11 +923,11 @@ function isValidPdf(filePath: string, minSizeBytes: number = 1024, minPages: num
   if (!existsSync(filePath)) return { valid: false, reason: 'file_not_found' };
   // 1. PDF magic: %PDF- (25 50 44 46 2D)
   try {
-    const fsSync = require('node:fs');
-    const fd = fsSync.openSync(filePath, 'r');
+    // 【W3】用 top-level import 的 node:fs sync API
+    const fd = openSync(filePath, 'r');
     const buf = Buffer.alloc(5);
-    fsSync.readSync(fd, buf, 0, 5, 0);
-    fsSync.closeSync(fd);
+    readSync(fd, buf, 0, 5, 0);
+    closeSync(fd);
     if (buf[0] !== 0x25 || buf[1] !== 0x50 || buf[2] !== 0x44 || buf[3] !== 0x46 || buf[4] !== 0x2D) {
       return { valid: false, reason: 'not_pdf_magic' };
     }
@@ -937,14 +935,13 @@ function isValidPdf(filePath: string, minSizeBytes: number = 1024, minPages: num
     return { valid: false, reason: `read_error:${(e as Error).message}` };
   }
   // 2. size check
-  const stat = require('node:fs').statSync(filePath);
+  const stat = statSync(filePath);
   if (stat.size < minSizeBytes) {
     return { valid: false, reason: `size_too_small:${stat.size}<${minSizeBytes}` };
   }
   // 3. page count check (数 /Type /Page 出现次数, 不算 /Type /Pages)
   try {
-    const fsSync = require('node:fs');
-    const content = fsSync.readFileSync(filePath, 'utf-8');
+    const content = readFileSync(filePath, 'utf-8');
     const pageMatches = content.match(/\/Type\s*\/Page[^s]/g) || [];
     if (pageMatches.length < minPages) {
       return { valid: false, reason: `page_count_too_few:${pageMatches.length}<${minPages}` };

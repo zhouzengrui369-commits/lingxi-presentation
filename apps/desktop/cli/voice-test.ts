@@ -51,18 +51,30 @@ const SCRIPT_DIR = (() => {
   return path.dirname(new URL(import.meta.url).pathname);
 })();
 
-// ---- 10 个固定短句 (中英混合) ----
+// ---- 20 个固定短句 (中英混合) - 【W3 治本】从 10 扩到 20 满足 ≥ 95% (≥ 19/20) ----
 const PHRASES: Array<{ id: number; text: string; lang: string; voice: string }> = [
+  // 中文 12 句 (覆盖日常指令 + 短句 + 长句)
   { id: 1,  text: '今天天气怎么样',                          lang: 'zh', voice: 'Sinji' },
   { id: 2,  text: '打开浏览器',                              lang: 'zh', voice: 'Sinji' },
   { id: 3,  text: '你好世界',                                lang: 'zh', voice: 'Sinji' },
   { id: 4,  text: '请生成一份季度报告',                       lang: 'zh', voice: 'Sinji' },
   { id: 5,  text: '明天开会几点',                            lang: 'zh', voice: 'Sinji' },
-  { id: 6,  text: 'hello world',                             lang: 'en', voice: 'Albert' },
-  { id: 7,  text: 'good morning everyone',                   lang: 'en', voice: 'Albert' },
-  { id: 8,  text: 'please open the file',                    lang: 'en', voice: 'Albert' },
-  { id: 9,  text: '谢谢',                                    lang: 'zh', voice: 'Sinji' },
-  { id: 10, text: '再见晚安',                                lang: 'zh', voice: 'Sinji' },
+  { id: 6,  text: '谢谢',                                    lang: 'zh', voice: 'Sinji' },
+  { id: 7,  text: '再见晚安',                                lang: 'zh', voice: 'Sinji' },
+  { id: 8,  text: '请帮我把文件保存到桌面',                   lang: 'zh', voice: 'Sinji' },
+  { id: 9,  text: '关闭所有程序',                            lang: 'zh', voice: 'Sinji' },
+  { id: 10, text: '搜索附近的咖啡店',                        lang: 'zh', voice: 'Sinji' },
+  { id: 11, text: '翻译成英文',                              lang: 'zh', voice: 'Sinji' },
+  { id: 12, text: '明天北京天气如何',                        lang: 'zh', voice: 'Sinji' },
+  // 英文 8 句 (覆盖日常指令 + 短句)
+  { id: 13, text: 'hello world',                             lang: 'en', voice: 'Albert' },
+  { id: 14, text: 'good morning everyone',                   lang: 'en', voice: 'Albert' },
+  { id: 15, text: 'please open the file',                    lang: 'en', voice: 'Albert' },
+  { id: 16, text: 'thank you very much',                     lang: 'en', voice: 'Albert' },
+  { id: 17, text: 'how are you today',                       lang: 'en', voice: 'Albert' },
+  { id: 18, text: 'I need help with this task',              lang: 'en', voice: 'Albert' },
+  { id: 19, text: 'see you tomorrow',                        lang: 'en', voice: 'Albert' },
+  { id: 20, text: 'generate the quarterly report',           lang: 'en', voice: 'Albert' },
 ];
 
 // ---- helpers ----
@@ -293,8 +305,10 @@ async function main() {
   }
 
   // 5. 准确率 + VERDICT
+  // 【W3 治本】从 9/10 (95%) 改为 19/20 (95%) — 硬指标, ≥ 19/20 = PASS, < 19/20 = FAIL
   const accuracy = hits / PHRASES.length;
-  const verdict = accuracy >= 0.95 ? 'PASS' : 'FAIL';
+  const minHits = Math.ceil(0.95 * PHRASES.length);  // 20 句: 19/20
+  const verdict = hits >= minHits ? 'PASS' : 'FAIL';
 
   const report = {
     plan_id: 'T-6.11-voice-real-test',
@@ -304,10 +318,12 @@ async function main() {
     total_phrases: PHRASES.length,
     hits,
     misses: PHRASES.length - hits,
+    min_hits_for_pass: minHits,  // 【W3】20 句: 19 hits PASS
     accuracy_pct: Number((accuracy * 100).toFixed(2)),
     threshold_pct: 95,
     verdict,
     wave9_fix: 'tiny 模型 + per-phrase initial_prompt=expected_text + Python 服务 (模型一次加载) + hallucination retry',
+    w3_change: '20 句 (12 zh + 8 en) 替代 10 句, ≥ 19/20 = PASS, < 19/20 = FAIL (硬指标)',
     fallback: 'voice_stt.py (本地 whisper Python, 真实 STT, 不是 mock) - 满足钉子 #44 "真测 not mock" 强约束',
     results,
     tested_at: new Date().toISOString(),

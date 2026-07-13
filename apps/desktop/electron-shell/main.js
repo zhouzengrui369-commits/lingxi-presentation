@@ -44,152 +44,6 @@ function resolveRuntimePaths() {
 let mainWindow = null; // T-6.1: 暴露给 IPC handler 拿主窗口
 let w1Daemon = null; // 【W2】daemon instance (W1 接通)
 
-// ---- T-W1: daemon 状态 ----
-let w1Daemon = {
-  proc: null,        // child process
-  port: null,        // port number
-  baseUrl: null,     // http://127.0.0.1:port
-  startedAt: null,   // ISO string
-  lastError: null,   // last error message
-  ready: false,      // bool
-};
-
-function logW1(line) {
-  // main console + IPC 推给 renderer log panel
-  console.log(`[w1] ${line}`);
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send('demo-log', `[w1] ${line}`);
-  }
-}
-
-async function startW1Daemon() {
-  if (w1Daemon.proc) {
-    logW1(`daemon already started on port ${w1Daemon.port}`);
-    return w1Daemon;
-  }
-  const paths = resolveRuntimePaths();
-  const pyCandidates = [
-    '/Users/njx/Project/灵犀演示/.venv-daemon-py312/bin/python3.12',
-    '/opt/homebrew/bin/python3.12',
-    '/opt/homebrew/bin/python3',
-    '/usr/bin/python3',
-  ];
-  const pyBin = pyCandidates.find((p) => fs.existsSync(p));
-  if (!pyBin) {
-    const err = `no python3 binary found in ${pyCandidates.join(', ')}`;
-    logW1(`[FATAL] ${err}`);
-    w1Daemon.lastError = err;
-    return w1Daemon;
-  }
-  logW1(`[setup] python=${pyBin}`);
-  const env = {
-    ...process.env,
-    LINGXI_DAEMON_PORT: '0',
-    PYTHONPATH: paths.repoRoot,
-    PATH: `${paths.desktopDir}/node_modules/.bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${process.env.PATH}`,
-  };
-  logW1(`[0/5] starting daemon...`);
-  const proc = spawn(pyBin, ['-m', 'backend.daemon.server'], {
-    cwd: paths.repoRoot,
-    env,
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  w1Daemon.proc = proc;
-
-  let buf = '';
-  let port = null;
-  await new Promise((resolve) => {
-    const timer = setTimeout(() => resolve(null), 10000);
-    proc.stdout.on('data', (chunk) => {
-      buf += chunk.toString();
-      const lines = buf.split('\n');
-      // PID + PORT 头两行
-      if (lines.length >= 2) {
-        const p = parseInt(lines[1].trim(), 10);
-        if (!isNaN(p) && p > 0) {
-          port = p;
-          clearTimeout(timer);
-          resolve(p);
-        }
-      }
-    });
-    proc.stderr.on('data', (chunk) => {
-      const s = chunk.toString().trim();
-      if (s) logW1(`[daemon] ${s}`);
-    });
-    proc.on('close', (code) => {
-      logW1(`[daemon] process exited code=${code}`);
-      w1Daemon.lastError = `daemon exited code=${code}`;
-      w1Daemon.ready = false;
-    });
-  });
-
-  if (!port) {
-    logW1('[FATAL] daemon failed to start (no port within 10s)');
-    try { proc.kill(); } catch (_) {}
-    w1Daemon.proc = null;
-    w1Daemon.lastError = 'daemon_failed_to_start';
-    return w1Daemon;
-  }
-  w1Daemon.port = port;
-  w1Daemon.baseUrl = `http://127.0.0.1:${port}`;
-  w1Daemon.startedAt = new Date().toISOString();
-  w1Daemon.ready = true;
-  logW1(`[0/5] daemon ready on port ${port} (baseUrl=${w1Daemon.baseUrl})`);
-  return w1Daemon;
-}
-
-async function stopW1Daemon() {
-  if (w1Daemon.proc) {
-    try {
-      w1Daemon.proc.kill();
-    } catch (_) {}
-    w1Daemon.proc = null;
-    w1Daemon.ready = false;
-    w1Daemon.port = null;
-  }
-}
-
-// ---- T-W1: daemon fetch helper ----
-// 统一的 fetch wrapper: 8s timeout + JSON parse + 错误归一化
-async function w1FetchJson(method, path, body) {
-  if (!w1Daemon.ready) {
-    return { ok: false, error: 'daemon_not_ready', error_code: 'E_DAEMON_NOT_READY', last_error: w1Daemon.lastError };
-  }
-  const url = `${w1Daemon.baseUrl}${path}`;
-  const started = Date.now();
-  const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), 30000);  // 30s timeout (大 import/preview 可能慢)
-  try {
-    const r = await fetch(url, {
-      method,
-      headers: { 'content-type': 'application/json' },
-      body: body ? JSON.stringify(body) : undefined,
-      signal: ac.signal,
-    });
-    clearTimeout(timer);
-    const elapsed_ms = Date.now() - started;
-    if (!r.ok) {
-      let errBody = '';
-      try { errBody = await r.text(); } catch (_) {}
-      logW1(`[fetch] ${method} ${path} → HTTP ${r.status} (${elapsed_ms}ms) errBody=${errBody.slice(0, 200)}`);
-      return { ok: false, error: `http_${r.status}`, error_code: `E_HTTP_${r.status}`, latency_ms: elapsed_ms, http_status: r.status, err_body: errBody.slice(0, 500) };
-    }
-    const data = await r.json();
-    logW1(`[fetch] ${method} ${path} → 200 (${elapsed_ms}ms) data_keys=${Object.keys(data).slice(0, 5).join(',')}`);
-    return { ok: true, data, latency_ms: elapsed_ms };
-  } catch (e) {
-    clearTimeout(timer);
-    const elapsed_ms = Date.now() - started;
-    if (e.name === 'AbortError') {
-      logW1(`[fetch] ${method} ${path} → TIMEOUT (${elapsed_ms}ms)`);
-      return { ok: false, error: 'timeout', error_code: 'E_TIMEOUT', latency_ms: elapsed_ms };
-    }
-    logW1(`[fetch] ${method} ${path} → ERROR ${e.message} (${elapsed_ms}ms)`);
-    return { ok: false, error: e.message, error_code: 'E_FETCH', latency_ms: elapsed_ms };
-  }
-}
-
 function createWindow() {
   const paths = resolveRuntimePaths();
 
@@ -555,6 +409,10 @@ app.whenReady().then(async () => {
       setTimeout(() => app.quit(), 2000);
     }
   }
+});
+
+app.on('before-quit', async () => {
+  await stopW1Daemon();
 });
 
 app.on('before-quit', async () => {
