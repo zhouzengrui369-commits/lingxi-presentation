@@ -346,6 +346,27 @@ mavis cron self lingxi-heartbeat \
 - **Windows**：本地路径 `%APPDATA%/灵犀演示/kb/`
 - **双平台共用同一份业务代码**（差异在打包配置 + 路径解析）
 
+### 9.4 钉子 #46 · PM HARD GATE for false-green (2026-07-13 baseline_truth)
+- **触发** (任一即触发):
+  - (a) 任一 producer / worker / agent 报 PASS, 但内容含 `mock` / `fallback` / `partial` / `fakeFetch` / `PIL` / `placeholder` 包装
+  - (b) 退出码 = 0 但返回内容 = mock (如 `hello (mock)`), 退出码与内容真假不一致
+  - (c) 数字与硬指标不一致 (如 4 格式 size 10 次 stddev = 0 但报"波动合理")
+  - (d) 硬编码 `0.96` / `N/A` / `"N/M=100%"` 等伪造指标 (real-runtime-validate voice=0.96 反例)
+- **PM 动作**: 30s 内 1 行命令 verify (e.g. `grep -c 'mock' <log>`, `file <output>`, `ls -la <dir>`), 触发任一 → 拒绝 PASS
+- **WHY**: 2026-07-13 `work/tasks/2026-07-13-lingxi-baseline-acceptance/ACCEPTANCE_REPORT.md` §4.2 + §4.4 + §4.5 暴露 5 处 false-green (full-demo.ts 包装 mock 退出 0 / real-runtime-validate 硬编码 voice / Windows PARTIAL 标 done / H5 严格 77% 标 design-aware 100% / Gate 3 PARTIAL 标 done)
+- **与钉子 #38 (cross-doc audit) 配对**: 钉子 #38 查文档一致性, 钉子 #46 查产品/代码/数据真伪
+- **升级**: 同一 producer 触发 ≥ 2 次 → 弹窗 NJX 拍板 (类似钉子 #24 consecutive_failures)
+
+### 9.5 钉子 #47 · RN Pressable vs Web placeholder (2026-07-13 baseline_truth)
+- **触发**: 任何 "RN 真组件" 验收包含 `<Pressable>` / `<TouchableOpacity>` / `<Text>` 等 RN 标准组件
+- **PM 动作**: 必独立 verify 组件是否真交互 (`grep -c "onPress" <file>` 1:1 配对 Pressable, 不是只渲染文字), 不能仅看代码/截图就认"占位"
+- **WHY**: 2026-07-11 T-7.5 (`work/tasks/.../outputs/T-7.5-t61-real-routes/deliverable.md`) 暴露 RN `<Pressable>` 已存在并配 onPress 1:1 20 处真交互, 但 task spec 基于"Pressable 占位"概念误判为占位 (实际 React.Fragment 不能替代交互组件)
+- **判别准则**:
+  - 真交互: `<Pressable onPress={handler}>` + handler 含业务逻辑 (state 变化 / API 调用 / 路由切换)
+  - 假占位: `<Pressable onPress={() => log('placeholder click')}>` 仅为日志, 无业务流
+  - 纯占位: `<View><Text>...占位...</Text></View>` 无任何 onPress / Touchable
+- **与钉子 #40 (verifier 4 adversarial probes) 配对**: 钉子 #40 真机验证, 钉子 #47 组件语义验证
+
 ---
 
 ## 完成度自检
@@ -359,5 +380,7 @@ mavis cron self lingxi-heartbeat \
 - [x] 工具白名单明确
 - [x] 持续跟踪规则覆盖 3 类任务 + 死循环处理
 - [x] 灵犀演示专属约束（PRD 硬指标 + NJX 拍板）
+- [x] 钉子 #46 PM HARD GATE for false-green (2026-07-13 baseline_truth)
+- [x] 钉子 #47 RN Pressable vs Web placeholder (2026-07-13 baseline_truth)
 
-**✅ 9 项全过 → 进入 delivery.md 起草**
+**✅ 9 项全过 → 进入 delivery.md 起草** (追加 2 钉子不增加自检数, 钉子属 §9 灵犀专属约束的硬约束层)

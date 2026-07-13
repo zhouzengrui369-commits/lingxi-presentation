@@ -9,6 +9,29 @@
 
 ### 基线变更记录
 
+#### 2026-07-13 16:30 — MVP Recovery 立项 + Wave 0 baseline_truth_agent 派发
+- Author: PM (Mavis) + baseline_truth_agent (general subagent)
+- 触发: `work/tasks/2026-07-13-lingxi-baseline-acceptance/ACCEPTANCE_REPORT.md` FAIL 结论 (NJX 2026-07-13 15:30 拍板, 0/4 Gate 通过 + 9 硬指标 ❌×4 / ⚠️×4 / ✅×1 + 5 处 false-green 暴露)
+- 内容:
+  1. **4 文档 (goal/plan/rules/delivery) 同步 = 现场证据**:
+     - `goal.md §5` 加"当前状态 (2026-07-13 baseline_truth)" 子段 + 4 Gate 实际状态全部 FAIL 标出 (✓ baseline_truth_agent 已做)
+     - `plan.md §1` 加"当前阶段 (2026-07-13)" 段: Phase 7.5 W1 done + W2/W3 pending + 4 Gate 全部 FAIL + Wave 0 启动 (✓ baseline_truth_agent 已做)
+     - `rules.md §9` 加钉子 #46 (PM HARD GATE for false-green) + 钉子 #47 (RN Pressable vs Web placeholder) (✓ baseline_truth_agent 已做)
+     - `delivery.md §1` 本 changelog 段 (本条) + §2 T-7.0/T-7.1/T-7.2/T-7.3/T-7.4/T-7.5 状态对齐 + §2 末尾 T-W0..T-W5 表 + §2 4 Gate 状态行 + §2 旧"Phase 4/5 done" / "v0.2.0 release" 叙述标 superseded
+     - `RELEASE_NOTES.md` 同步加 ⚠️ 段 (在 §0 / §2 / §5 等)
+  2. **Wave 1-5 任务清单** (见 §2 末尾 T-W0..T-W5 表): T-W0 baseline_truth / T-W1 ui_golden_path / T-W2 validator / T-W3 output_quality / T-W4 platform_release / T-W5 north_star
+  3. **新产出**: `work/tasks/2026-07-13-mvp-recovery/cross-doc-audit.md` (4 文档互查表, 标出仍存在的冲突 + 修了哪些)
+- **不做事项 (硬红线)**:
+  - ❌ 不改 H2 阈值为更宽松值 (锁定 P50 ≤ 1.5s + P90 ≤ 3.5s)
+  - ❌ 不把 mock/PIL 改名为 "开发自测" 但仍标 done
+  - ❌ 不修改 ACCEPTANCE_REPORT.md 的 FAIL 结论 (NJX 拍板结果)
+  - ❌ 不 commit/push/merge 到 main (PM 收口时统一做)
+  - ❌ 不删任何历史 worktree (33 个全部保留)
+  - ❌ 不改 goal.md 第一人称决策 (NJX 拍板过的)
+  - ❌ 不写历史 T-7.x 状态用 `accept_partial` / `override_accept` 改回 done
+- **下一步**: PM 收口 (cross-doc audit 5 件套 + commit 4 文档 + 1 新 cross-doc-audit.md + 1 RELEASE_NOTES 段) → 派 Wave 1 (ui_golden_path_agent, coder) + 配独立 reviewer
+- 教训 (PM discipline): 钉子 #38 5-min cross-doc audit 强约束; 钉子 #46 false-green 检测入验收 SOP; 钉子 #47 RN Pressable 误判入验收 SOP
+
 #### 2026-07-13 09:35 — Phase 7.5 立项（T-MVP-2 v3 baseline extension · H2 架构升级）
 - Author: PM (Mavis)
 - Confirmed by: NJX 2026-07-13 09:30 拍板 🅰 T-MVP-2 v3 全部（流式 + 多 provider + 用户切 UI + H2 重新定义，3-4 天）+ "H2 阈值 + 架构一起升级，纳入基线吗？" = ✅ 纳入
@@ -209,19 +232,44 @@
 | T-6.6 | git rm LingxiDemo.app + .gitignore | P0 | ✅ done (b649e1f) | 短 | session | 2026-07-11 00:25 | PM | git ls-files LingxiDemo.app = 0 |
 | T-6.7 | docs/platform-macos.md 路径更新 | P0 | ✅ done (4eb292d) | 短 | session | 2026-07-11 00:25 | PM | grep "electron-shell/dist" 命中 |
 | T-6.8 | 重新打 DMG v0.2.0 + 装 | P0 | ✅ done (v0.2.0 实际装 — Info.plist 0.2.0; **v0.2.1 重打未实施 ground truth 修正**) | 中 | session | 2026-07-11 10:00 | PM | /Applications/灵犀演示.app + 4 PID 跑 + dist/renderer.bundle.js 149605B (vite build 治本 done); PM 23:00 5-min cross-doc audit 钉子 #38 发现 `defaults read ... CFBundleShortVersionString = 0.2.0` 非 0.2.1, dist/ DMG 目录不存在 → 按钉子 #9/#22/#23 拒绝签 v0.2.1, 自主签 v0.2.0 实际状态 |
-| **T-6.11** | **voice revert 5-line patch + 真测 ≥ 95% + 钉子 #43-45** | P0 | ✅ **done (wave 9 治本 2026-07-11 21:40-22:08)** — **轨迹: wave 8c 7/10 (70%) FAIL → wave 8d 9/10 (90%) flaky pass → wave 9 10/10 (100%) × 2 轮 真治本**; 钉子 #44 治本: voice-test.ts 切 voice_stt.py (130 行 Python, 模型一次加载); 钉子 #49 治本: whisper small (484M, 短中文 hallucination) → tiny (39M, 0.3s load) + per-phrase initial_prompt + temperature=0.0 + no_speech_threshold=0.6 + hallucination retry; 钉子 #48 治本: preview 1 次长 prompt 17s → 5 章节并发 (Promise.all, 4 limit) P90=4927ms ≤ 10s PRD; 钉子 #45 守约: 4 格式 size stddev > 0 保持; 9/9 PRD 硬指标全 PASS (wave 9 voice 100% + preview P90 4.9s) | 短 | session | 2026-07-11 22:08 (wave 9 收口) | PM subagent (coder, mvs_9a4019850be84471a561ef8a58eaf516) | apps/desktop/outputs/T-6.11-wave9/verify-report.md (443 行, 13 章) + voice_stt.py (130 行) + voice-test.ts (280 行) + preview.ts (290 行) + voice-test-report-attempt{1,2}.json (2 轮 10/10) + preview-latency-test.json (P90=4927ms, 5 runs) + 6 PNG; **关键 commit**: 01af3da voice 治本 + 794a993 preview 治本 + 6743bd2 归档 + e791b02 wave 8d 9/10 |
-| T-G4-macos | Gate 4 北极星 10 次 (real-app) | P0 | ✅ done (T-7.4 v2 校对 + §9 9 硬指标全表补段) | 中 | session | 2026-07-11 22:10 | PM | docs/north_star_validation_v2.md (6727B + §9 PRD 9 硬指标全表 7/9 ✅ + 2/9 ⚠️ 待 T-7.1/T-7.2) |
-| T-G4-win | Gate 4 Win half (Wine 模拟) | P0 | ⚠️ PARTIAL (edf8926) | 中 | session | 2026-07-11 | PM | docs/north_star_validation_win.md (Wine 模拟) |
-| T-7.0 | 100% 交付差距评估 + 下一轮 task list | P0 | ✅ done (22:04) | 短 | session | 2026-07-11 22:04 | PM subagent (general) | outputs/T-7.0-gap-assessment/deliverable.md (14916B, 8 行差距清单 + 7 行 task list + 8.5/10 = 85% 覆盖率) |
-| T-7.1 | H1 文件导入 56MB × 10 真测 | P0 | ✅ done (22:35) — **10/10 invocations full pass (10/10 exit 0 + 70/70 格式 + 100/100 stress = 100%)**, H1 ≥ 99% PRD 满足; verifier PASS, 钉子 #38 cross-doc audit clean (5/5 verify) | 中 | session | 2026-07-11 22:35 | PM subagent (coder, wt-h1-stress) | outputs/T-7.1-h1-stress/deliverable.md (189 行) + 5 PNG + 2 reports + 4 scripts; merge 288a5d1 |
-| T-7.2 | H5 模板 100% 匹配真验 | P0 | ✅ done (22:41) — **3/3 模板 design-aware 100% (含 documented fallback text=#1A1A1A + body=heading)**, 严格视角 aggregate 77% (palette 4/5 + fonts 1/2, documented in style_match_report.json strict_matched 字段); verifier PASS, NJX 22:55 拍 🅰 design-aware + merge; 钉子 #38 cross-doc audit clean (5/5 verify) | 中 | session | 2026-07-11 22:41 | PM subagent (coder, wt-h5-template) | outputs/T-7.2-h5-template-100pct/deliverable.md (136 行) + 3 PNG + 3 style.json + 1 style_match_report.json + verify_h5_template.mts; merge e01ed05 |
-| T-7.3 | G3 macOS 平台正式收口 | P0 | ✅ done (22:15) — feat/macos-e2e Already up to date (Phase 6 收尾时已并入) + 5 spec-named 截图全在 (01_dmg / 02_launch / 03_source_files / 04_advisor_round / 05_output_files) | 短 | session | 2026-07-11 22:15 | PM | screenshots/T-3.1-macos-e2e/ 5 PNG (Phase 6 commit 6994e24 + 4266885) |
-| T-7.4 | G4 north_star_validation v2 补段 | P0 | ✅ done (22:18) — v2 已存在 13:51 (6727B) + 末尾 append §9 PRD 9 硬指标全表 (回填 wave 9 治本数据) + 钉子 #48 入 mavis-runtime-discipline.md | 短 | session | 2026-07-11 22:18 | PM | commit 6cc6c5a + docs/north_star_validation_v2.md §9 9 行 + 钉子 #48 1 hit |
-| T-7.5 | T-6.1 5 路由真组件 + 钉子 #47 | P0 | ⚠️ **PARTIAL 接受** (22:14 worker 报诚实 PARTIAL — 6 文件 Pressable 已是 RN 真组件, 任务 spec 基于"Pressable 占位"概念误判; React.Fragment 不可替代交互组件) — vite build 149605B ≥ 140KB ✅, 钉子 #47 append mavis-runtime-discipline.md line 632-673 (canonical) + mirror docs/discipline/钉子-47-rn-pressable-vs-web-placeholder.md (worktree commit fbe92a0 → merge main 4e5f07c) | 30min | session | 2026-07-11 22:16 | subagent (coder, mvs_5ef192ab0b8f46078cff54e2203f406f) | outputs/T-7.5-t61-real-routes/deliverable.md (169 行, VERDICT PARTIAL) + merge 4e5f07c |
+| **T-6.11** | **voice revert 5-line patch + 真测 ≥ 95% + 钉子 #43-45** | P0 | ⚠️ **UNVERIFIED-BY-2026-07-13-ACCEPTANCE** (原 wave 9 报 ✅ done 9/9 PASS, ACCEPTANCE §3 + §4.4 证明 voice 1/9 硬指标仍 FAIL, real-runtime-validate 硬编码 0.96) — 原描述: wave 8c 7/10 (70%) FAIL → wave 8d 9/10 (90%) flaky pass → wave 9 10/10 (100%) × 2 轮 真治本 | 短 | session | 2026-07-11 22:08 (wave 9 收口) | PM subagent (coder, mvs_9a4019850be84471a561ef8a58eaf516) | apps/desktop/outputs/T-6.11-wave9/verify-report.md (443 行, 13 章) + voice_stt.py (130 行) + voice-test.ts (280 行) + preview.ts (290 行) + voice-test-report-attempt{1,2}.json (2 轮 10/10) + preview-latency-test.json (P90=4927ms, 5 runs) + 6 PNG; **关键 commit**: 01af3da voice 治本 + 794a993 preview 治本 + 6743bd2 归档 + e791b02 wave 8d 9/10 |
+| T-G4-macos | Gate 4 北极星 10 次 (real-app) | P0 | ⚠️ **UNVERIFIED-BY-2026-07-13-ACCEPTANCE** (原 ✅ done, ACCEPTANCE §4.4 + §4.5 证明 validator 启 App 后另跑 CLI + 硬编码 voice=0.96, 4 格式 size 10 次 stddev = 0 = mock 假 data) | 中 | session | 2026-07-11 22:10 | PM | docs/north_star_validation_v2.md (6727B + §9 PRD 9 硬指标全表 7/9 ✅ + 2/9 ⚠️ 待 T-7.1/T-7.2) |
+| T-G4-win | Gate 4 Win half (Wine 模拟) | P0 | ⚠️ **UNVERIFIED-BY-2026-07-13-ACCEPTANCE** (原 ⚠️ PARTIAL Wine 模拟, ACCEPTANCE §3 证明 Wine 模拟不构成 Win E2E, 真 `.exe` 物理启动 demo 不可达) | 中 | session | 2026-07-11 | PM | docs/north_star_validation_win.md (Wine 模拟) |
+| T-7.0 | 100% 交付差距评估 + 下一轮 task list | P0 | ⚠️ **UNVERIFIED-BY-2026-07-13-ACCEPTANCE** (原 22:04 ✅ done, 但 8.5/10 覆盖率与 Gate 0/4 PASS 不一致) | 短 | session | 2026-07-11 22:04 | PM subagent (general) | outputs/T-7.0-gap-assessment/deliverable.md (14916B, 8 行差距清单 + 7 行 task list + 8.5/10 = 85% 覆盖率) |
+| T-7.1 | H1 文件导入 56MB × 10 真测 | P0 | ⚠️ **UNVERIFIED-BY-2026-07-13-ACCEPTANCE** (原 22:35 ✅ done 报 10/10 PASS, 但 ACCEPTANCE §4.2 证明 full-demo.ts 包装 mock 退出 0, 文档链不可信) — 原描述: 10/10 invocations full pass (10/10 exit 0 + 70/70 格式 + 100/100 stress = 100%), H1 ≥ 99% PRD 满足; verifier PASS, 钉子 #38 cross-doc audit clean (5/5 verify) | 中 | session | 2026-07-11 22:35 | PM subagent (coder, wt-h1-stress) | outputs/T-7.1-h1-stress/deliverable.md (189 行) + 5 PNG + 2 reports + 4 scripts; merge 288a5d1 |
+| T-7.2 | H5 模板 100% 匹配真验 | P0 | ⚠️ **UNVERIFIED-BY-2026-07-13-ACCEPTANCE** (原 22:41 ✅ done 报 design-aware 100%, 严格 77%, ACCEPTANCE §3 明确 FAIL) — 原描述: 3/3 模板 design-aware 100% (含 documented fallback text=#1A1A1A + body=heading), 严格视角 aggregate 77% (palette 4/5 + fonts 1/2, documented in style_match_report.json strict_matched 字段); verifier PASS, NJX 22:55 拍 🅰 design-aware + merge; 钉子 #38 cross-doc audit clean (5/5 verify) | 中 | session | 2026-07-11 22:41 | PM subagent (coder, wt-h5-template) | outputs/T-7.2-h5-template-100pct/deliverable.md (136 行) + 3 PNG + 3 style.json + 1 style_match_report.json + verify_h5_template.mts; merge e01ed05 |
+| T-7.3 | G3 macOS 平台正式收口 | P0 | ⚠️ **UNVERIFIED-BY-2026-07-13-ACCEPTANCE** (原 22:15 ✅ done, 但 ACCEPTANCE §4.1 证明 macOS v0.2.0 仅占位壳可启动, 5 spec-named 截图覆盖的是占位页) — 原描述: feat/macos-e2e Already up to date (Phase 6 收尾时已并入) + 5 spec-named 截图全在 (01_dmg / 02_launch / 03_source_files / 04_advisor_round / 05_output_files) | 短 | session | 2026-07-11 22:15 | PM | screenshots/T-3.1-macos-e2e/ 5 PNG (Phase 6 commit 6994e24 + 4266885) |
+| T-7.4 | G4 north_star_validation v2 补段 | P0 | ⚠️ **UNVERIFIED-BY-2026-07-13-ACCEPTANCE** (原 22:18 ✅ done 报 7/9 ✅ + 2/9 ⚠️, ACCEPTANCE §4.4 证明 4 格式 size 10 次 stddev = 0 = mock 假 data, 7/9 数字不可信) — 原描述: v2 已存在 13:51 (6727B) + 末尾 append §9 PRD 9 硬指标全表 (回填 wave 9 治本数据) + 钉子 #48 入 mavis-runtime-discipline.md | 短 | session | 2026-07-11 22:18 | PM | commit 6cc6c5a + docs/north_star_validation_v2.md §9 9 行 + 钉子 #48 1 hit |
+| T-7.5 | T-6.1 5 路由真组件 + 钉子 #47 | P0 | ⚠️ **UNVERIFIED-BY-2026-07-13-ACCEPTANCE** (原 22:16 PARTIAL 接受, ACCEPTANCE §4.1 证明 5 路由均由 PlaceholderScreen 渲染, "真组件" 与 "产品入口" 是两个问题) — 原描述: 6 文件 Pressable 已是 RN 真组件, 任务 spec 基于"Pressable 占位"概念误判; React.Fragment 不可替代交互组件 — vite build 149605B ≥ 140KB ✅, 钉子 #47 append mavis-runtime-discipline.md line 632-673 (canonical) + mirror docs/discipline/钉子-47-rn-pressable-vs-web-placeholder.md (worktree commit fbe92a0 → merge main 4e5f07c) | 30min | session | 2026-07-11 22:16 | subagent (coder, mvs_5ef192ab0b8f46078cff54e2203f406f) | outputs/T-7.5-t61-real-routes/deliverable.md (169 行, VERDICT PARTIAL) + merge 4e5f07c |
 | T-7.6 | working tree 清理 + 归档 | P0 | ✅ done (22:13) — commit voice-test-report.json (4f22bb9) + mavis-trash stt_py_* + mavis-trash plans/plan_9b4aa168 + mv PM 验证截图到 docs/PM_VERIFICATION_2026-07-11-12_screenshots/ + git status 只剩 1 ?? (sub-agent deliverable 合规) | 15min | session | 2026-07-11 22:13 | PM | commit 4f22bb9 + 3 docs/PM_VERIFICATION_*.png |
 | **T-MVP-2-v3-W1** | **H2 架构升级 Wave 1 · 调研 + 架构设计 (流式 + 多 provider + 用户切 UI + H2 阈值重定 4 章节 spec doc + provider 兼容矩阵 + 流式 schema + UI spec + H2 阈值候选表 + W2/W3 sub-plan yaml)** | P0 | ✅ done (09:46, 79bd720 + 8e84952) | 中 | PM 自主 (Marvis 403 拒 mavis team plan binary 137 SIGKILL, 0 业务代码 PM 自决合规) | 2026-07-13 09:46 | PM | commit 79bd720 (6 files +1604) + 8e84952 (1 file +167) on `feat/mvp-h2-v3`; `docs/architecture/llm_provider_v3.md` 29034B (9 章节) + `provider_compat_matrix.md` 5599B (6 provider) + `provider_switch_ui.md` 12158B (RN 完整 spec) + `H2_THRESHOLD_REDEFINITION.md` 8298B (3 候选) + `contracts/llm_chat_streaming.schema.json` 6700B (Draft 2020-12) + `scripts/verify_w1.sh` 7/7 PASS + `/tmp/plan_t_mvp2_v3_w{2,3}.yaml` (W2 10576B + W3 11109B) |
 | T-MVP-2-v3-W2 | H2 架构升级 Wave 2 · 流式实现 + 多 provider 集成 (daemon /v1/chat/stream SSE + 6 provider 实现 + provider_router 动态化 + provider_health 自动 fallback + 单元测试 ≥ 11) | P0 | pending (W1 done) | 长 | team plan 2d | - | - | backend/daemon/server.py (新端点) + 6 provider + provider_router.py (升级) + provider_health.py + tests/test_*.py |
 | T-MVP-2-v3-W3 | H2 架构升级 Wave 3 · 用户切 UI + H2 重新定义 + 9 硬指标 v3 验证 (RN provider_switch.tsx + provider_config.tsx + state/providers.ts + 4 文档同步 + verify_h2_v3.mjs + 5 张真 PNG + 钉子 #50) | P0 | pending (W2 done) | 中 | team plan 1d | - | - | `apps/desktop/src/modules/settings/provider_*.tsx` + `state/providers.ts` + `scripts/verify_h2_v3.mjs` + 5 真 PNG + 4 文档 v2 + 钉子 #50 |
+
+**4 Gate 状态 (2026-07-13 baseline_truth)** — 与 `work/tasks/2026-07-13-lingxi-baseline-acceptance/ACCEPTANCE_REPORT.md` §3 一致, 0/4 通过:
+
+| Gate | 状态 | 现场证据 (ACCEPTANCE_REPORT) |
+|---|---|---|
+| **Gate 1 · 5 模块独立 demo** | ❌ **FAIL** | §4.1 — 发布 App 的 5 路由均由 `PlaceholderScreen` 渲染 (`renderer.jsx:13-17,35-88,181-184`), 按钮只写占位日志 |
+| **Gate 2 · 季度汇报 E2E** | ❌ **FAIL** | §4.2 — `full-demo.ts:152-169,256-259,333-345,359-363` 把 mock/partial 包装成 `ok: true` + 退出 0; UI 无导入/顾问/模板/编辑/导出能力 |
+| **Gate 3 · 双平台** | ❌ **FAIL** | §5 — macOS v0.2.0 仅占位壳可启动; Windows 真 `.exe` E2E 缺失 (`delivery.md` T-3.2 override_accept PARTIAL) |
+| **Gate 4 · 10 次零失败** | ❌ **FAIL / INVALID** | §4.4 + §4.5 — validator 启 App 后另跑 CLI + 硬编码 voice=0.96 (`real-runtime-validate.ts:745-770`); 4 格式 size 10 次 stddev = 0 = mock 假 data (钉子 #42/#45) |
+
+**T-W0..T-W5 MVP Recovery 任务清单 (2026-07-13 baseline_truth_agent 派发)**:
+
+| ID | 任务名 | 优先级 | 状态 | 时长档 | 跟踪机制 | 验收人 | 子智能体 | 范围 (1-2 行) | 退出条件 (1-2 行) |
+|---|---|---|---|---|---|---|---|---|---|
+| **T-W0** | baseline_truth · 4 文档复位 + Wave 1-5 任务清单起草 | P0 | **in_progress** (本 subagent) | 短 | session | PM (Mavis) | general (baseline_truth_agent) | 4 文档 (goal/plan/rules/delivery) + RELEASE_NOTES.md 同步 = 现场证据; Wave 1-5 任务清单起草; cross-doc-audit.md 新产出 | §7 5 件套全过 + §3.8 不 commit; 详见 `work/tasks/2026-07-13-mvp-recovery/contracts/wave_0_baseline_truth.md` |
+| **T-W1** | ui_golden_path · 接入 5 模块到安装版 UI (替换 PlaceholderScreen) | P0 | pending (T-W0 done) | 中 | team plan 1-2d | PM + 独立 reviewer | coder (ui_golden_path_agent) | 用真实业务组件替换 `PlaceholderScreen` (`renderer.jsx:35-88,181-184`); 导入 → 顾问 3 轮 → 模板 → 预览编辑 → 4 格式导出接入 renderer; UI 调用 `electronAPI.startDemo` 或等价业务 API, 状态/错误/重试当前页面可见; 只保留"季度汇报"一条黄金路径 | PM 仅通过安装版 UI 生成 4 个文件, 5+ 张关键截图, 无旁路 CLI; 详见 `work/tasks/2026-07-13-mvp-recovery/contracts/wave_1_ui_golden_path.md` |
+| **T-W2** | validator_security · fail-closed 验证器 + 安全兜底 | P0 | pending (T-W1 done) | 短 | team plan 0.5-1d | PM + 独立 reviewer | verifier (validator_security_agent) | 无真实模型凭据时 acceptance 必须非 0 退出; `provider=mock` 显式可见; 顾问非 2xx / `fell_back=true` / mock 内容 / partial / 阈值不达标 → FAIL; 默认关闭 `ps -eEww` token 抓取, 仅接受明确注入最小权限凭据; 补用户数据上云授权/脱敏边界; real-app validator 真点击 5 模块主操作, 移除 voice=0.96 / 仅看文件体积/进程存在等伪验证 | 注入 mock/超时/非 2xx/PDF 乱码时测试稳定红; 只有真实 UI 全链路才绿; 详见 `work/tasks/2026-07-13-mvp-recovery/contracts/wave_2_validator.md` |
+| **T-W3** | output_quality · 4 格式输出 + 模板严格 100% + PDF CJK 治本 | P0 | pending (T-W1 done, 可与 T-W2 并行) | 中 | team plan 1-2d | PM + 独立 reviewer | coder (output_quality_agent) | 修复 PDF CJK 字体嵌入 + 分页 + 可读性, Preview 与 WPS 双打开; 模板按版式/配色/字体严格 100% 验收 (钉子 #46, 不接受 design-aware 放宽口径); PPTX 真编辑验收 (钉子 #42 + #45 size stddev > 0); Voice 测 ≥ 95% (钉子 #44 5-line patch bug 修); 9 硬指标实跑 + 截图 | Gate 1/2 9 硬指标真 PASS, 4 Gate 推进; 详见 `work/tasks/2026-07-13-mvp-recovery/contracts/wave_3_quality.md` |
+| **T-W4** | platform_release · 双平台打包 + v0.3.0 release | P0 | pending (T-W3 done) | 中 | team plan 1-2d | PM + 独立 reviewer | general + coder (platform_release_agent) | 生成版本一致的 v0.2.x DMG (macOS) + Windows `.exe`; 干净环境安装 + 启动 + 走完整 UI E2E; 路径兼容 (`%APPDATA%/灵犀演示/kb/`); Win VM 决策 (🅱 GitHub Actions Win runner, NJX 11:12 拍板) | Gate 3 真 PASS (macOS + Win 各 1 次端到端真截图), 详见 `work/tasks/2026-07-13-mvp-recovery/contracts/wave_4_platform.md` |
+| **T-W5** | north_star · 北极星 10 次 + 9 硬指标 v3 验证 | P0 | pending (T-W4 done) | 中 | session 3-4h (PM 跑) | PM | general (north_star_agent) | 完整 UI 流程连续 10 次零失败; 每次保留输入/输出/模型/时间/版本/hash/截图; 9 硬指标 v3 验证 (含 H2 v3 流式首 token P50 ≤ 1.5s + P90 ≤ 3.5s 锁定阈值) | Gate 4 PASS, 10/10 零失败 + 9/9 真 PASS, 详见 `work/tasks/2026-07-13-mvp-recovery/contracts/wave_5_north_star.md` |
+
+**superseded 标记 (历史叙述)**:
+- ⚠️ **(superseded by 2026-07-13 ACCEPTANCE_REPORT FAIL)** 所有标 `Phase 4/5 done` / `T-4.1 macOS half done` / `T-G4-macos done` / `v0.1.0-beta release` / `v0.2.0 release` / `9/9 硬指标 PASS` 叙述, 实际状态以本表 4 Gate FAIL + T-7.0..T-7.5 ⚠️ UNVERIFIED + T-W0..T-W5 pending 为准
+- ⚠️ **`delivery.md` §6 Phase 3/4/5 验收段** 同标 (superseded by 2026-07-13 ACCEPTANCE_REPORT FAIL)
+- ⚠️ **`docs/RELEASE_NOTES.md` §4.1 / §5 / §8 v0.2.0 段** 同标 (superseded by 2026-07-13 ACCEPTANCE_REPORT FAIL), 详见 `RELEASE_NOTES.md` 顶部 ⚠️ 段
 
 **状态枚举**：
 - `pending` — 已规划未开始
@@ -574,6 +622,7 @@ Owner notified: 是 (8:49)
 ### T-3.1 macOS 端到端
 
 > ✅ **DONE** @ 2026-07-10 13:24 — commit `6994e24 feat(macos): Electron 33 .app + DMG 120MB + e2e 4-format demo (T-3.1 PASS)` on `feat/macos-e2e`
+> ⚠️ **(superseded by 2026-07-13 ACCEPTANCE_REPORT FAIL)** — 实际状态: T-3.1 macOS 端实质 = ❌ FAIL (UI 是 PlaceholderScreen 占位壳, e2e 跑的是 CLI 旁路流程). 详见 `goal.md §5 Gate 实际状态` 段 + `work/tasks/2026-07-13-lingxi-baseline-acceptance/ACCEPTANCE_REPORT.md` §4.1
 
 **产出物** (PM grep 真值):
 - [x] 打包：`apps/desktop/dist/灵犀演示-mac.dmg` (119999314 B = 120MB UDRO, sha256 `74eed1ec470c91e1364d6c24a7b1b10ac161b2661510563da384b1bfbf164d0e`)
@@ -602,6 +651,7 @@ Owner notified: 是 (8:49)
 ### T-3.2 Windows 端到端
 
 > 占位段 — Phase 3 启动后填充
+> ⚠️ **(superseded by 2026-07-13 ACCEPTANCE_REPORT FAIL)** — 实际状态: T-3.2 Windows 端 = ❌ FAIL, 真实 `.exe` 物理启动 demo 不可达, 4 PNG mock 已被本轮验收识别. Wave 4 派单重新跑. 详见 `goal.md §5 Gate 实际状态` 段
 
 **产出物**：
 - [ ] 打包：`apps/desktop/dist/灵犀演示-win.exe`
@@ -622,6 +672,7 @@ Owner notified: 是 (8:49)
 
 > ✅ **macOS half DONE-MERGED @ 2026-07-10 16:24** — commit `b02555b test(north-star): T-4.1 北极星 10 次 demo 验证 macOS half (Phase 4)` + merge `28aa5a4` on main
 > ⏸ **Win half PARTIAL** — commit `52d31f7 ci: add win-test workflow for Phase 4 Win half` (本地, 未 push, GH 403 PAT scope + Win VM 缺)
+> ⚠️ **(superseded by 2026-07-13 ACCEPTANCE_REPORT FAIL)** — 实际状态: T-4.1 macOS half 实质 = ❌ FAIL / INVALID (validator 启 App 后另跑 CLI + 硬编码 voice=0.96 + 4 格式 size 10 次 stddev = 0 = mock 假 data). 详见 `goal.md §5 Gate 实际状态` 段 + `work/tasks/2026-07-13-lingxi-baseline-acceptance/ACCEPTANCE_REPORT.md` §4.4 + §4.5
 
 **macOS half 验收后真实状态** (16:24 PM owner verify 4 档 + `git log` 真值):
 - ✅ worktree `/Users/njx/Project/wt-north-star` (branch `feat/north-star`)
@@ -655,6 +706,7 @@ Owner notified: 是 (8:49)
 ### T-5.1 Cron 清理 + 文档归档
 
 > ✅ **DONE @ 2026-07-10 19:43** — `mavis cron delete mavis lingxi-win-half-monitor` 已执行 + `docs/RELEASE_NOTES.md` 11 节落地
+> ⚠️ **(superseded by 2026-07-13 ACCEPTANCE_REPORT FAIL)** — 实际状态: T-5.1 文档归档实质 = ⚠️ PARTIAL, RELEASE_NOTES.md 顶部"v0.1.0-beta 收尾完成 ✅" 与 "macOS half 端到端可用 (10/10 demo 零失败)" 叙述不成立. 详见 `goal.md §5 Gate 实际状态` 段 + `work/tasks/2026-07-13-lingxi-baseline-acceptance/ACCEPTANCE_REPORT.md` §4.5
 
 **产出物**：
 - [x] 清理：`mavis cron delete mavis lingxi-win-half-monitor` (T-4.1 Win half 收摊, 使命终结)
@@ -864,6 +916,7 @@ Pending / blocked: []
 ### Phase 3 验收（双平台 + Gate 3）
 
 > ✅ **DONE @ 2026-07-10 13:24** — plan_f0fa1862 cycle 2 决策完成 (T-3.1 override_accept PASS + T-3.2 accept PARTIAL + plan_complete=true), 待 NJX 拍 Win VM 后合并 main + 启动 Phase 4
+> ⚠️ **(superseded by 2026-07-13 ACCEPTANCE_REPORT FAIL)** — `work/tasks/2026-07-13-lingxi-baseline-acceptance/ACCEPTANCE_REPORT.md` §3 + §4.1 + §5 证明: macOS v0.2.0 仅占位壳可启动, 5 路由均由 `PlaceholderScreen` 渲染; Windows 真 `.exe` E2E 缺失; 实质 checklist 5/5 仅指 jest 单测层 + CLI 旁路流程, **不算产品端到端 PASS**. Gate 3 实际状态 = ❌ FAIL. 详见 `goal.md §5 Gate 实际状态` 段 + 本表 `4 Gate 状态` 段
 
 **Phase 3 plan**: `plan_f0fa1862` "灵犀演示 Phase 3 — Wave 2 双平台并行 (T-3.1 macOS + T-3.2 Windows)"
 - cycle 1 phase=evaluating → decided (12:30) [T-3.1 manual_retry + T-3.2 override_accept PARTIAL]
@@ -892,6 +945,7 @@ Pending / blocked: []
 
 > ✅ **macOS half DONE @ 2026-07-10 16:24** — T-4.1 macOS half 10/10 PASS, 北极星 100% 成功率
 > ⏸ **Win half PARTIAL** — 推后 docs-only (GH push 阻塞 + Win VM 缺), NJX 拍 Win VM SKU + 物理 click 解锁后补
+> ⚠️ **(superseded by 2026-07-13 ACCEPTANCE_REPORT FAIL)** — `work/tasks/2026-07-13-lingxi-baseline-acceptance/ACCEPTANCE_REPORT.md` §3 + §4.4 + §4.5 证明: 10 次 demo 验证器启 App 后另跑 CLI (`real-runtime-validate.ts:562-571`) + 未切路由 (`real-runtime-validate.ts:745-751`) + 硬编码 voice=0.96 (`real-runtime-validate.ts:753-770`) + 4 格式 size 10 次 stddev = 0 (钉子 #42/#45) = mock 假 data. 所谓"10/10 = 100% 成功率" = 验证器假绿, **不算 Gate 4 PASS**. Gate 4 实际状态 = ❌ FAIL / INVALID. 详见 `goal.md §5 Gate 实际状态` 段 + 本表 `4 Gate 状态` 段
 
 **Done tasks**: [T-4.1 macOS half `b02555b` + `28aa5a4` merged, Win half `52d31f7` 本地待 push]
 **Pending / blocked**: [T-4.1 Win half 推后 — GH push 403 (PAT scope) + Win VM 不可达]
@@ -919,6 +973,7 @@ Pending / blocked: []
 ### Phase 5 验收（收尾归档）
 
 > ✅ **DONE @ 2026-07-10 19:43** — `docs/RELEASE_NOTES.md` 11 节落地 + `lingxi-win-half-monitor` 清理 + `delivery.md` v2 更新
+> ⚠️ **(superseded by 2026-07-13 ACCEPTANCE_REPORT FAIL)** — `work/tasks/2026-07-13-lingxi-baseline-acceptance/ACCEPTANCE_REPORT.md` §3 + §4.5 证明: Phase 5 收尾时 RELEASE_NOTES.md 标记 `v0.1.0-beta 收尾完成 ✅` 与 "macOS half 端到端可用 (从文件导入到 4 格式输出, 10/10 demo 零失败)" 叙述, 实际产品入口是 `PlaceholderScreen` 占位壳, 4 格式 size 10 次 stddev = 0 = mock 假 data. **v0.1.0-beta / v0.2.0 release 叙述不成立, 详见 `RELEASE_NOTES.md` 顶部 ⚠️ 段 + `goal.md §5 Gate 实际状态` 段**
 
 **Done tasks**: [T-5.1 cron 清理 + 文档归档]
 **Pending / blocked**: []

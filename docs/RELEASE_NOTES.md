@@ -6,6 +6,8 @@
 > 作者: Mavis (PM)
 > 触发: NJX 22:55 拍板 T-7.2 H5 = 🅰 design-aware + merge + Phase 6 v0.2.1 签字 = "PM决定" → PM 自主 4 文档同步 + 4 文档 commit + cron disable + release notes 收口
 
+> ⚠️ **(superseded by 2026-07-13 ACCEPTANCE_REPORT FAIL)** — 2026-07-13 baseline_truth_agent 派发 (`work/tasks/2026-07-13-mvp-recovery/contracts/wave_0_baseline_truth.md`) 重新校准: `work/tasks/2026-07-13-lingxi-baseline-acceptance/ACCEPTANCE_REPORT.md` §3 证明 **4 Gate 全部 FAIL** (Gate 1 ❌ PlaceholderScreen 占位壳 / Gate 2 ❌ full-demo.ts 包装 mock 退出 0 / Gate 3 ❌ macOS 占位壳 + Win 无真 .exe / Gate 4 ❌ validator 假绿 + 4 格式 size stddev = 0), 9 硬指标实跑结果: H1/H3/H4/H8 ⚠️ UNVERIFIED + H2/H5/H6/H9 ❌ FAIL + H7 ✅. **v0.2.0 实际状态 = ⚠️ 不可发布** (NJX 拍板结果, 不可改). 详见 `goal.md §5 Gate 实际状态` 段 + `delivery.md` §2 `4 Gate 状态` 段 + T-W0..T-W5 MVP Recovery 任务清单. Wave 1-5 任务清单见 `delivery.md` §2 末尾表 (T-W1 ui_golden_path / T-W2 validator / T-W3 output_quality / T-W4 platform_release / T-W5 north_star)
+
 ---
 
 ## 1. 项目概览

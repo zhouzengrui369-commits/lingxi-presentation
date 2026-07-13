@@ -72,12 +72,32 @@
 - PPTX 可编辑（Office/WPS 真截图，10 次）
 - PDF 无格式错乱（图片/字体/版式正常，10 次）
 
+**当前状态 (2026-07-13 baseline_truth)** — 9 硬指标实跑结果（来源 `work/tasks/2026-07-13-lingxi-baseline-acceptance/ACCEPTANCE_REPORT.md` §3 + §4.1-§4.5 现场证据 + `commands.log` 隔离 probe）：
+- H1 文件导入 ≥ 99%: ⚠️ **UNVERIFIED-BY-2026-07-13-ACCEPTANCE**. T-7.1 报 10/10 PASS, 但 ACCEPTANCE 现场发现 T-6.3 文档链仍依赖 mock + fallback 包装, **本轮验收不认可, 需 Wave 1 重测**
+- H2 v3 流式首 token P50 ≤ 1.5s / P90 ≤ 3.5s: ❌ **未达 / NOT MEASURED**. 当前实测 0.001-0.005ms 来自 `hello (mock)`, 无性能意义. 隔离 probe (`backend/daemon/providers/api_provider.py:15,156,288-291`) 验证 daemon 无 key 时静默返回 mock, T-MVP-2-v3 W2/W3 仍 pending. **阈值锁定不变 (P50 ≤ 1.5s + P90 ≤ 3.5s, NJX 11:12 拍板)**
+- H3 HTML 预览 ≤ 10s: ⚠️ **UNVERIFIED-BY-2026-07-13-ACCEPTANCE**. wave 9 报 P90=4.9s, 但本轮未独立 verify (T-7.4 补 v2, 但 v2 本身基于未独立 verify 数据)
+- H4 顾问 ≥ 90% 选项: ⚠️ **UNVERIFIED-BY-2026-07-13-ACCEPTANCE**. T-1.2 报 22/23 = 95.65%, 本轮未独立 verify
+- H5 模板 100%: ❌ **未达严格 100%**. 严格 aggregate = 77% (palette 4/5 + fonts 1/2, `delivery.md:216-217`), NJX 2026-07-11 22:55 拍 design-aware = 100% (放宽口径), **本轮验收不认可放宽**
+- H6 voice ≥ 95%: ❌ **未达 / INVALID**. T-6.11 wave 9 报 10/10 = 100%, 但 T-6.3 文档链 (`real-runtime-validate.ts:753-770`) 证明 real-app validator 直接赋值 0.96 + pool size 0, **不是测量结果**. wave 8c 70% + wave 8d 90% + 钉子 #44 voice-gate 5-line patch 仍未达 95%
+- H7 内存 ≤ 8G: ✅ T-6.3 报 71MB, 本轮 verify OK
+- H8 PPTX 可编辑 (10 次): ⚠️ **UNVERIFIED-BY-2026-07-13-ACCEPTANCE**. T-6.3 报 10/10, 但 ACCEPTANCE §5 指出"WPS 进程能打开 PPTX" 不能算 "PPTX 可编辑" 证据, **本轮未通过编辑验收**
+- H9 PDF 无乱码 (10 次): ❌ **未达**. 本轮 PDF 现场乱码 + 大面积空白 (`ACCEPTANCE_REPORT.md` §4.3 + `screenshots/08-09`), 独立 Poppler 渲染 (`pdftoppm`) 确认首页 CJK 标题乱码 + 后续空白 + 第 2 页仍可见 `hello (mock)`. `delivery.md:493-506` 自承 CJK 字体为已知问题, 仍勾选 .pdf 无格式错乱 — **与本硬指标直接冲突**
+
+**9/9 状态汇总**: ✅ × 1 (H7) + ⚠️ × 4 (H1/H3/H4/H8) + ❌ × 4 (H2/H5/H6/H9). **北极星未达 = Gate 4 FAIL**. **4 Gate (Gate 1/2/3/4) 全部 FAIL**, 详见 `work/tasks/2026-07-13-lingxi-baseline-acceptance/ACCEPTANCE_REPORT.md` §3.
+
 **质量门卡**（不是按时间，是按质量）：
 - **Gate 1**：5 大模块各自单模块 demo 跑通（独立验收）
 - **Gate 2**：5 模块串成端到端 demo（季度汇报场景一次走通）
 - **Gate 3**：macOS + Win 双平台端到端各跑 1 次（双 sub-agent 并行验收）
 - **Gate 4**：连续 10 次季度汇报 demo 零失败（北极星验证）
 - **任一 Gate 不过 = 不进下一阶段**（NJX 拍板"质量优先"的硬底线）
+
+**Gate 实际状态 (2026-07-13 baseline_truth)**:
+- **Gate 1 ❌ FAIL**: 五模块独立 demo 仅 jest 单测层 PASS, 实际 `PlaceholderScreen` 渲染 (`renderer.jsx:13-17,35-88,181-184`), 用户无法触发真实业务. ACCEPTANCE §4.1 直接否决
+- **Gate 2 ❌ FAIL**: UI 无导入/顾问问答/模板选择/编辑/导出能力, CLI 是旁路流程, 不算产品端到端. ACCEPTANCE §4.2 证明 `full-demo.ts:152-169,256-259,333-345,359-363` 把 mock/partial 包装成 `ok: true` + 退出 0
+- **Gate 3 ❌ FAIL**: macOS v0.2.0 仅占位壳可启动, Windows 真 `.exe` E2E 缺失 (`delivery.md` T-3.2 override_accept PARTIAL). ACCEPTANCE §5 实测
+- **Gate 4 ❌ FAIL / INVALID**: 10 次 demo validator 启 App 后另跑 CLI + 未切路由 (`real-runtime-validate.ts:745-751`) + 硬编码 voice=0.96 (`real-runtime-validate.ts:753-770`), 证据无效. 4 格式 size 10 次 stddev = 0 = mock 假 data (钉子 #42/#45)
+- **0/4 Gate 通过** (来源: `ACCEPTANCE_REPORT.md` §3 表). **任何 Gate 失败 = 不进下一阶段** — 当前 Phase 4/5 叙述不成立, 详见 `delivery.md` 2026-07-13 16:30 changelog 段 + §3.6 标 superseded 段
 
 ---
 
@@ -152,6 +172,28 @@
 ---
 
 ## Changelog
+
+### 2026-07-13 16:30 — baseline_truth 复位（4 文档 = 现场证据）
+
+- Author: PM (Mavis) + baseline_truth_agent (general subagent)
+- 触发: `work/tasks/2026-07-13-lingxi-baseline-acceptance/ACCEPTANCE_REPORT.md` FAIL 结论 (NJX 拍板, 2026-07-13 15:30) + 派发 `wave_0_baseline_truth` 任务合同
+- 范围: **4 文档 (goal/plan/rules/delivery) + RELEASE_NOTES.md** — 同步对齐 9 硬指标当前真值 + 4 Gate 实际状态 (0/4 PASS) + Wave 1-5 任务清单
+- **不改阈值数字**: H2 阈值 P50 ≤ 1.5s + P90 ≤ 3.5s 锁定值保留 (NJX 11:12 拍板不可改)
+- **不改历史签字**: 不修改 ACCEPTANCE_REPORT.md 的 FAIL 结论 (NJX 拍板结果), 不动历史 T-7.x 状态, 不删任何 worktree
+- **新增状态段**:
+  - `goal.md §5` 加"当前状态 (2026-07-13 baseline_truth)" 子段: 9 硬指标实跑结果 ✅×1 / ⚠️×4 / ❌×4
+  - `goal.md §5 Gate 实际状态`: Gate 1/2/3/4 全部 FAIL 标出
+  - `plan.md §1` 加"当前阶段 (2026-07-13)" 段: Phase 7.5 W1 done + W2/W3 pending + Wave 0 启动
+  - `rules.md §9` 加钉子 #46 (PM HARD GATE for false-green) + 钉子 #47 (RN Pressable vs Web placeholder)
+  - `delivery.md §1 changelog` 2026-07-13 16:30 段: MVP Recovery 立项 + Wave 0 baseline_truth_agent 派发
+  - `delivery.md §2` T-7.0/T-7.1/T-7.2/T-7.3/T-7.4/T-7.5 状态对齐 ACCEPTANCE 验收 (不沿用历史 ✅ done 标签, 标 ⚠️ UNVERIFIED-BY-2026-07-13-ACCEPTANCE)
+  - `delivery.md §2` 末尾加新表 T-W0..T-W5 MVP Recovery 任务清单
+  - `delivery.md §2` 加 4 Gate 状态行: Gate 1-4 = FAIL
+  - `delivery.md §2` 旧"Phase 4/5 done" / "v0.2.0 release" 叙述加 (superseded by 2026-07-13 ACCEPTANCE_REPORT FAIL) 标记
+  - `RELEASE_NOTES.md` 同步加 ⚠️ 段
+- **新产出**: `work/tasks/2026-07-13-mvp-recovery/cross-doc-audit.md` (4 文档互查表, 标出仍存在的冲突 + 修了哪些)
+- **不 commit**: PM 收口时统一 1 commit (4 文档 + 1 新 cross-doc-audit.md + 1 RELEASE_NOTES 段), 本 Wave 0 subagent 不 push
+- 下一步: PM 收口 (cross-doc audit 5 件套 + commit) → 派 Wave 1 (ui_golden_path_agent, coder) + 配独立 reviewer
 
 ### 2026-07-13 11:12 — H2 v3 阈值锁定 + Win VM = 🅱 GitHub Actions Win runner
 - Author: PM (Mavis)

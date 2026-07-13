@@ -23,6 +23,18 @@ Phase 4: 北极星验证 (Gate 4) — 连续 10 次季度汇报 demo 零失败
 Phase 5: 交付 + 收尾（cron 清理 + 文档归档）
 ```
 
+**当前阶段 (2026-07-13 baseline_truth)**:
+- **所处**: Phase 7.5 (T-MVP-2 v3 baseline extension, W1 done 2026-07-13 09:46 / commit 8e84952)
+- **W2/W3 pending**: H2 架构升级 (流式 + 多 provider + 用户切 UI + H2 重新定义) 的 W2 (流式实现 + 多 provider 集成) 与 W3 (UI + 阈值 + 验证) 均未启动
+- **4 Gate 全部 FAIL** (2026-07-13 baseline 验收结果, 与 `work/tasks/2026-07-13-lingxi-baseline-acceptance/ACCEPTANCE_REPORT.md` §3 一致):
+  - Gate 1 ❌ FAIL — 五模块独立 demo 仅 jest 单测层 PASS, UI 端是 `PlaceholderScreen` 占位壳 (`renderer.jsx:13-17,35-88,181-184`)
+  - Gate 2 ❌ FAIL — UI 无导入/顾问问答/模板选择/编辑/导出能力, CLI 旁路流程被 `full-demo.ts:152-169,256-259,333-345,359-363` 包装成 `ok: true` + 退出 0
+  - Gate 3 ❌ FAIL — macOS v0.2.0 仅占位壳可启动, Windows 真 `.exe` E2E 缺失 (T-3.2 override_accept PARTIAL)
+  - Gate 4 ❌ FAIL / INVALID — 10 次 demo 验证器启 App 后另跑 CLI + 硬编码 voice=0.96 (`real-runtime-validate.ts:745-770`), 4 格式 size 10 次 stddev = 0 = mock 假 data (钉子 #42/#45)
+- **Wave 0 启动** (mvp-recovery 2026-07-13 16:30): baseline_truth_agent 派发 → 4 文档复位 + Wave 1-5 任务清单起草
+- **历史叙述**: "当前 Phase 0" 是 Phase 0 立项时的旧叙述 (2026-07-09), 不再准确. 详见 `delivery.md` §1 2026-07-13 16:30 changelog 段 + §2 末尾 T-W0..T-W5 表 + §3.6 superseded 段
+- **下一步**: Wave 1 (ui_golden_path_agent, coder) + 配独立 reviewer → 接入五模块到安装版 UI, 让用户从产品入口完成季度汇报端到端 (Wave 1 退出条件详见 `delivery.md` §2 T-W1 行)
+
 | Phase | 起止 | 任务数 | 并行度 | 出口标准 |
 |---|---|---|---|---|
 | Phase 0 | 2026-07-09 ~ | 4 个文档起草 | PM 串行 | owner 弹窗签字 |
