@@ -181,11 +181,22 @@ export function parseArgs(argv: string[]): CliArgs {
       out[k] = v;
     }
   }
-  let mode: CliArgs['mode'] = 'harness';
-  if (out['w2-failclosed'] === 'true') mode = 'w2-failclosed';
-  else if (out['real-app'] === 'true') mode = 'real-app';
+  // 【Wave 4 改默认】从 'harness' 改 'real-cli' — harness 是 mock 路径, 默认走会假绿
+  // NJX 拍板: 默认走 real-cli (真活路径), harness 需显式 --harness
+  let mode: CliArgs['mode'] = 'real-cli';
+  if (out['real-app'] === 'true') mode = 'real-app';
   else if (out['real-cli'] === 'true') mode = 'real-cli';
-  else if (out.harness === 'true' || !out['real-app'] && !out['real-cli'] && !out['w2-failclosed']) mode = 'harness';
+  else if (out.harness === 'true') {
+    // 用户显式 --harness → 走 harness (mock 路径, 仅开发)
+    mode = 'harness';
+  }
+
+  // 【Wave 4】harness mode 显式 warning (开发模式, 非生产验证)
+  if (mode === 'harness') {
+    console.warn('⚠️  harness mode is for development only, NOT for production verification');
+    console.warn('   9 指标全走 mock 路径, voice 硬编码 0.96, 不 spawn 任何 subprocess');
+    console.warn('   生产验证请用 --real-cli (默认) 或 --real-app');
+  }
 
   return {
     mode,
