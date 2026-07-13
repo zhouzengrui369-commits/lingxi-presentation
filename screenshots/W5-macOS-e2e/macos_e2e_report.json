@@ -1,0 +1,17 @@
+{
+  "task": "灵犀演示 macOS 真 E2E — Wave 5 §5.3",
+  "generated_at": "2026-07-13T23:56:42Z",
+  "worktree": "/Users/njx/Project/wt-mvp-recovery-w5",
+  "app_path": "/Applications/灵犀演示.app",
+  "app_version": "0.2.0",
+  "counts": {
+    "pass": 28,
+    "fail": 1,
+    "skip": 0,
+    "defer": 1,
+    "total": 30
+  },
+  "verdict": "FAIL",
+  "screenshots_dir": "/Users/njx/Project/wt-mvp-recovery-w5/screenshots/W5-macOS-e2e",
+  "daemon_log": "/tmp/lingxi_w5_daemon.log"
+}
