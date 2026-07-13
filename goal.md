@@ -63,7 +63,7 @@
 
 **辅助指标**（PRD 9 硬指标 · 对齐 phase6_plan T-6.3 line 130-139）：
 - HTML 预览生成延迟 ≤ 10s（PRD 硬指标）
-- AI 交互响应延迟 ≤ 3s avg / ≤ 5s max（PRD 硬指标）
+- AI 交互响应延迟（**v3 流式升级，NJX 2026-07-13 11:12 拍板**）= **流式首 token P50 ≤ 1.5s + P90 ≤ 3.5s**（旧：full response avg ≤ 3s / max ≤ 5s，流式后改为首 token 计时，业内 Anthropic/OpenAI 流式 P50 600-1200ms，NJX 选"宽松"档）
 - 文件导入成功率 ≥ 99%（PRD 硬指标）
 - 顾问式交互 ≥ 90% 提问带可选项（PRD 硬指标）
 - 模板导入后生成内容 100% 匹配模板版式/配色/字体（PRD 硬指标）
@@ -152,6 +152,27 @@
 ---
 
 ## Changelog
+
+### 2026-07-13 11:12 — H2 v3 阈值锁定 + Win VM = 🅱 GitHub Actions Win runner
+- Author: PM (Mavis)
+- Confirmed by: NJX 2026-07-13 11:12 拍板 (弹窗 reply 2 项)
+- 拍板内容:
+  - **H2 阈值锁定**: 流式首 token **P50 ≤ 1.5s + P90 ≤ 3.5s**（NJX 选"宽松"档，对比候选 P50 ≤ 1.2s / P90 ≤ 3s；流式架构下首 token 才是用户感知延迟，full response 计时无意义）
+  - **Win VM 方案**: 🅱 **GitHub Actions Win runner**（从 docs/platform-windows-vm-options.md 4 选 1 锁定，解 T-3.2 PARTIAL pending；用现有 `.github/workflows/win-test.yml` 跑 `windows-latest` runner 出 `.exe` + 跑 e2e）
+- 基线影响:
+  - `goal.md §5 辅助指标`: H2 指标改写（"AI 交互响应延迟 ≤ 3s avg / ≤ 5s max" → "流式首 token P50 ≤ 1.5s + P90 ≤ 3.5s"）
+  - `plan.md §2 T-1.2 验收`: H2 指标同步
+  - `plan.md §2 T-3.2`: 分配给 sub-agent-windows 段加 Win VM = 🅱 GitHub Actions Win runner 标注
+  - `plan.md §2 T-4.1 验收`: H2 指标同步
+  - `plan.md §5 风险表`: Win VM 风险行加 "已拍 🅱 GitHub Actions Win runner (2026-07-13 11:12)"
+  - `phase7_v3_mvp_h2_v3_plan.md §5`: H2 阈值候选变锁定值
+- PM 自主派发: 3 文档同步编辑 + 准备 W1 subagent 补 prompt（H2 候选值变锁定值）+ 不重启 Phase 3/4 Win half（sprint 仍是 Phase 7.5）
+- 教训:
+  - 钉子 #5 PRD 级 >30min 拆 ≤3 wave：H2 阈值属于 Phase 7.5 Gate 6 必拍项，PM 自主落基线不弹 NJX
+  - 钉子 #39 NJX 临时拍板让 PM 反思基线：H2 阈值 / Win VM 拍板都从 30s grep goal.md 验证范围，**无冲突**（H2 = Phase 7.5 Gate 6 必拍，Win VM = 解 T-3.2 PARTIAL pending），PM 自主落基线
+  - 钉子 #25 path precision: 拍板值精确到具体 P50/P90 数字 + 标注"宽松"档，避免基线歧义
+- 北极星对齐: 仍为"季度汇报 PPT 端到端 demo 100% 成功率"（H2 阈值升级 = 手段，不是目的）
+- 下一步: 弹窗 1 步问 NJX Win half 重启时机（不立即派 Win half / 立即派 / 暂缓到 7/16 Phase 7.5 收口后）
 
 ### 2026-07-13 09:35 — Phase 7.5 基线扩展（T-MVP-2 v3 · H2 架构升级）
 - Author: PM (Mavis)
