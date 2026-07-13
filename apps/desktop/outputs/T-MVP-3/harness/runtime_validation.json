@@ -1,0 +1,104 @@
+{
+  "plan_id": "T-6.3-runtime-validation",
+  "mode": "harness",
+  "generated_at": "2026-07-13T00:48:17.739Z",
+  "overall_verdict": "PASS",
+  "success_count": 3,
+  "total_runs": 3,
+  "nine_gates": [
+    {
+      "index": 1,
+      "name": "文件导入成功率",
+      "threshold_desc": "≥ 99%",
+      "pass": true,
+      "observed": 1,
+      "unit": "ratio",
+      "detail": "100.00%"
+    },
+    {
+      "index": 2,
+      "name": "AI 响应延迟",
+      "threshold_desc": "avg ≤ 3s, max ≤ 5s",
+      "pass": true,
+      "observed": 320,
+      "unit": "ms",
+      "detail": "avg=320ms, max=380ms"
+    },
+    {
+      "index": 3,
+      "name": "HTML 预览延迟",
+      "threshold_desc": "avg ≤ 10s, max ≤ 15s",
+      "pass": true,
+      "observed": 1400,
+      "unit": "ms",
+      "detail": "avg=1400ms, max=1600ms"
+    },
+    {
+      "index": 4,
+      "name": "顾问带选项比例",
+      "threshold_desc": "≥ 90%",
+      "pass": true,
+      "observed": 1,
+      "unit": "ratio",
+      "detail": "100.00%"
+    },
+    {
+      "index": 5,
+      "name": "模板匹配度",
+      "threshold_desc": "100% (builtin_business_dark)",
+      "pass": true,
+      "observed": 1,
+      "unit": "ratio",
+      "detail": "100.00% template_id=builtin_business_dark"
+    },
+    {
+      "index": 6,
+      "name": "voice 准确率",
+      "threshold_desc": "avg ≥ 95% (mock 录音池)",
+      "pass": true,
+      "observed": 0.968,
+      "unit": "ratio",
+      "detail": "avg=96.80% min=96.40% pool_size=10"
+    },
+    {
+      "index": 7,
+      "name": "资源占用",
+      "threshold_desc": "max ≤ 8G",
+      "pass": true,
+      "observed": 504,
+      "unit": "MB",
+      "detail": "max=504MB"
+    },
+    {
+      "index": 8,
+      "name": "PPTX 可编辑",
+      "threshold_desc": "WPS 截图全部可编辑",
+      "pass": true,
+      "observed": 3,
+      "unit": "count",
+      "detail": "3/3 runs"
+    },
+    {
+      "index": 9,
+      "name": "PDF 无格式错乱",
+      "threshold_desc": "Preview 11 pages 全部 OK",
+      "pass": true,
+      "observed": 3,
+      "unit": "count",
+      "detail": "3/3 runs"
+    }
+  ],
+  "aggregate": {
+    "import_success_rate_avg": 1,
+    "ai_latency_avg_ms": 320,
+    "ai_latency_max_ms": 380,
+    "html_preview_avg_ms": 1400,
+    "html_preview_max_ms": 1600,
+    "advisor_option_ratio_avg": 1,
+    "template_match_rate_avg": 1,
+    "voice_accuracy_avg": 0.968,
+    "memory_peak_max_mb": 504,
+    "pptx_editable_count": 3,
+    "pdf_no_garbled_count": 3
+  }
+}

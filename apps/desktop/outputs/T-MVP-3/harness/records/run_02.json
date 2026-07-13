@@ -1,0 +1,104 @@
+{
+  "run_num": 2,
+  "started_at": "2026-07-13T00:48:17.632Z",
+  "finished_at": "2026-07-13T00:48:17.683Z",
+  "total_duration_ms": 51,
+  "mode": "harness",
+  "import_success_rate": 1,
+  "import_total": 5,
+  "import_failed": 0,
+  "ai_latency_ms": 320,
+  "html_preview_latency_ms": 1400,
+  "advisor_option_ratio": 1,
+  "template_match_rate": 1,
+  "template_id": "builtin_business_dark",
+  "voice_accuracy": 0.968,
+  "voice_pool_size": 10,
+  "memory_peak_mb": 496,
+  "pptx_editable": true,
+  "pdf_no_garbled": true,
+  "gates": [
+    {
+      "index": 1,
+      "name": "文件导入成功率",
+      "threshold_desc": "≥ 99%",
+      "pass": true,
+      "observed": 1,
+      "unit": "ratio",
+      "detail": "100.00%"
+    },
+    {
+      "index": 2,
+      "name": "AI 响应延迟",
+      "threshold_desc": "avg ≤ 3s, max ≤ 5s",
+      "pass": true,
+      "observed": 320,
+      "unit": "ms",
+      "detail": "avg=320ms, max=320ms"
+    },
+    {
+      "index": 3,
+      "name": "HTML 预览延迟",
+      "threshold_desc": "avg ≤ 10s, max ≤ 15s",
+      "pass": true,
+      "observed": 1400,
+      "unit": "ms",
+      "detail": "avg=1400ms, max=1400ms"
+    },
+    {
+      "index": 4,
+      "name": "顾问带选项比例",
+      "threshold_desc": "≥ 90%",
+      "pass": true,
+      "observed": 1,
+      "unit": "ratio",
+      "detail": "100.00%"
+    },
+    {
+      "index": 5,
+      "name": "模板匹配度",
+      "threshold_desc": "100% (builtin_business_dark)",
+      "pass": true,
+      "observed": 1,
+      "unit": "ratio",
+      "detail": "100.00% template_id=builtin_business_dark"
+    },
+    {
+      "index": 6,
+      "name": "voice 准确率",
+      "threshold_desc": "avg ≥ 95% (mock 录音池)",
+      "pass": true,
+      "observed": 0.968,
+      "unit": "ratio",
+      "detail": "avg=96.80% min=96.80% pool_size=10"
+    },
+    {
+      "index": 7,
+      "name": "资源占用",
+      "threshold_desc": "max ≤ 8G",
+      "pass": true,
+      "observed": 496,
+      "unit": "MB",
+      "detail": "max=496MB"
+    },
+    {
+      "index": 8,
+      "name": "PPTX 可编辑",
+      "threshold_desc": "WPS 截图全部可编辑",
+      "pass": true,
+      "observed": 1,
+      "unit": "count",
+      "detail": "1/1 runs"
+    },
+    {
+      "index": 9,
+      "name": "PDF 无格式错乱",
+      "threshold_desc": "Preview 11 pages 全部 OK",
+      "pass": true,
+      "observed": 1,
+      "unit": "count",
+      "detail": "1/1 runs"
+    }
+  ],
+  "overall_pass": true
+}
