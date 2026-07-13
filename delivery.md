@@ -7,7 +7,34 @@
 
 ## 1. Changelog
 
-### PM ↔ Owner 弹窗记录（2026-07-09 立项阶段）
+### 基线变更记录
+
+#### 2026-07-13 09:35 — Phase 7.5 立项（T-MVP-2 v3 baseline extension · H2 架构升级）
+- Author: PM (Mavis)
+- Confirmed by: NJX 2026-07-13 09:30 拍板 🅰 T-MVP-2 v3 全部（流式 + 多 provider + 用户切 UI + H2 重新定义，3-4 天）+ "H2 阈值 + 架构一起升级，纳入基线吗？" = ✅ 纳入
+- 触发链: H2 真 LLM 延迟 avg=7259ms / max=9297ms（超阈 2.4x/1.9x）→ 4 选 1 弹窗 → NJX 9:30 选 🅰 纳入基线
+- 内容:
+  1. **`phase7_v3_mvp_h2_v3_plan.md` 新建** — Phase 7.5 阶段总览 + 3 wave (W1 调研+设计 / W2 流式+多 provider / W3 UI+阈值+验证) + 依赖图 + 6 风险 + Gate 6 验收门卡 + 时间线 + Changelog
+  2. **T-MVP-2-v3-W1 派发** — worktree `feat/mvp-h2-v3`, 30min PM cap, 1-2h subagent 实际, 6 件套验收 (ls + wc + grep + validate + sub-plan yaml + 0 行代码改动 verify)
+  3. **goal.md changelog 同步** — 记录基线扩展决策 + 9:30 弹窗答案
+  4. **钉子 #50 准备** — W3 收口时 append mavis-runtime-discipline.md (provider 切换最佳实践 + 流式架构经验)
+- 教训 (PM discipline):
+  - 钉子 #5 PRD 级 >30min 拆 ≤3 wave × ≤30min cap — 3-4 天拆 W1/W2/W3
+  - 钉子 #14 worktree 隔离 — 3 wave 各独立 worktree (feat/mvp-h2-v3-w{1,2,3})
+  - 钉子 #22 worktree fresh install — 钉子入 prompt 头部
+  - 钉子 #23 producer self-declare audit — W1 验收时跑 5-min cross-doc audit
+  - 钉子 #25 path precision — W2 禁 hardcode API key, 走 .env
+  - 钉子 #27 PM 引用 worker 数字必自 grep — 验收 6 件套 (ls + wc + grep + validate)
+  - 钉子 #38 5-min cross-doc audit — W1/W2/W3 done 后必跑
+  - §0.6.6 PM 自主派发基线对应项 — 不弹 NJX "what's next"
+- 下一步: 写 `/tmp/plan_t_mvp2_v3_w1.yaml` + `mavis team plan run` 派 W1 subagent
+
+#### 2026-07-09 08:35 — goal.md 批准
+- Author: PM
+- Confirmed by: NJX
+- 内容：4 项核心决策 + 8 条不做 + 4 个质量 Gate + 8 个风险
+
+#### 2026-07-09 08:45 — plan.md 批准
 
 | 时间 | 弹窗 | 场景 | owner 决策 |
 |---|---|---|---|
@@ -192,6 +219,9 @@
 | T-7.4 | G4 north_star_validation v2 补段 | P0 | ✅ done (22:18) — v2 已存在 13:51 (6727B) + 末尾 append §9 PRD 9 硬指标全表 (回填 wave 9 治本数据) + 钉子 #48 入 mavis-runtime-discipline.md | 短 | session | 2026-07-11 22:18 | PM | commit 6cc6c5a + docs/north_star_validation_v2.md §9 9 行 + 钉子 #48 1 hit |
 | T-7.5 | T-6.1 5 路由真组件 + 钉子 #47 | P0 | ⚠️ **PARTIAL 接受** (22:14 worker 报诚实 PARTIAL — 6 文件 Pressable 已是 RN 真组件, 任务 spec 基于"Pressable 占位"概念误判; React.Fragment 不可替代交互组件) — vite build 149605B ≥ 140KB ✅, 钉子 #47 append mavis-runtime-discipline.md line 632-673 (canonical) + mirror docs/discipline/钉子-47-rn-pressable-vs-web-placeholder.md (worktree commit fbe92a0 → merge main 4e5f07c) | 30min | session | 2026-07-11 22:16 | subagent (coder, mvs_5ef192ab0b8f46078cff54e2203f406f) | outputs/T-7.5-t61-real-routes/deliverable.md (169 行, VERDICT PARTIAL) + merge 4e5f07c |
 | T-7.6 | working tree 清理 + 归档 | P0 | ✅ done (22:13) — commit voice-test-report.json (4f22bb9) + mavis-trash stt_py_* + mavis-trash plans/plan_9b4aa168 + mv PM 验证截图到 docs/PM_VERIFICATION_2026-07-11-12_screenshots/ + git status 只剩 1 ?? (sub-agent deliverable 合规) | 15min | session | 2026-07-11 22:13 | PM | commit 4f22bb9 + 3 docs/PM_VERIFICATION_*.png |
+| **T-MVP-2-v3-W1** | **H2 架构升级 Wave 1 · 调研 + 架构设计 (流式 + 多 provider + 用户切 UI + H2 阈值重定 4 章节 spec doc + provider 兼容矩阵 + 流式 schema + UI spec + H2 阈值候选表 + W2/W3 sub-plan yaml)** | P0 | ✅ done (09:46, 79bd720 + 8e84952) | 中 | PM 自主 (Marvis 403 拒 mavis team plan binary 137 SIGKILL, 0 业务代码 PM 自决合规) | 2026-07-13 09:46 | PM | commit 79bd720 (6 files +1604) + 8e84952 (1 file +167) on `feat/mvp-h2-v3`; `docs/architecture/llm_provider_v3.md` 29034B (9 章节) + `provider_compat_matrix.md` 5599B (6 provider) + `provider_switch_ui.md` 12158B (RN 完整 spec) + `H2_THRESHOLD_REDEFINITION.md` 8298B (3 候选) + `contracts/llm_chat_streaming.schema.json` 6700B (Draft 2020-12) + `scripts/verify_w1.sh` 7/7 PASS + `/tmp/plan_t_mvp2_v3_w{2,3}.yaml` (W2 10576B + W3 11109B) |
+| T-MVP-2-v3-W2 | H2 架构升级 Wave 2 · 流式实现 + 多 provider 集成 (daemon /v1/chat/stream SSE + 6 provider 实现 + provider_router 动态化 + provider_health 自动 fallback + 单元测试 ≥ 11) | P0 | pending (W1 done) | 长 | team plan 2d | - | - | backend/daemon/server.py (新端点) + 6 provider + provider_router.py (升级) + provider_health.py + tests/test_*.py |
+| T-MVP-2-v3-W3 | H2 架构升级 Wave 3 · 用户切 UI + H2 重新定义 + 9 硬指标 v3 验证 (RN provider_switch.tsx + provider_config.tsx + state/providers.ts + 4 文档同步 + verify_h2_v3.mjs + 5 张真 PNG + 钉子 #50) | P0 | pending (W2 done) | 中 | team plan 1d | - | - | `apps/desktop/src/modules/settings/provider_*.tsx` + `state/providers.ts` + `scripts/verify_h2_v3.mjs` + 5 真 PNG + 4 文档 v2 + 钉子 #50 |
 
 **状态枚举**：
 - `pending` — 已规划未开始
