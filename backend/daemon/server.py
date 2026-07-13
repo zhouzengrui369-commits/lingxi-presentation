@@ -9,19 +9,31 @@ Endpoints（v1）:
   POST /v1/chat/force       → query ?provider=cli|api → 同 /v1/chat 但强制 provider
   POST /v1/cache/clear      → 清空 router LRU cache (T-MVP-2 H2 治本配套)
   GET  /v1/cache/stats      → {"hits", "misses", "size", "max_size", "ttl_seconds", "evictions"}
+  POST /v1/import           → body {"paths": [..]} → 文件 KB 导入（spawn cli/import-5-files-to-kb.ts）
+  POST /v1/templates        → body {"input_path"?: .., "builtin"?: "light"|"dark"} → 模板风格分析（spawn src/modules/template/cli.ts）
+  POST /v1/preview          → body {"prompt": "..", "style_id"?: ".."} → HTML 预览生成（spawn cli/preview.ts）
+  POST /v1/output           → body {"html_path": "..", "format": "pptx|pdf|docx|html", "output_path": ".."} → 多格式输出（spawn cli/export.ts）
 
 T-MVP-2 H2 治本 (v2): 不再用 prewarm 测 cache 命中延迟, 改在 full-demo.ts
 advisor 步骤 3 轮并行调 LLM (Promise.all), 测真 LLM 延迟.
 provider_router LRU cache 仍保留 (工程价值: 避免重复 LLM 浪费钱),
 但测试时 --no-cache 清空 cache 跑真 LLM.
+
+T-W1 扩展 (Wave 1 · ui_golden_path_agent): 加 4 个端点 (import/templates/preview/output)
+作为 UI 黄金路径与 5 模块业务逻辑的代理: 内部 spawn Node tsx 子进程跑对应的 CLI 脚本.
+代理而非直调, 是因为 5 模块业务逻辑都是 TypeScript (cli/import-5-files-to-kb.ts / src/modules/template/cli.ts
+/ cli/preview.ts / cli/export.ts), Python daemon 不直接 import 它们, 但可以 spawn + 解析 JSON 输出.
 """
 
 from __future__ import annotations
 
 import asyncio
+import json
 import os
 import socket
+import subprocess
 import sys
+import time
 from contextlib import asynccontextmanager
 from typing import Any
 
@@ -188,7 +200,377 @@ def create_app(router: ProviderRouter | None = None) -> FastAPI:
         """当前 cache 状态 (调试/监控用)。"""
         return router.cache_stats()
 
+    # ---- T-W1: 4 端点代理 (UI 黄金路径接通) ----
+    #
+    # 4 端点都通过 _spawn_cli() 调 Node tsx 跑对应 .ts CLI 脚本, 捕获 stdout/stderr/exit_code,
+    # 把结构化结果返回给 UI. 失败时返回非 200 + 明确错误 (不是 "未知错误").
+
+    @app.post("/v1/import")
+    async def import_files(req: ImportRequest) -> dict:
+        """文件 KB 导入 — spawn cli/import-5-files-to-kb.ts 真业务.
+
+        body: {"paths": [..]}
+        response: {"status": "ok"|"failed", "files": [...], "entries": [...], "failed": [...],
+                   "kb_root": "..", "elapsed_ms": ..., "stdout_tail": ".."}
+        """
+        started = time.time()
+        if not req.paths:
+            raise HTTPException(status_code=400, detail={"error": "no_paths", "message": "至少需要 1 个 path"})
+        # 用第一个 path 作为 input (cli:import-5-files-to-kb.ts 当前是 --input 单个)
+        input_path = req.paths[0]
+        # 私有 flag 让 import-5-files-to-kb.ts 输出结构化 JSON 到 stdout 末尾 (T-W1 加)
+        result = await _spawn_cli(
+            script="cli/import-5-files-to-kb.ts",
+            args=["--input", input_path, "--json-output"],
+            cwd_override=req.cwd, timeout=180.0,
+        )
+        elapsed_ms = round((time.time() - started) * 1000, 2)
+        if result["exit_code"] != 0:
+            return {
+                "status": "failed",
+                "error": result.get("stderr_tail", "cli_exit_nonzero")[-500:],
+                "exit_code": result["exit_code"],
+                "elapsed_ms": elapsed_ms,
+                "stdout_tail": result.get("stdout_tail", "")[-2000:],
+            }
+        # 解析末尾的 JSON (T-W1 import-5-files-to-kb.ts 会加 --json-output flag, 输出结构化 JSON)
+        json_data = _extract_json_from_stdout(result.get("stdout", ""))
+        if json_data is None:
+            # 兜底: 从 KB 根读 index.json + manifest.json
+            json_data = _read_kb_index_fallback()
+        return {
+            "status": "ok",
+            "data": json_data,
+            "elapsed_ms": elapsed_ms,
+            "stdout_tail": result.get("stdout_tail", "")[-1000:],
+        }
+
+    @app.post("/v1/templates")
+    async def select_template(req: TemplateRequest) -> dict:
+        """模板风格分析 — spawn src/modules/template/cli.ts 真业务.
+
+        body: {"input_path"?: "..", "builtin"?: "light"|"dark"}
+        response: {"status": "ok"|"failed", "template_id": "..", "template_style": {...},
+                   "html_preview": "..", "source": "imported"|"builtin", "elapsed_ms": ...}
+        """
+        started = time.time()
+        args = []
+        if req.builtin:
+            args.extend(["--builtin", req.builtin])
+        elif req.input_path:
+            args.extend(["--input", req.input_path])
+        else:
+            raise HTTPException(status_code=400, detail={"error": "no_input", "message": "必须传 input_path 或 builtin"})
+        # T-W1: 强制加 --output (CLI 必填), 写到 /tmp 不污染仓库
+        args.extend(["--output", f"/tmp/lingxi_template_{int(started)}.json"])
+        args.extend(["--json-output"])
+        result = await _spawn_cli(
+            script="src/modules/template/cli.ts",
+            args=args,
+            cwd_override=req.cwd, timeout=60.0,
+        )
+        elapsed_ms = round((time.time() - started) * 1000, 2)
+        if result["exit_code"] != 0:
+            return {
+                "status": "failed",
+                "error": result.get("stderr_tail", "cli_exit_nonzero")[-500:],
+                "exit_code": result["exit_code"],
+                "elapsed_ms": elapsed_ms,
+            }
+        json_data = _extract_json_from_stdout(result.get("stdout", ""))
+        if json_data is None:
+            return {
+                "status": "failed",
+                "error": "json_parse_failed",
+                "stdout_tail": result.get("stdout_tail", "")[-2000:],
+                "elapsed_ms": elapsed_ms,
+            }
+        return {
+            "status": "ok",
+            "data": json_data,
+            "elapsed_ms": elapsed_ms,
+        }
+
+    @app.post("/v1/preview")
+    async def generate_preview(req: PreviewRequest) -> dict:
+        """HTML 预览生成 — spawn cli/preview.ts 真业务 (Wave 9 治本: 5 章节并发).
+
+        body: {"prompt": "..", "style_id"?: ".."}
+        response: {"status": "ok"|"failed", "preview_id": "..", "html": "..",
+                   "sections": [...], "latency_ms": ..., "provider": "..", "elapsed_ms": ...}
+        """
+        started = time.time()
+        out_dir = f"/tmp/lingxi_preview_{int(started)}"
+        os.makedirs(out_dir, exist_ok=True)
+        args = ["--prompt", req.prompt, "--out", out_dir]
+        if req.style_id:
+            args.extend(["--style-id", req.style_id])
+        result = await _spawn_cli(
+            script="cli/preview.ts",
+            args=args,
+            cwd_override=req.cwd, timeout=120.0,
+        )
+        elapsed_ms = round((time.time() - started) * 1000, 2)
+        if result["exit_code"] != 0:
+            return {
+                "status": "failed",
+                "error": result.get("stderr_tail", "cli_exit_nonzero")[-500:],
+                "exit_code": result["exit_code"],
+                "elapsed_ms": elapsed_ms,
+            }
+        json_data = _extract_json_from_stdout(result.get("stdout", ""))
+        if json_data is None:
+            return {
+                "status": "failed",
+                "error": "json_parse_failed",
+                "stdout_tail": result.get("stdout_tail", "")[-2000:],
+                "elapsed_ms": elapsed_ms,
+            }
+        # 尝试读 HTML 文件
+        html_content = ""
+        html_path = json_data.get("html_path") if json_data else None
+        if html_path and os.path.exists(html_path):
+            with open(html_path, "r", encoding="utf-8") as f:
+                html_content = f.read()
+        return {
+            "status": "ok",
+            "data": json_data,
+            "html": html_content,
+            "html_path": html_path,
+            "out_dir": out_dir,
+            "elapsed_ms": elapsed_ms,
+        }
+
+    @app.post("/v1/output")
+    async def generate_output(req: OutputRequest) -> dict:
+        """多格式输出 — spawn cli/export.ts 真业务 (pptx/pdf/docx/html).
+
+        body: {"html_path": "..", "format": "pptx|pdf|docx|html", "output_path": ".."}
+        response: {"status": "ok"|"failed", "format": "..", "output_path": "..",
+                   "size_bytes": ..., "elapsed_ms": ...}
+        """
+        started = time.time()
+        if req.format not in ("pptx", "pdf", "docx", "html"):
+            raise HTTPException(status_code=400, detail={"error": "bad_format", "message": f"format must be pptx|pdf|docx|html, got {req.format}"})
+        if not os.path.exists(req.html_path):
+            raise HTTPException(status_code=400, detail={"error": "html_missing", "message": f"html_path not found: {req.html_path}"})
+        args = ["--input", req.html_path, "--format", req.format, "--output", req.output_path]
+        result = await _spawn_cli(
+            script="cli/export.ts",
+            args=args,
+            cwd_override=req.cwd, timeout=120.0,
+        )
+        elapsed_ms = round((time.time() - started) * 1000, 2)
+        if result["exit_code"] != 0:
+            return {
+                "status": "failed",
+                "error": result.get("stderr_tail", "cli_exit_nonzero")[-500:],
+                "exit_code": result["exit_code"],
+                "elapsed_ms": elapsed_ms,
+            }
+        # 验证产物
+        size_bytes = 0
+        if os.path.exists(req.output_path):
+            size_bytes = os.path.getsize(req.output_path)
+        return {
+            "status": "ok",
+            "format": req.format,
+            "output_path": req.output_path,
+            "size_bytes": size_bytes,
+            "elapsed_ms": elapsed_ms,
+        }
+
     return app
+
+
+# ---- T-W1: 4 端点共享的工具函数 ----
+
+
+class ImportRequest(BaseModel):
+    """POST /v1/import 请求体。"""
+    paths: list[str] = Field(..., min_length=1)
+    cwd: str | None = None  # 可选: 自定义工作目录 (默认 apps/desktop)
+
+
+class TemplateRequest(BaseModel):
+    """POST /v1/templates 请求体。"""
+    input_path: str | None = None
+    builtin: str | None = None  # 'light' | 'dark'
+    cwd: str | None = None
+
+
+class PreviewRequest(BaseModel):
+    """POST /v1/preview 请求体。"""
+    prompt: str = Field(..., min_length=1, max_length=100_000)
+    style_id: str | None = None
+    cwd: str | None = None
+
+
+class OutputRequest(BaseModel):
+    """POST /v1/output 请求体。"""
+    html_path: str = Field(..., min_length=1)
+    format: str = Field(..., min_length=1)
+    output_path: str = Field(..., min_length=1)
+    cwd: str | None = None
+
+
+def _resolve_cwd(override: str | None) -> str:
+    """解析 CLI 工作目录.
+
+    优先: override
+    其次: daemon 启动时的 cwd + /apps/desktop (即 apps/desktop/)
+    兜底: daemon 进程 cwd
+    """
+    if override and os.path.isdir(override):
+        return override
+    # 自动检测: 在 daemon cwd 找 apps/desktop/ 子目录
+    daemon_cwd = os.getcwd()
+    candidate = os.path.join(daemon_cwd, "apps", "desktop")
+    if os.path.isfile(os.path.join(candidate, "cli", "full-demo.ts")):
+        return candidate
+    return daemon_cwd
+
+
+def _resolve_tsx_bin(cwd: str) -> str | None:
+    """解析 tsx 可执行文件: cwd 优先, 然后 $PATH."""
+    candidates = [
+        os.path.join(cwd, "node_modules", ".bin", "tsx"),  # cwd 已是 apps/desktop/
+        os.path.join(cwd, "..", "node_modules", ".bin", "tsx"),  # cwd 是 repo root
+        os.path.join(cwd, "..", "..", "node_modules", ".bin", "tsx"),  # cwd 是 apps/
+        "/usr/local/bin/tsx",
+        "/opt/homebrew/bin/tsx",
+    ]
+    for p in candidates:
+        if os.path.isfile(p) and os.access(p, os.X_OK):
+            return p
+    return None
+
+
+async def _spawn_cli(script: str, args: list[str], cwd_override: str | None = None, timeout: float = 120.0) -> dict:
+    """异步 spawn Node tsx 跑 CLI 脚本.
+
+    Args:
+        script: ts 脚本路径 (相对 cwd, e.g. "cli/preview.ts")
+        args: 脚本后的参数 (例如 ["--input", "/path", "--json-output"])
+        cwd_override: 自定义 cwd (None = 用 daemon cwd)
+        timeout: 超时秒数
+
+    Returns:
+        {"exit_code": int, "stdout": str, "stderr": str, "stdout_tail": str, "stderr_tail": str}
+    """
+    cwd = _resolve_cwd(cwd_override)
+    tsx = _resolve_tsx_bin(cwd)
+    if tsx is None:
+        return {
+            "exit_code": 127,
+            "stdout": "",
+            "stderr": f"tsx not found (cwd={cwd}, looked in apps/desktop/node_modules/.bin/tsx + $PATH)",
+            "stdout_tail": "",
+            "stderr_tail": f"tsx not found (cwd={cwd})",
+        }
+    # 用 run_in_executor 跑 subprocess (避免 asyncio 阻塞)
+    loop = asyncio.get_event_loop()
+
+    def _run():
+        try:
+            # tsx 调用约定: tsx [flags] <script.ts> [args...]
+            # 例如: tsx cli/preview.ts --prompt "..." --out /tmp/...
+            cmd = [tsx, script] + args
+            proc = subprocess.run(
+                cmd,
+                cwd=cwd,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                env={**os.environ, "PATH": f"{os.path.dirname(tsx)}:{os.environ.get('PATH', '')}"},
+            )
+            return {
+                "exit_code": proc.returncode,
+                "stdout": proc.stdout or "",
+                "stderr": proc.stderr or "",
+                "stdout_tail": (proc.stdout or "")[-3000:],
+                "stderr_tail": (proc.stderr or "")[-3000:],
+            }
+        except subprocess.TimeoutExpired as e:
+            return {
+                "exit_code": 124,
+                "stdout": e.stdout.decode("utf-8", errors="ignore") if e.stdout else "",
+                "stderr": (e.stderr.decode("utf-8", errors="ignore") if e.stderr else "") + f"\n[TIMEOUT after {timeout}s]",
+                "stdout_tail": "",
+                "stderr_tail": f"TIMEOUT after {timeout}s",
+            }
+        except Exception as e:
+            return {
+                "exit_code": 1,
+                "stdout": "",
+                "stderr": f"subprocess error: {e}",
+                "stdout_tail": "",
+                "stderr_tail": f"subprocess error: {e}",
+            }
+
+    return await loop.run_in_executor(None, _run)
+
+
+def _extract_json_from_stdout(stdout: str) -> dict | None:
+    """从 CLI stdout 末尾抽取 JSON object.
+
+    CLI 约定: 把结构化 JSON 用 '---JSON---' 标记后, 跟其他 log 行.
+    或者用 lastIndexOf('{') ... lastIndexOf('}') 兜底.
+    """
+    if not stdout:
+        return None
+    # 1) 找 '---JSON---' 标记
+    marker = "---JSON---"
+    if marker in stdout:
+        idx = stdout.rindex(marker)
+        json_str = stdout[idx + len(marker):].strip()
+        try:
+            return json.loads(json_str)
+        except Exception:
+            pass
+    # 2) 兜底: 找最后完整的 { ... } 块
+    last_brace = stdout.rfind("}")
+    if last_brace == -1:
+        return None
+    first_brace = stdout.rfind("{", 0, last_brace)
+    if first_brace == -1:
+        return None
+    try:
+        return json.loads(stdout[first_brace:last_brace + 1])
+    except Exception:
+        return None
+
+
+def _read_kb_index_fallback() -> dict:
+    """兜底: 从 PRD 3.1 KB 根读 index.json + manifest.json."""
+    import platform
+
+    if platform.system() == "Darwin":
+        kb_root = os.path.expanduser("~/Library/Application Support/灵犀演示/kb")
+    else:
+        kb_root = os.path.expanduser("~/.lingxi/kb")
+    if not os.path.isdir(kb_root):
+        return {"files": [], "entries": [], "failed": [], "kb_root": kb_root, "fallback": True}
+    index = {}
+    manifest = {}
+    try:
+        with open(os.path.join(kb_root, "index.json"), "r", encoding="utf-8") as f:
+            index = json.load(f)
+    except Exception:
+        pass
+    try:
+        with open(os.path.join(kb_root, "manifest.json"), "r", encoding="utf-8") as f:
+            manifest = json.load(f)
+    except Exception:
+        pass
+    return {
+        "files": index.get("files", []),
+        "entries": index.get("entries", []),
+        "failed": [],
+        "kb_root": kb_root,
+        "manifest": manifest,
+        "fallback": True,
+    }
 
 
 # ---- 入口辅助 ----

@@ -40,6 +40,7 @@ async function initKbModuleForCli() {
 interface Args {
   input: string;
   clean: boolean;
+  jsonOutput: boolean;
 }
 
 function parseArgs(argv: string[]): Args {
@@ -49,6 +50,8 @@ function parseArgs(argv: string[]): Args {
     if (a === '--clean') out.clean = true;
     else if (a === '--input') {
       out.input = argv[++i] ?? '';
+    } else if (a === '--json-output') {
+      out.jsonOutput = true;
     } else if (a.startsWith('--')) {
       out[a.slice(2)] = argv[++i] ?? 'true';
     }
@@ -59,6 +62,7 @@ function parseArgs(argv: string[]): Args {
   return {
     input: (out.input as string) || defaultInput,
     clean: Boolean(out.clean),
+    jsonOutput: Boolean(out.jsonOutput),
   };
 }
 
@@ -191,10 +195,38 @@ async function main() {
   console.log(`      init_state:   initialized=${initState.initialized} error=${initState.error ?? 'null'}`);
 
   if (!ok) {
+    if (args.jsonOutput) {
+      console.log('---JSON---');
+      console.log(JSON.stringify({
+        ok: false,
+        files: batch.files,
+        entries: batch.entries,
+        failed: batch.failed,
+        kb_root: root,
+        elapsed_ms: elapsedMs,
+        error: 'import_partial_or_failed',
+      }, null, 2));
+    }
     console.error('T-6.2 验证 FAIL');
     process.exit(3);
   }
   console.log('\nT-6.2 验证 PASS — 5 文件真持久化到 ~/Library/Application Support/灵犀演示/kb/ OK');
+
+  // T-W1: --json-output flag, 末尾输出结构化 JSON (daemon /v1/import 解析)
+  if (args.jsonOutput) {
+    console.log('---JSON---');
+    console.log(JSON.stringify({
+      ok: true,
+      files: batch.files,
+      entries: batch.entries,
+      failed: batch.failed,
+      kb_root: root,
+      elapsed_ms: elapsedMs,
+      kb_files_dir_files: fileNames,
+      kb_entries_dir_files: entryNames,
+      manifest: mf,
+    }, null, 2));
+  }
 }
 
 main().catch((err) => {
