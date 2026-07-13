@@ -1,0 +1,163 @@
+{
+  "plan_id": "T-MVP-2-v2-h2-real-llm-validation",
+  "mode": "real-cli (真 LLM, --no-cache)",
+  "worktree": "/Users/njx/Project/wt-mvp-h2",
+  "branch": "feat/mvp-h2",
+  "base_commit": "e18a1cb",
+  "generated_at": "2026-07-13T09:11:00+08:00",
+  "overall_verdict": "FAIL",
+  "h2_threshold": {
+    "avg_max_ms": 3000,
+    "max_max_ms": 5000
+  },
+  "h2_observed": {
+    "avg_ms": 7259,
+    "max_ms": 9297,
+    "min_ms": 5258,
+    "per_round_avg_ms": 5813,
+    "per_round_max_ms": 9283,
+    "per_round_min_ms": 2561
+  },
+  "runs": [
+    {
+      "run": 1,
+      "advisor_step_ms": 5258,
+      "per_round_ms": [
+        5244,
+        4861,
+        4810
+      ]
+    },
+    {
+      "run": 2,
+      "advisor_step_ms": 8246,
+      "per_round_ms": [
+        6245,
+        8221,
+        5452
+      ]
+    },
+    {
+      "run": 3,
+      "advisor_step_ms": 8469,
+      "per_round_ms": [
+        5719,
+        8436,
+        4004
+      ]
+    },
+    {
+      "run": 4,
+      "advisor_step_ms": 7480,
+      "per_round_ms": [
+        6511,
+        7453,
+        5793
+      ]
+    },
+    {
+      "run": 5,
+      "advisor_step_ms": 9297,
+      "per_round_ms": [
+        9283,
+        7266,
+        7182
+      ]
+    },
+    {
+      "run": 6,
+      "advisor_step_ms": 6668,
+      "per_round_ms": [
+        4018,
+        3174,
+        6627
+      ]
+    },
+    {
+      "run": 7,
+      "advisor_step_ms": 5306,
+      "per_round_ms": [
+        2561,
+        5269,
+        4502
+      ]
+    },
+    {
+      "run": 8,
+      "advisor_step_ms": 8261,
+      "per_round_ms": [
+        5985,
+        5217,
+        8222
+      ]
+    },
+    {
+      "run": 9,
+      "advisor_step_ms": 5788,
+      "per_round_ms": [
+        3066,
+        5413,
+        5703
+      ]
+    },
+    {
+      "run": 10,
+      "advisor_step_ms": 7816,
+      "per_round_ms": [
+        7805,
+        3797,
+        6565
+      ]
+    }
+  ],
+  "v1_comparison": {
+    "v1_cache_hit_cheating": {
+      "avg": 2,
+      "max": 4,
+      "verdict": "CHEATING (prewarm 作弊)"
+    },
+    "v1_audit_real_llm": {
+      "avg": 7164,
+      "max": 20101,
+      "verdict": "FAIL"
+    },
+    "v2_real_llm_parallel_3rounds": {
+      "avg": 7259,
+      "max": 9297,
+      "verdict": "FAIL (单 round 5-9s 超阈)"
+    }
+  },
+  "v2_changes": [
+    "移除 /v1/cache/prewarm 端点 (server.py)",
+    "移除 CachePrewarmRequest Pydantic model",
+    "改 full-demo.ts advisor 3 轮 for 循环 → Promise.all 并行",
+    "3 轮各调 1 次 LLM (cache miss, 真 LLM 延迟)",
+    "保留 provider_router LRU cache (e18a1cb) 作为副产物"
+  ],
+  "pm_decision_needed": {
+    "options": [
+      {
+        "id": "A",
+        "name": "降阈值 (avg ≤ 9s, max ≤ 12s)",
+        "expected": "PASS",
+        "workload": "1 行 docs",
+        "risk": "改基线, 需 NJX 批"
+      },
+      {
+        "id": "B",
+        "name": "切 provider (Claude Haiku / GPT-4o-mini)",
+        "expected": "估计 1.5-2.5s",
+        "workload": "半天 + key 申请",
+        "risk": "改 provider 路径"
+      },
+      {
+        "id": "C",
+        "name": "缩 prompt (100-200 字 → 20-30 字)",
+        "expected": "估计 2-3s",
+        "workload": "1h",
+        "risk": "顾问质量可能降"
+      }
+    ],
+    "subagent_recommendation": "A + C 组合, 工作量 2-3h, 不改 provider 路径"
+  }
+}

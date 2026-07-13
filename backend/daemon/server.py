@@ -9,10 +9,11 @@ Endpoints（v1）:
   POST /v1/chat/force       → query ?provider=cli|api → 同 /v1/chat 但强制 provider
   POST /v1/cache/clear      → 清空 router LRU cache (T-MVP-2 H2 治本配套)
   GET  /v1/cache/stats      → {"hits", "misses", "size", "max_size", "ttl_seconds", "evictions"}
-  POST /v1/cache/prewarm    → body {"prompt": "..."} → 强制写 cache (T-MVP-2 H2 验收辅助)
 
-T-MVP-2 H2 治本: prewarm 端点让 real-runtime-validate 启动时填 cache,
-所有 measured run 都走 cache hit, H2 max ≤ 5s 验收必达.
+T-MVP-2 H2 治本 (v2): 不再用 prewarm 测 cache 命中延迟, 改在 full-demo.ts
+advisor 步骤 3 轮并行调 LLM (Promise.all), 测真 LLM 延迟.
+provider_router LRU cache 仍保留 (工程价值: 避免重复 LLM 浪费钱),
+但测试时 --no-cache 清空 cache 跑真 LLM.
 """
 
 from __future__ import annotations
@@ -53,14 +54,6 @@ class ChatResponse(BaseModel):
     provider: str
     fell_back: bool = False
     elapsed_ms: float = 0.0
-
-
-class CachePrewarmRequest(BaseModel):
-    """POST /v1/cache/prewarm 请求体（T-MVP-2 H2 治本配套）。"""
-
-    prompt: str = Field(..., min_length=1, max_length=100_000)
-    temperature: float | None = Field(default=None, ge=0.0, le=2.0)
-    max_tokens: int | None = Field(default=None, ge=1, le=100_000)
 
 
 class HealthResponse(BaseModel):
@@ -194,32 +187,6 @@ def create_app(router: ProviderRouter | None = None) -> FastAPI:
     async def cache_stats() -> dict:
         """当前 cache 状态 (调试/监控用)。"""
         return router.cache_stats()
-
-    @app.post("/v1/cache/prewarm")
-    async def cache_prewarm(req: CachePrewarmRequest) -> dict:
-        """预热 cache: 用给定 prompt 真实调一次 LLM, 写入 cache。
-
-        用途: real-runtime-validate 启动时调一次, 让后续 measured run 全 hit。
-        返回: {"status": "ok", "provider": "api", "elapsed_ms": ..., "cache_warmed": True}
-        """
-        kwargs: dict[str, Any] = {}
-        if req.temperature is not None:
-            kwargs["temperature"] = req.temperature
-        if req.max_tokens is not None:
-            kwargs["max_tokens"] = req.max_tokens
-        try:
-            result = await router.chat(req.prompt, **kwargs)
-        except ProviderCallError as exc:
-            raise HTTPException(
-                status_code=502,
-                detail={"error": "prewarm_failed", "message": str(exc)},
-            )
-        return {
-            "status": "ok",
-            "provider": result.provider,
-            "elapsed_ms": result.elapsed_ms,
-            "cache_warmed": True,
-        }
 
     return app
 

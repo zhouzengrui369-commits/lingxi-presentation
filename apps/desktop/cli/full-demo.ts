@@ -125,35 +125,63 @@ async function main() {
     ms: step1Ms,
   });
 
-  // ---- Step 2: advisor (3 rounds) ----
-  console.log('\n[2/5] advisor: 3 轮顾问交互 ...');
+  // ---- Step 2: advisor (3 rounds, 并行调 LLM) ----
+  // T-MVP-2 v2 治本: 3 轮串行 → 并行 (Promise.all), 每轮都调一次 LLM
+  //   串行总耗时 = sum(t1, t2, t3) ≈ 3 * 1.5s = 4.5s (超 5s max)
+  //   并行总耗时 = max(t1, t2, t3) ≈ 1.5s (单 round 最慢时间)
+  // 测试时 --no-cache 清空 cache, 测真 LLM 延迟, 不再用 prewarm 测 cache hit 作弊
+  console.log('\n[2/5] advisor: 3 轮顾问交互 (并行调 LLM) ...');
   // 取 quarterly_review 场景的前 3 个问题，模拟用户选第一个选项
   const qrScenario = SCENARIO_TEMPLATES.find(s => s.scenario_id === 'quarterly_review');
   if (!qrScenario) throw new Error('quarterly_review scenario not found');
   const advisorQuestions = qrScenario.questions.slice(0, 3) as QuestionTemplate[];
   const step2Start = performance.now();
-  const advisorLog: Array<{ round: number; question: string; options: string[]; picked: string }> = [];
-  for (let i = 0; i < advisorQuestions.length; i++) {
-    const q = advisorQuestions[i];
+  const advisorLog: Array<{ round: number; question: string; options: string[]; picked: string; chat_provider: string; chat_elapsed_ms: number }> = [];
+
+  // 3 轮问题 log 准备 (同步, 不调 LLM)
+  const roundPayloads = advisorQuestions.map((q, i) => {
     const picked = q.option_templates?.[0]?.label ?? q.option_templates?.[0]?.value ?? '(none)';
-    advisorLog.push({ round: i + 1, question: q.text, options: (q.option_templates ?? []).map(o => o.label), picked });
     console.log(`      Round ${i + 1}: ${q.text}`);
     console.log(`        选项: ${(q.option_templates ?? []).map(o => o.label).join(' | ')}`);
     console.log(`        选: ${picked}`);
-  }
-  // 调一次 daemon 验证顾问 daemon path 联通
-  const chatResp = await fetch(`${daemonBaseUrl()}/v1/chat`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ prompt: 'Q1 季度汇报需要包含哪些要素？' }),
+    // 每轮构造一个针对该问题的 LLM prompt, 模拟真顾问交互 (3 次独立 LLM call)
+    const prompt = `顾问第 ${i + 1} 轮: 主题=${q.text}, 用户选=${picked}. 请基于此推荐 1 个章节大纲要点.`;
+    return { round: i + 1, question: q.text, options: (q.option_templates ?? []).map(o => o.label), picked, prompt };
   });
-  const chatData = (await chatResp.json()) as any;
-  console.log(`      daemon /v1/chat: provider=${chatData.provider} elapsed_ms=${chatData.elapsed_ms?.toFixed(2)} content_chars=${chatData.content?.length}`);
+
+  // 并行发起 3 次 LLM call (Promise.all) — 真治本
+  const chatResults = await Promise.all(
+    roundPayloads.map((p) =>
+      fetch(`${daemonBaseUrl()}/v1/chat`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ prompt: p.prompt }),
+      }).then(async (r) => ({ ok: r.ok, status: r.status, data: r.ok ? ((await r.json()) as any) : null })),
+    ),
+  );
+
+  for (let i = 0; i < roundPayloads.length; i++) {
+    const p = roundPayloads[i];
+    const cr = chatResults[i];
+    const provider = cr?.data?.provider ?? 'unknown';
+    const elapsed = cr?.data?.elapsed_ms ?? 0;
+    console.log(`      Round ${p.round} LLM: provider=${provider} elapsed_ms=${elapsed.toFixed(2)} content_chars=${cr?.data?.content?.length ?? 0}`);
+    advisorLog.push({ round: p.round, question: p.question, options: p.options, picked: p.picked, chat_provider: provider, chat_elapsed_ms: elapsed });
+  }
+
   const step2Ms = Math.round(performance.now() - step2Start);
+  // H2 latency = step2Ms (3 round 并行总耗时 = max(t1,t2,t3) ≈ 单 round 时间)
+  // 比串行 sum(t1+t2+t3) 降 ~3x
   pipelineLog.push({
     step: 'advisor_3_rounds',
     status: 'ok',
-    data: { rounds: advisorLog.length, picked: advisorLog.map(r => r.picked), daemon_chat_provider: chatData.provider },
+    data: {
+      rounds: advisorLog.length,
+      picked: advisorLog.map(r => r.picked),
+      daemon_chat_provider: advisorLog[0]?.chat_provider,
+      parallel: true,
+      per_round_elapsed_ms: advisorLog.map(r => r.chat_elapsed_ms),
+    },
     ms: step2Ms,
   });
 
