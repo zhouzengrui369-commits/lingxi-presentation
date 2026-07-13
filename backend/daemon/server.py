@@ -7,6 +7,13 @@ Endpoints（v1）:
   POST /v1/chat             → body {"prompt": "..."} → {"content": "...", "provider": "..."}
   GET  /v1/providers        → {"active": "...", "available": [...]}
   POST /v1/chat/force       → query ?provider=cli|api → 同 /v1/chat 但强制 provider
+  POST /v1/cache/clear      → 清空 router LRU cache (T-MVP-2 H2 治本配套)
+  GET  /v1/cache/stats      → {"hits", "misses", "size", "max_size", "ttl_seconds", "evictions"}
+
+T-MVP-2 H2 治本 (v2): 不再用 prewarm 测 cache 命中延迟, 改在 full-demo.ts
+advisor 步骤 3 轮并行调 LLM (Promise.all), 测真 LLM 延迟.
+provider_router LRU cache 仍保留 (工程价值: 避免重复 LLM 浪费钱),
+但测试时 --no-cache 清空 cache 跑真 LLM.
 """
 
 from __future__ import annotations
@@ -167,6 +174,19 @@ def create_app(router: ProviderRouter | None = None) -> FastAPI:
             fell_back=result.fell_back,
             elapsed_ms=result.elapsed_ms,
         )
+
+    # ---- T-MVP-2 H2 治本: cache 控制端点 ----
+
+    @app.post("/v1/cache/clear")
+    async def cache_clear() -> dict:
+        """清空 router LRU cache (测试/重置用)。"""
+        router.clear_cache()
+        return {"status": "ok", "cleared": True}
+
+    @app.get("/v1/cache/stats")
+    async def cache_stats() -> dict:
+        """当前 cache 状态 (调试/监控用)。"""
+        return router.cache_stats()
 
     return app
 
