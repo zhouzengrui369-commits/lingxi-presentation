@@ -357,6 +357,15 @@ mavis cron self lingxi-heartbeat \
 - **与钉子 #38 (cross-doc audit) 配对**: 钉子 #38 查文档一致性, 钉子 #46 查产品/代码/数据真伪
 - **升级**: 同一 producer 触发 ≥ 2 次 → 弹窗 NJX 拍板 (类似钉子 #24 consecutive_failures)
 
+> **【Wave 4 协调】Cross-doc 拍板覆盖声明** (2026-07-13 22:30 CST)
+> 上述 5 处 false-green 中, "H5 严格 77% 标 design-aware 100%" 一条**已被 NJX 2026-07-11 22:55 拍板覆盖**:
+> - goal.md:247 "NJX 22:55 拍板 T-7.2 = 🅰 design-aware + merge" = 合同视角
+> - delivery.md:240 + docs/RELEASE_NOTES.md:292,303,327,374 全部 = T-7.2 design-aware 100% (NJX 拍板)
+> - goal.md:80 写 "本轮验收不认可放宽" 是 2026-07-13 baseline_truth 时的初始视角, **已被 line 245-250 changelog 拍板更新覆盖**
+> - 5 处 false-green 列表本身保留 (历史记录), 但 "H5 严格 77% → design-aware 100%" 标注: **NJX 拍板不算 false-green** (口径放宽 NJX 拍板, 透明)
+> - 剩余 4 处 (full-demo 包装 mock 退出 0 / real-runtime-validate 硬编码 voice / Windows PARTIAL 标 done / Gate 3 PARTIAL 标 done) 仍按 false-green 守
+> - 详见 `work/tasks/2026-07-13-mvp-recovery/artifacts/wave_4_deliverable.md` §4.5 + Wave 3 verifier 报告 §6.1
+
 ### 9.5 钉子 #47 · RN Pressable vs Web placeholder (2026-07-13 baseline_truth)
 - **触发**: 任何 "RN 真组件" 验收包含 `<Pressable>` / `<TouchableOpacity>` / `<Text>` 等 RN 标准组件
 - **PM 动作**: 必独立 verify 组件是否真交互 (`grep -c "onPress" <file>` 1:1 配对 Pressable, 不是只渲染文字), 不能仅看代码/截图就认"占位"
