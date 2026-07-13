@@ -240,6 +240,7 @@ async function main(): Promise<void> {
   const htmlPath = path.join(outDir, `${previewId}.html`);
   fs.writeFileSync(htmlPath, html, 'utf8');
 
+  process.stdout.write('---JSON---\n');
   process.stdout.write(
     JSON.stringify(
       {
@@ -253,6 +254,7 @@ async function main(): Promise<void> {
         mode,
         concurrency,
         section_count: finalSections.length,
+        sections: finalSections,
       },
       null,
       2,

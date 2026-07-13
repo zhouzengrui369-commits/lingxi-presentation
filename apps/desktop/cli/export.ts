@@ -138,6 +138,8 @@ async function main() {
     },
   };
   console.log('[cli:export] 结果:');
+  // T-W1: 用 ---JSON--- 标记让 daemon 准确抽取结构化 JSON
+  console.log('---JSON---');
   console.log(JSON.stringify(summary, null, 2));
 
   if (result.status !== 'ok' || !verify.ok) {

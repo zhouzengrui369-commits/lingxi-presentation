@@ -31,6 +31,7 @@ interface CliArgs {
   output: string;
   daemonUrl?: string;
   builtin?: 'light' | 'dark' | null;
+  jsonOutput?: boolean;
 }
 
 function parseArgs(argv: string[]): CliArgs {
@@ -41,9 +42,14 @@ function parseArgs(argv: string[]): CliArgs {
     else if (a === '--output' || a === '-o') out.output = argv[++i];
     else if (a === '--daemon-url') out.daemonUrl = argv[++i];
     else if (a === '--builtin') out.builtin = argv[++i] as 'light' | 'dark';
+    else if (a === '--json-output') out.jsonOutput = true;
+  }
+  // T-W1: --builtin 模式允许 --input 缺省 (用 dummy 路径, 不会被使用)
+  if (!out.input) {
+    out.input = out.builtin ? 'builtin://placeholder.pptx' : '';
   }
   if (!out.input || !out.output) {
-    console.error('Usage: tsx cli.ts --input <file.pptx> --output <out.json> [--builtin light|dark] [--daemon-url http://127.0.0.1:PORT]');
+    console.error('Usage: tsx cli.ts --input <file.pptx> --output <out.json> [--builtin light|dark] [--daemon-url http://127.0.0.1:PORT] [--json-output]');
     process.exit(2);
   }
   return out as CliArgs;
@@ -95,7 +101,8 @@ interface ExportPayload {
 
 export async function runImport(args: CliArgs): Promise<ExportPayload> {
   const inputPath = resolve(args.input);
-  if (!existsSync(inputPath)) {
+  // T-W1: builtin:// 跳过 existsSync 校验 (cli 解析已允许 dummy)
+  if (!args.builtin && !inputPath.startsWith('builtin://') && !existsSync(inputPath)) {
     throw new Error(`input not found: ${inputPath}`);
   }
 
@@ -141,8 +148,28 @@ async function main() {
     console.log(`     template_id: ${payload.template_style.template_id}`);
     console.log(`     layout_types: ${payload.template_style.layout_types.join(', ')}`);
     console.log(`     palette: primary=${payload.template_style.palette.primary} accent=${payload.template_style.palette.accent}`);
+    // T-W1: --json-output flag, 末尾输出结构化 JSON (daemon /v1/templates 解析)
+    if (args.jsonOutput) {
+      console.log('---JSON---');
+      console.log(JSON.stringify({
+        ok: true,
+        source: payload.source,
+        template_id: payload.template_style.template_id,
+        template_style: payload.template_style,
+        html_preview: payload.html_preview,
+        generated_at: payload.generated_at,
+        output_path: args.output,
+      }, null, 2));
+    }
   } catch (err) {
     console.error('[FAIL]', err instanceof Error ? err.message : err);
+    if (args.jsonOutput) {
+      console.log('---JSON---');
+      console.log(JSON.stringify({
+        ok: false,
+        error: err instanceof Error ? err.message : String(err),
+      }, null, 2));
+    }
     process.exit(1);
   }
 }
