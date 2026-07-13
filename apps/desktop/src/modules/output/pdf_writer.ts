@@ -6,24 +6,73 @@
  *
  * 实现：使用 pdfkit 库（纯 JS，无原生依赖，macOS/Win 跨平台）。
  * 文档结构：标题页 → 每章节一页 → 总段落数 / 页脚。
- * 字体：默认 Helvetica（pdfkit 内置），可识别 CJK unicode 但中文显示需嵌入字体。
+ * 字体：默认 Noto Sans CJK SC（Wave 3 治本嵌入），保证中英混排 PDF 在
+ *   - macOS Preview
+ *   - WPS Office
+ *   - poppler pdftoppm / pdffonts
+ *   - 浏览器 PDF viewer
+ * 均能正确渲染（无方块、无 ? 替换、无乱码）。
  *
  * PRD 硬约束：图片/字体/版式正常。
- * - pdfkit 默认字体不含 CJK，但所有字符仍可写入 PDF（作为 winAnsiEncoding 时超出范围
- *   的字符会被替换为 ? 或被丢弃）。Phase 1 Gate 用 ASCII + 中文混排演示，
- *   通过 verification.format_valid 仅校验文件首 4 字节 = %PDF 与 size > 1KB；
- *   真实 CJK 渲染在 Phase 3 macOS Gate 用 weasyprint 替换。
+ * - 之前用 pdfkit 内置 Helvetica，CJK 字符会被替换为 ? 或被丢弃 (ACCEPTANCE_REPORT §4.3
+ *   "PDF 现场乱码" 历史根因)。
+ * - W3 治本 (钉子 #40 #5 + Wave 1 verifier §10 留 Wave 3 治本):
+ *   1. 默认 embedFont NotoSansCJKsc-Regular.otf (16MB, 落 apps/desktop/src/assets/fonts/)
+ *   2. 字体回退: Noto 缺时降级 Helvetica (含硬编码 warn, 不 silent 假绿)
+ *   3. 文档 metadata 加 /FontDescriptor + /ToUnicode 映射, Preview/WPS 双打开必可见
+ *   4. 验收命令: `pdffonts <file>.pdf` 见 `CZZZZZ+NotoSansCJKsc-Regular` CID Type 0C
+ *      Identity-H yes yes yes (emb=yes sub=yes uni=yes 三件齐)
  *
  * 验收标准：
  * - 文件存在
  * - 文件首 4 字节 = %PDF（即 25 50 44 46）
  * - size > 1KB
+ * - pdffonts: NotoSansCJKsc 嵌入 (emb=yes)
+ * - pdftoppm -png 第 1-3 页中文渲染正确 (无方块)
  */
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import PDFDocument from 'pdfkit';
 import type { ExportPayload, OutputMetadata, OutputResult } from './types';
+
+/**
+ * 【W3 治本】CJK 字体嵌入:Noto Sans CJK SC Regular (16MB OTF, 落 apps/desktop/src/assets/fonts/)
+ * 优先级: 1) 项目内字体 2) 用户 Application Support 字体 3) 系统字体 4) pdfkit 默认
+ * 缺字体时显式 warn + 降级,不 silent 假绿
+ */
+const CJK_FONT_CANDIDATES = [
+  // W3 治本: 项目内字体 — process.cwd() 相对 (最稳, main.js spawn cli 时 cwd = repo root)
+  path.join(process.cwd(), 'apps', 'desktop', 'src', 'assets', 'fonts', 'NotoSansCJKsc-Regular.otf'),
+  // W3 治本: 项目内字体 — apps/desktop cwd 相对 (cli/export.ts 跑时)
+  path.join(process.cwd(), 'src', 'assets', 'fonts', 'NotoSansCJKsc-Regular.otf'),
+  // 用户级 Application Support 字体 (per-user install)
+  path.join(process.env.HOME || '', 'Library', 'Application Support', '灵犀演示', 'fonts', 'NotoSansCJKsc-Regular.otf'),
+  // 系统级字体 (macOS brew / Linux noto)
+  '/usr/local/share/fonts/NotoSansCJKsc-Regular.otf',
+  '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
+  '/opt/homebrew/share/fonts/NotoSansCJKsc-Regular.otf',
+];
+
+let _cjkFontPath: string | null = null;
+let _cjkFontWarned = false;
+
+function resolveCjkFont(): string | null {
+  if (_cjkFontPath !== null) return _cjkFontPath;
+  for (const p of CJK_FONT_CANDIDATES) {
+    if (p && fs.existsSync(p)) {
+      _cjkFontPath = p;
+      return p;
+    }
+  }
+  if (!_cjkFontWarned) {
+    // eslint-disable-next-line no-console
+    console.warn('[pdf_writer.ts] [W3] CJK 字体未找到, 降级 pdfkit 默认 Helvetica。中文字符将显示为 ? 或方块。');
+    console.warn('[pdf_writer.ts] [W3] 候选路径:', CJK_FONT_CANDIDATES);
+    _cjkFontWarned = true;
+  }
+  return null;
+}
 
 /** 从 <p>/<li> 抽取纯文本段落（PDF 不嵌 HTML，简化处理） */
 function htmlToTextBlocks(html: string): string[] {
@@ -104,6 +153,22 @@ export function writePdf(
       });
       const stream = fs.createWriteStream(outputPath);
       doc.pipe(stream);
+
+      // 【W3 治本】CJK 字体嵌入: 用 Noto Sans CJK SC Regular (16MB OTF)
+      // pdfkit 默认 Helvetica 不含 CJK, 中文会显示为 ? 或方块 (ACCEPTANCE_REPORT §4.3 根因)
+      const cjkFont = resolveCjkFont();
+      if (cjkFont) {
+        try {
+          doc.registerFont('NotoSansCJKsc', cjkFont);
+          doc.font('NotoSansCJKsc');
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.warn('[pdf_writer.ts] [W3] Noto 字体 registerFont 失败:', (e as Error).message);
+        }
+      } else {
+        // eslint-disable-next-line no-console
+        console.warn('[pdf_writer.ts] [W3] 无 CJK 字体, 降级 Helvetica (中文会 ?/方块)');
+      }
 
       const palette = payload.style.palette;
 
