@@ -1,0 +1,105 @@
+{
+  "plan_id": "T-6.3-runtime-validation",
+  "mode": "real-cli",
+  "generated_at": "2026-07-13T00:48:00.151Z",
+  "overall_verdict": "FAIL",
+  "success_count": 0,
+  "total_runs": 3,
+  "nine_gates": [
+    {
+      "index": 1,
+      "name": "文件导入成功率",
+      "threshold_desc": "≥ 99%",
+      "pass": false,
+      "observed": 0.5714285714285714,
+      "unit": "ratio",
+      "detail": "57.14%"
+    },
+    {
+      "index": 2,
+      "name": "AI 响应延迟",
+      "threshold_desc": "avg ≤ 3s, max ≤ 5s",
+      "pass": false,
+      "observed": 6162,
+      "unit": "ms",
+      "detail": "avg=6162ms, max=7546ms"
+    },
+    {
+      "index": 3,
+      "name": "HTML 预览延迟",
+      "threshold_desc": "avg ≤ 10s, max ≤ 15s",
+      "pass": true,
+      "observed": 3824,
+      "unit": "ms",
+      "detail": "avg=3824ms, max=3963ms"
+    },
+    {
+      "index": 4,
+      "name": "顾问带选项比例",
+      "threshold_desc": "≥ 90%",
+      "pass": true,
+      "observed": 1,
+      "unit": "ratio",
+      "detail": "100.00%"
+    },
+    {
+      "index": 5,
+      "name": "模板匹配度",
+      "threshold_desc": "100% (builtin_business_dark)",
+      "pass": true,
+      "observed": 1,
+      "unit": "ratio",
+      "detail": "100.00% template_id=builtin_business_dark"
+    },
+    {
+      "index": 6,
+      "name": "voice 准确率",
+      "threshold_desc": "avg ≥ 95% (mock 录音池)",
+      "pass": true,
+      "observed": "N/A",
+      "unit": "ratio",
+      "detail": "H6 N/A (real-cli mode, 3/3 runs) — voice 评估在 harness+voice 模式跑 (T-6.11 wave 9, 100% pass)",
+      "notApplicable": true
+    },
+    {
+      "index": 7,
+      "name": "资源占用",
+      "threshold_desc": "max ≤ 8G",
+      "pass": true,
+      "observed": 71,
+      "unit": "MB",
+      "detail": "max=71MB"
+    },
+    {
+      "index": 8,
+      "name": "PPTX 可编辑",
+      "threshold_desc": "WPS 截图全部可编辑",
+      "pass": true,
+      "observed": 3,
+      "unit": "count",
+      "detail": "3/3 runs"
+    },
+    {
+      "index": 9,
+      "name": "PDF 无格式错乱",
+      "threshold_desc": "Preview 11 pages 全部 OK",
+      "pass": true,
+      "observed": 3,
+      "unit": "count",
+      "detail": "3/3 runs"
+    }
+  ],
+  "aggregate": {
+    "import_success_rate_avg": 0.5714285714285714,
+    "ai_latency_avg_ms": 6162,
+    "ai_latency_max_ms": 7546,
+    "html_preview_avg_ms": 3824,
+    "html_preview_max_ms": 3963,
+    "advisor_option_ratio_avg": 1,
+    "template_match_rate_avg": 1,
+    "voice_accuracy_avg": null,
+    "memory_peak_max_mb": 71,
+    "pptx_editable_count": 3,
+    "pdf_no_garbled_count": 3
+  }
+}
