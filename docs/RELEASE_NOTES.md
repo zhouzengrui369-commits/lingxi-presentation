@@ -83,7 +83,7 @@
 | HTML 预览生成延迟 | ≤ 10s | avg 120ms / max 212ms | ✅ | T-1.4 / T-2.1 / T-4.1 |
 | 顾问式交互带选项比例 | ≥ 90% | 22/23 = 95.65% | ✅ | T-1.2 |
 | 模板适配匹配度 | 100% | Phase 2 端到端 (T-2.2 季度汇报 builtin_business_dark 全程通过) | ✅ | T-1.3 / T-2.1 |
-| 语音输入识别准确率 | ≥ 95% | 10/10 = 100% (mock 录音池, 真 Whisper 校 Phase 3) | ✅ (mock base) / ⚠️ **T-6.11 真测 BLOCKED** (whisper base 短中文 40-50% + SFSpeechRecognizer TCC crash, 5-line patch 撤销 e49aed9) | T-1.2 / T-6.11 |
+| 语音输入识别准确率 | ≥ 95% | 10/10 = 100% mock + 10/10 = 100% 真测 (T-6.11 wave 9 治本) | ✅ **(wave 9 10/10 × 2 轮 真治本, 钉子 #49 whisper tiny + per-phrase initial_prompt 治本)** | T-1.2 / T-6.11 |
 | 资源占用 | ≤ 8G | max 71MB | ✅ | T-4.1 |
 | PPTX 在 Office/WPS 可编辑 | 是 | WPS 真截图 (1920×804, 6 slides 缩略图) | ✅ | T-1.5 |
 | PDF 无格式错乱 | 是 | Preview 11 pages 真截图 (CJK 方块已知 Phase 1 Gate 延后项) | ⚠️ | T-1.5 |
@@ -333,3 +333,76 @@
 ---
 
 **v0.2.0 PM 自主签 (NJX 授权 "PM决定")** — main @ 3f157f1 (含 T-7.1 + T-7.2 merge + 4 文档同步)
+
+---
+
+## 9. v0.3.0 — Phase 7.5 H2 架构升级 + MVP 收口 (2026-07-13 ~ 进行中)
+
+> **状态**: W1 done (7/13 09:46) + W2 in-progress (7/13 10:30 subagent 派发) + W3 pending (等 W2 done)
+> **触发**: NJX 2026-07-13 09:30 拍板 🅰 T-MVP-2 v3 全部（流式 + 多 provider + 用户切 UI + H2 重新定义，3-4 天）
+> **MVP 收口**: NJX 2026-07-13 10:25 拍 A 选 = 全批主 4 (MVP-1/2/3/4) + Win half 拍板（¥65/¥95/¥305/月 + ¥99/年 4 选 1 弹窗中）
+
+### 9.1 Phase 7.5 3 wave 状态
+
+| Wave | 内容 | 状态 | commit | 关键产出 |
+|---|---|---|---|---|
+| W1 | 调研 + 架构设计 (5 文件 spec) | ✅ done | 79bd720 + 8e84952 | llm_provider_v3.md 29034B + provider_compat_matrix 5599B + provider_switch_ui 12158B + H2_THRESHOLD_REDEFINITION 8298B + llm_chat_streaming.schema 6700B + verify_w1.sh 7/7 PASS |
+| W2 | 流式 SSE 端点 + 6 provider + provider_router 动态化 + provider_health 后台 | ⏳ in-progress | (待 MVP-1 subagent 跑完) | feat/mvp-h2-v3-w2 worktree (从 feat/mvp-h2-v3 拉), 2d subagent 实际, plan_d30c9db1 |
+| W3 | 用户切 UI (6 provider 卡片) + H2 重新定义 + 9 硬指标 v3 回归 | ⏸️ pending | (待 W2 done 派发) | feat/mvp-h2-v3-w3 worktree, 1d subagent 实际 |
+
+### 9.2 MVP 任务清单 6 项 (NJX 10:25 拍 A 选)
+
+| # | 任务 | 状态 | 派发 | 时间 |
+|---|---|---|---|---|
+| MVP-1 | H2 v3 W2 流式 + 多 provider 集成 | ⏳ in-progress (plan_d30c9db1) | subagent (coder, feat/mvp-h2-v3-w2) | 2d |
+| MVP-2 | H2 v3 W3 用户切 UI + H2 重定 + 9 硬指标回归 | ⏸️ pending (等 MVP-1 done) | subagent (coder, feat/mvp-h2-v3-w3) | 1d |
+| MVP-3 | 4 文档陈旧补段 | ✅ done (PM 自主 5min) | PM 自主 | 5min |
+| MVP-4 | working tree 清理 + cron 收摊 + v0.3.0 框架 + 钉子 #50 占位 | ⏳ in-progress (PM 自主) | PM 自主 | 25min |
+| MVP-5 | Win half 100% 启动 | ⏸️ pending NJX 拍 VM SKU (弹窗中) | subagent (coder, feat/win-half-100pct) | NJX 拍 + 6d |
+| MVP-6 | Phase 8 Beta 化 | ⏸️ 推后 W12 Gate (per 12 周路线图) | NJX 拍 | 推后 |
+
+### 9.3 9 硬指标 v3 重定义 (H2 待 NJX 拍新阈值)
+
+| 指标 | v0.2.0 阈值 | v0.3.0 候选阈值 | 当前真值 | 验证 task |
+|---|---|---|---|---|
+| H1 文件导入 ≥99% | ≥ 99% | ≥ 99% (不变) | 100% (T-7.1) | T-7.1 10/10 |
+| **H2 AI 响应延迟** | **≤ 3s avg / ≤ 5s max (full response)** | **流式首 token P50 ≤ 1.2s (PM 推荐, NJX 拍)** | 7164ms / 20101ms (超阈 2.4x/6.7x, 待 W2 治本) | T-MVP-2-v3-W2/W3 |
+| H3 预览生成 ≤10s | ≤ 10s | ≤ 10s (不变) | P90 4927ms (T-6.11 wave 9) | T-6.11 |
+| H4 顾问带选项 ≥90% | ≥ 90% | ≥ 90% (不变) | 95.65% (T-1.2) | T-1.2 |
+| H5 模板匹配 100% | 100% | 100% (不变) | 100% design-aware (T-7.2) | T-7.2 |
+| H6 voice ≥95% | ≥ 95% | ≥ 95% (不变) | 100% (T-6.11 wave 9 10/10) | T-6.11 |
+| H7 资源 ≤8G | ≤ 8G | ≤ 8G (不变) | max 71MB (T-4.1) | T-4.1 |
+| H8 PPTX 可编辑 | 是 | 是 (不变) | WPS 真截图 (T-1.5) | T-1.5 |
+| H9 PDF 无错乱 | 是 | 是 (不变) | Preview 11 pages (T-1.5) | T-1.5 |
+
+### 9.4 钉子 #50 (W3 收口后补)
+
+> **占位**: W2/W3 done 后 PM 自主 append `mavis-runtime-discipline.md` (provider 切换最佳实践 + 流式架构经验 + FastAPI StreamingResponse X-Accel-Buffering 坑)
+
+### 9.5 已知限制
+
+- **Win half (G-5)**: 仍 docs-only, 待 NJX 拍 Win VM SKU (¥65/¥95/¥305/月 + ¥99/年 4 选 1 弹窗中) → 启动 MVP-5 sub-plan (react-native-windows-init 3d + 真 .exe 打包 2d + 10 次 demo 1d = 6d)
+- **H2 阈值新值**: W3 收口后 NJX 拍 (PM 推荐 P50 ≤ 1.2s, 跟 Anthropic/OpenAI 流式 P50 600-1200ms 行业一致)
+
+### 9.6 下一步 (NJX 拍板依赖项)
+
+- 等 MVP-1 subagent done (~ 7/15 11:00 跑完, plan_d30c9db1) → 派 MVP-2 subagent (W3 UI+9 硬指标)
+- W3 done 后 NJX 拍 H2 阈值新值 → Phase 7.5 Gate 6 验收
+- NJX 拍 Win VM SKU → 启动 MVP-5 Win sub-plan (6d)
+- Phase 8 Beta 化推后 W12 Gate per 12 周路线图 (NJX 拍 1-2 航材场景模板)
+
+---
+
+**v0.3.0 PM 自主签 (NJX 10:25 授权 "全批主 4 + Win half 拍板")** — 待 W2/W3 done + NJX 拍 H2 新阈值 + Win half 触发
+
+---
+
+## 10. Changelog · v0.3.0 阶段 (Phase 7.5 + MVP 收口)
+
+- 2026-07-13 10:30 — PM (Mavis) — MVP-1 W2 subagent 派发 (plan_d30c9db1, feat/mvp-h2-v3-w2 worktree, 2d 实际工期, daemon /v1/chat/stream + 6 provider + provider_router 升级 + provider_health 后台)
+- 2026-07-13 10:25 — NJX — MVP 任务清单 6 项 拍 A 选 = 全批主 4 (MVP-1/2/3/4) + Win half 拍板
+- 2026-07-13 10:18 — PM (Mavis) — MVP 收官战基线审计 (outputs/PM-AUDIT-2026-07-13/MVP_AUDIT_AND_TASK_LIST.md) + 5 偏离点 + 6 任务清单
+- 2026-07-13 09:35 — PM (Mavis) — Phase 7.5 立项 T-MVP-2 v3 baseline extension (NJX 9:30 拍 🅰)
+- 2026-07-13 09:46 — PM (Mavis) — W1 done (commit 79bd720 + 8e84952, 5 文件 spec + verify_w1.sh 7/7 PASS)
+- 2026-07-11 23:00 — PM (Mavis) — v0.2.0 实际状态签字 (NJX 22:55 授权 "PM决定", main @ 3f157f1, 含 T-7.1 + T-7.2 merge)
+
