@@ -1,6 +1,7 @@
 /**
  * Electron main process — T-3.1 macOS 端到端 demo + 打包
  *                  — T-6.1 Electron BrowserWindow ↔ RN renderer 桥接
+ *                  — W2 (2026-07-13) fail-closed 验证 + 5 路由 IPC + daemon health
  *
  * 灵犀演示 · Phase 6
  *
@@ -13,6 +14,7 @@ const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const http = require('http');
 
 // ---- T-6.1: 路径解析 (含 renderer bundle 校验) ----
 function resolveRuntimePaths() {
@@ -36,11 +38,11 @@ function resolveRuntimePaths() {
 }
 
 let mainWindow = null; // T-6.1: 暴露给 IPC handler 拿主窗口
+let w1Daemon = null; // 【W2】daemon instance (W1 接通)
 
 function createWindow() {
   const paths = resolveRuntimePaths();
 
-  // ---- T-6.1: 校验 renderer bundle 存在 (vite build 没跑 → 友好提示)
   if (!fs.existsSync(paths.rendererBundle)) {
     console.warn(
       `[T-6.1] dist/renderer.bundle.js 不存在, 启动 BrowserWindow 将显示 5 路由占位。
@@ -57,16 +59,14 @@ function createWindow() {
     title: '灵犀演示',
     backgroundColor: '#ffffff',
     webPreferences: {
-      // ---- T-6.1: 桥接配置 ----
-      preload: paths.preloadScript, // preload.js 暴露 window.electronAPI
-      contextIsolation: true, // 安全: 隔离 preload 和 renderer
-      nodeIntegration: false, // 不让 renderer 直接 require('electron')
-      sandbox: false, // 允许 preload 跑 require
+      preload: paths.preloadScript,
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: false,
     },
   });
 
   // T-6.1: 支持 --initial-route=<key> 命令行参数 (e.g. advisor, template)
-  // 渲染初始路由, 方便多路由截图
   const initialRouteArg = process.argv.find((a) => a.startsWith('--initial-route='));
   const initialRoute = initialRouteArg ? initialRouteArg.split('=')[1] : '';
   if (initialRoute && ['file-kb', 'advisor', 'template', 'preview', 'output'].includes(initialRoute)) {
@@ -79,15 +79,12 @@ function createWindow() {
 
 // ---- T-6.1: renderer → main 的 demo-log 通道 ----
 ipcMain.on('demo-log', (event, line) => {
-  // renderer 主动推一条日志 (web 端测试用)
   if (mainWindow && !mainWindow.isDestroyed()) {
-    // 当前窗口已订阅自己的 demo-log, 这里只回显到 main console
     console.log(`[renderer-log] ${line}`);
   }
 });
 
-// ---- T-6.1: 切换 route (供 main process / 测试用)
-// 通过修改 URL hash 让 renderer 切换 tab, 然后 re-screenshot
+// ---- T-6.1: 切换 route ----
 ipcMain.handle('set-route', async (event, routeKey) => {
   if (mainWindow && !mainWindow.isDestroyed()) {
     const paths = resolveRuntimePaths();
@@ -97,6 +94,174 @@ ipcMain.handle('set-route', async (event, routeKey) => {
   }
   return { ok: false, error: 'no main window' };
 });
+
+// ---- 【W2】set-route-without-reload: 改 hash 不 reload page ----
+ipcMain.handle('set-route-navigate', async (event, routeKey) => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    try {
+      await mainWindow.webContents.executeJavaScript(`window.location.hash = '${routeKey}';`);
+      return { ok: true, route: routeKey };
+    } catch (e) {
+      return { ok: false, error: e?.message ?? 'unknown' };
+    }
+  }
+  return { ok: false, error: 'no main window' };
+});
+
+// ---- 【W2】daemon health: renderer 可拉 ----
+ipcMain.handle('get-info', async () => ({
+  electron: process.versions.electron,
+  chrome: process.versions.chrome,
+  node: process.versions.node,
+  platform: process.platform,
+  arch: process.arch,
+  pid: process.pid,
+}));
+
+// 【W2】daemon health: 转发 daemon /v1/health
+ipcMain.handle('daemon:health', async () => {
+  if (!w1Daemon?.baseUrl) return { status: 'unknown', available: false, active_provider: 'unknown' };
+  try {
+    const r = await fetch(`${w1Daemon.baseUrl}/v1/health`, { signal: AbortSignal.timeout(2_000) });
+    return await r.json();
+  } catch (e) {
+    return { status: 'unreachable', available: false, active_provider: 'unknown', error: e?.message };
+  }
+});
+
+// ---- 【W2】30s IPC timeout + 5 业务 IPC handler (W1 接通) ----
+async function w1FetchJson(method, path, body) {
+  if (!w1Daemon?.baseUrl) {
+    return { ok: false, error: 'daemon not started', error_code: 'E_DAEMON_NOT_READY' };
+  }
+  const url = `${w1Daemon.baseUrl}${path}`;
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), 30_000);
+  const t0 = Date.now();
+  try {
+    const opts = { method, signal: ac.signal, headers: { 'content-type': 'application/json' } };
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch(url, opts);
+    clearTimeout(timer);
+    const latency_ms = Date.now() - t0;
+    if (!r.ok) {
+      let data = null;
+      try { data = await r.json(); } catch { /* ignore */ }
+      return { ok: false, error: data?.detail?.message ?? `http_${r.status}`, error_code: data?.detail?.error_code ?? `E_HTTP_${r.status}`, latency_ms };
+    }
+    const data = await r.json();
+    return { ok: true, data: data?.data ?? data, latency_ms };
+  } catch (e) {
+    clearTimeout(timer);
+    const error_code = e.name === 'AbortError' ? 'E_TIMEOUT' : 'E_FETCH';
+    return { ok: false, error: e.message, error_code, latency_ms: Date.now() - t0 };
+  }
+}
+
+function logW1(...args) {
+  console.log('[w1]', ...args);
+}
+
+ipcMain.handle('w1:fileKb:list', async () => {
+  logW1('[w1:fileKb:list]');
+  return w1FetchJson('GET', '/v1/kb/list');
+});
+
+ipcMain.handle('w1:fileKb:import', async (event, { paths: importPaths }) => {
+  logW1(`[w1:fileKb:import] paths=${JSON.stringify(importPaths)}`);
+  return w1FetchJson('POST', '/v1/import', { paths: importPaths });
+});
+
+ipcMain.handle('w1:advisor:scenarios', async () => {
+  logW1('[w1:advisor:scenarios]');
+  return w1FetchJson('GET', '/v1/advisor/scenarios');
+});
+
+ipcMain.handle('w1:advisor:chat', async (event, { prompt }) => {
+  logW1(`[w1:advisor:chat] prompt_len=${prompt?.length ?? 0}`);
+  return w1FetchJson('POST', '/v1/chat', { prompt });
+});
+
+ipcMain.handle('w1:template:selectBuiltin', async (event, { builtin }) => {
+  logW1(`[w1:template:selectBuiltin] builtin=${builtin}`);
+  return w1FetchJson('POST', '/v1/templates', { builtin });
+});
+
+ipcMain.handle('w1:preview:generate', async (event, { prompt, style_path }) => {
+  logW1(`[w1:preview:generate] prompt_len=${prompt?.length ?? 0}`);
+  return w1FetchJson('POST', '/v1/preview', { prompt, style_path });
+});
+
+ipcMain.handle('w1:preview:load', async (event, { id }) => {
+  logW1(`[w1:preview:load] id=${id}`);
+  // 简化: 返回最近一个 preview html_path
+  return w1FetchJson('GET', `/v1/preview/${id}`);
+});
+
+ipcMain.handle('w1:output:generate', async (event, { format, html_path, output_path }) => {
+  logW1(`[w1:output:generate] format=${format} html=${html_path} output=${output_path}`);
+  return w1FetchJson('POST', '/v1/output', { format, html_path, output_path });
+});
+
+// ---- 【W2】daemon 生命周期 ----
+async function startW1Daemon() {
+  const paths = resolveRuntimePaths();
+  const port = parseInt(process.env.LINGXI_DAEMON_PORT || '0', 10) || 0;
+  const pyBin = '/opt/homebrew/bin/python3.12';
+  // 【W2】显式 unset 默认 fail-closed env (用户必须显式 enable)
+  const daemonEnv = {
+    ...process.env,
+    LINGXI_DAEMON_PORT: '0',  // 让 daemon 选空闲端口
+    PYTHONPATH: paths.repoRoot,
+    LINGXI_API_PROVIDER_ALLOW_PS_TOKEN: '0',  // 【W2】默认禁 ps 抓 token
+    PATH: `/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${process.env.PATH}`,
+  };
+  // 不强制设 LINGXI_API_PROVIDER_ALLOW_MOCK, 跟 shell 一致
+  const daemon = spawn(pyBin, ['-m', 'backend.daemon.server'], {
+    cwd: paths.repoRoot,
+    env: daemonEnv,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  let buf = '';
+  let daemonPort = null;
+  const ready = new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(null), 10_000);
+    daemon.stdout.on('data', (chunk) => {
+      buf += chunk.toString();
+      const lines = buf.split('\n');
+      if (lines.length >= 2) {
+        const p = parseInt(lines[1].trim(), 10);
+        if (!isNaN(p) && p > 0) {
+          daemonPort = p;
+          clearTimeout(timer);
+          resolve(p);
+        }
+      }
+    });
+    daemon.stderr.on('data', (chunk) => {
+      const s = chunk.toString().trim();
+      if (s) logW1(`[daemon] ${s}`);
+    });
+  });
+  const result = await ready;
+  if (!result) {
+    try { daemon.kill(); } catch {}
+    logW1('[daemon] failed to start within 10s');
+    return null;
+  }
+  w1Daemon = { proc: daemon, baseUrl: `http://127.0.0.1:${daemonPort}`, port: daemonPort };
+  logW1(`[daemon] started on port ${daemonPort}`);
+  return w1Daemon;
+}
+
+async function stopW1Daemon() {
+  if (w1Daemon?.proc) {
+    try { w1Daemon.proc.kill('SIGTERM'); } catch {}
+    await new Promise((r) => setTimeout(r, 500));
+    try { w1Daemon.proc.kill('SIGKILL'); } catch {}
+    w1Daemon = null;
+  }
+}
 
 // ---- T-3.1: 跑 full-demo (T-6.1 保留) ----
 ipcMain.handle('start-demo', async (event) => {
@@ -226,21 +391,23 @@ ipcMain.handle('show-in-finder', async (event, dir) => {
   if (dir && fs.existsSync(dir)) shell.showItemInFolder(dir);
 });
 
-// ---- T-6.1: 暴露 Electron 版本信息给 renderer (用于 health check) ----
-ipcMain.handle('get-info', async () => ({
-  electron: process.versions.electron,
-  chrome: process.versions.chrome,
-  node: process.versions.node,
-  platform: process.platform,
-  arch: process.arch,
-  pid: process.pid,
-}));
-
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // 【W2】app 启动时自动启 daemon (供 renderer 调)
+  if (process.env.LINGXI_DAEMON_AUTOSTART !== '0') {
+    try {
+      await startW1Daemon();
+    } catch (e) {
+      logW1('[daemon] autostart failed:', e?.message);
+    }
+  }
   createWindow();
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
+});
+
+app.on('before-quit', async () => {
+  await stopW1Daemon();
 });
 
 app.on('window-all-closed', () => {

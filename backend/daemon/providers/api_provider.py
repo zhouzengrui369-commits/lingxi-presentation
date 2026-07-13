@@ -6,13 +6,21 @@ Key 来源（按优先级）：
   1. 显式注入 api_key 参数
   2. env $MiniMax_API_KEY / $MINIMAX_API_KEY / $minimax_API_KEY (Wave 5a 大小写兼容)
   3. env $__MAVIS_PARENT_ACCESS_TOKEN (mavis daemon 内部继承的 JWT)
-  4. 通过 `ps eww` 从 mavis daemon 进程抓（mac/linux, last resort）
+  4. ~~通过 `ps eww` 从 mavis daemon 进程抓（mac/linux, last resort)~~
+     【W2 fail-closed】默认关闭 (`LINGXI_API_PROVIDER_ALLOW_PS_TOKEN` 默认 0)
 
 协议风格（自动检测 baseURL）：
   - baseURL 含 "mavis/api/v1/llm" → Anthropic /v1/messages 风格
   - 其他 → OpenAI /chat/completions 风格（向后兼容现有测试）
 
-无 key → 降级 MockProvider 返回 "hello (mock)"。
+【W2 fail-closed】`LINGXI_API_PROVIDER_ALLOW_MOCK` (默认 0):
+  - 0 (默认, fail-closed 模式): 无 key → `is_mock=True` 但 `chat()` 抛 `ProviderCallError("api_key_missing")`,
+    provider name 报 "unavailable"。这是为了把 "silent mock" 变成 "loud fail" —
+    调用方 / 测试方一看就知道当前不是真活。
+  - 1 (显式, smoke test 模式): 无 key → 返回 "hello (mock)", provider name 报 "mock" (不是 "api"，
+    避免跟真活路径混淆)。
+
+返回值 / 行为改动后，server.py / router / 测试会看到 `provider != "api"` 的字段。
 """
 
 from __future__ import annotations
@@ -45,16 +53,38 @@ _MAVIS_PARENT_TOKEN_ENV = "__MAVIS_PARENT_ACCESS_TOKEN"
 _MAVIS_DAEMON_PROCESS_HINT = "daemon.js"
 
 
-# 是否允许通过 `ps` 从 mavis daemon 进程抓 token（默认允许，可被 env 关掉）
-# - 设 "0" / "false" → 禁用（测试 / 安全环境用）
-# - 设 "1" / "true" / 未设 → 启用
+# 【W2 fail-closed】是否允许通过 `ps` 从 mavis daemon 进程抓 token
+# 【W2 改默认】从 1 改 0 — 之前默认 1 是因为 env 经常不带 key, 但生产 token 泄露风险高。
+# 现在 default 0, 真要 ps 抓 token 显式开。
 _PS_TOKEN_ALLOW_ENV = "LINGXI_API_PROVIDER_ALLOW_PS_TOKEN"
 
 
 def _ps_token_allowed() -> bool:
-    """是否启用 ps 抓 token。"""
-    val = os.environ.get(_PS_TOKEN_ALLOW_ENV, "1").strip().lower()
-    return val not in ("0", "false", "no", "off")
+    """是否启用 ps 抓 token。【W2 改默认】从 True 改 False.
+
+    - 设 "0" / "false" → 禁用（默认行为，fail-closed）
+    - 设 "1" / "true" → 显式启用
+    - 未设 → 默认禁用（W2 行为变更）
+    """
+    val = os.environ.get(_PS_TOKEN_ALLOW_ENV, "0").strip().lower()
+    return val in ("1", "true", "yes", "on")
+
+
+# 【W2 fail-closed】是否允许 silent mock 降级
+# 默认 0 → 无 key 直接抛错, 不返回 "hello (mock)"
+# 设 1 → 显式允许 mock, 返回 "hello (mock)" + provider name "mock" (不是 "api")
+_MOCK_ALLOW_ENV = "LINGXI_API_PROVIDER_ALLOW_MOCK"
+
+
+def _mock_allowed() -> bool:
+    """是否允许 silent mock 降级。【W2 新增】默认 False (fail-closed).
+
+    - 设 "0" / "false" → 禁用 silent mock（默认，fail-closed）
+    - 设 "1" / "true" / "yes" / "on" → 显式启用（仅 smoke test 用）
+    - 未设 → 默认禁用
+    """
+    val = os.environ.get(_MOCK_ALLOW_ENV, "0").strip().lower()
+    return val in ("1", "true", "yes", "on")
 
 
 def _read_mavis_access_token_from_ps() -> str | None:
@@ -116,7 +146,7 @@ def _resolve_api_key() -> str | None:
     优先级：
       1. 显式大小写兼容的 MiniMax_API_KEY 系列
       2. __MAVIS_PARENT_ACCESS_TOKEN env
-      3. ps 抓 mavis daemon 进程
+      3. ps 抓 mavis daemon 进程（【W2】默认禁用）
     """
     for env_name in _API_KEY_ENV_NAMES:
         val = os.environ.get(env_name)
@@ -146,9 +176,12 @@ def _detect_protocol(base_url: str) -> str:
 
 
 class MockProvider(AIProvider):
-    """无 key 时降级使用，纯本地返回 "hello"。
+    """无 key 时的显式 mock 路径（【W2】只允许 `LINGXI_API_PROVIDER_ALLOW_MOCK=1` 时用）。
 
-    用作 default fallback + smoke test 用。
+    与 MiniMaxAPIProvider.is_mock=True 区分:
+    - MockProvider 是独立类, name = "mock", 用于显式 mock 场景
+    - MiniMaxAPIProvider.is_mock=True 是"假装有 provider 但其实走 mock 内部"，
+      【W2】默认会抛错, 不再 silent 返回 mock
     """
 
     name = "mock"
@@ -163,13 +196,45 @@ class MockProvider(AIProvider):
         return True
 
 
+class UnavailableProvider(AIProvider):
+    """【W2 新增】无可用 provider 时占位用, name = "unavailable"。
+
+    chat() 永远抛 ProviderCallError("no_provider_available")。
+    用于 router.fallback 也没找到时, 让 server 返回 503 而不是 silent mock。
+    """
+
+    name = "unavailable"
+
+    def __init__(self, reason: str = "no_provider_available") -> None:
+        self._reason = reason
+
+    async def chat(self, prompt: str, **kwargs: Any) -> str:
+        raise ProviderCallError(
+            f"[W2 fail-closed] {self._reason}: 无可用 provider (无 MiniMax_API_KEY, CLI 也不可达). "
+            f"显式启用 mock: 设 LINGXI_API_PROVIDER_ALLOW_MOCK=1",
+            provider=self.name,
+        )
+
+    async def health(self) -> bool:
+        return False
+
+
 class MiniMaxAPIProvider(AIProvider):
     """MiniMax API provider。
 
     支持 OpenAI (/chat/completions) 和 Anthropic (/v1/messages) 两种风格，
     根据 baseURL 自动检测。
+
+    【W2 fail-closed】无 key 且 `LINGXI_API_PROVIDER_ALLOW_MOCK != 1` 时:
+      - `is_mock` 仍为 True (兼容现有代码)
+      - `chat()` 抛 `ProviderCallError("api_key_missing")` (不返回 "hello (mock)")
+      - 调用方 (router / server) 看到异常, 会回 503/502
+
+    有 key 时: 真 LLM 路径, 行为与 W1 一致。
     """
 
+    # 【W2 注意】name 仍是 "api" 以保持向后兼容
+    # 但当 is_mock=True 且 mock 不允许时, 上层应改报 "unavailable"
     name = "api"
 
     DEFAULT_BASE_URL = "https://agent.minimaxi.com/mavis/api/v1/llm/v1"
@@ -221,6 +286,24 @@ class MiniMaxAPIProvider(AIProvider):
     def is_mock(self) -> bool:
         """当前实例是否走 mock 路径（无 API key）。"""
         return not (self._api_key and self._api_key.strip())
+
+    @property
+    def mock_allowed(self) -> bool:
+        """当前是否允许 silent mock 降级。【W2 新增】"""
+        return _mock_allowed()
+
+    @property
+    def effective_name(self) -> str:
+        """【W2 新增】根据 is_mock + mock_allowed 返回对外报告的名字:
+        - 有 key → "api"
+        - 无 key + mock 允许 → "mock"
+        - 无 key + mock 不允许 → "unavailable"
+        """
+        if not self.is_mock:
+            return "api"
+        if self.mock_allowed:
+            return "mock"
+        return "unavailable"
 
     @property
     def protocol(self) -> str:
@@ -286,9 +369,18 @@ class MiniMaxAPIProvider(AIProvider):
             ) from exc
 
     async def chat(self, prompt: str, **kwargs: Any) -> str:
+        # 【W2 fail-closed】无 key 时, 如果 mock 允许才返回 mock, 否则抛错
         if self.is_mock:
-            # 降级 mock：返回 hello
-            return "hello (mock)"
+            if self.mock_allowed:
+                # 显式允许 mock 模式 (LINGXI_API_PROVIDER_ALLOW_MOCK=1)
+                return "hello (mock)"
+            # 【W2 fail-closed】默认: 抛 ProviderCallError, 让上层 (router/server) 知道真没 provider
+            raise ProviderCallError(
+                "[W2 fail-closed] api_key_missing: 无 MiniMax_API_KEY, "
+                "LINGXI_API_PROVIDER_ALLOW_PS_TOKEN 默认 0 禁用 ps 抓 token. "
+                "显式启用 mock: 设 LINGXI_API_PROVIDER_ALLOW_MOCK=1",
+                provider="unavailable",  # 【W2】上报的名字, 跟 effective_name 一致
+            )
 
         url = f"{self._base_url}{self._endpoint}"
         headers = {
@@ -331,7 +423,10 @@ class MiniMaxAPIProvider(AIProvider):
         return self._extract_content(data)
 
     async def health(self) -> bool:
-        # mock 永远健康；真实路径只检查 key 是否存在（不真发请求，避免 cost）
+        # 【W2 fail-closed】
+        # - 无 key + 默认 (mock 不允许) → False (无真活)
+        # - 无 key + mock 允许 → True (smoke test 模式)
+        # - 有 key → True
         if self.is_mock:
-            return True
+            return self.mock_allowed
         return bool(self._api_key)
