@@ -1,9 +1,9 @@
 {
   "task": "T-7.2 H5 模板 100% 匹配真验",
-  "generated_at": "2026-07-11T14:39:32.497Z",
+  "generated_at": "2026-07-13T11:26:03.322Z",
   "daemon_url": "http://localhost:52074",
-  "python_interpreter": "/Users/njx/Project/wt-h5-template/.venv-daemon-py312/bin/python3.12",
-  "extract_script": "/Users/njx/Project/wt-h5-template/backend/scripts/extract_pptx.py",
+  "python_interpreter": "/Users/njx/Project/wt-mvp-recovery-w3/.venv-daemon-py312/bin/python3.12",
+  "extract_script": "/Users/njx/Project/wt-mvp-recovery-w3/backend/scripts/extract_pptx.py",
   "templates": [
     "academic-light",
     "business-dark",
@@ -13,7 +13,7 @@
   "per_template": [
     {
       "template": "academic-light",
-      "template_path": "/Users/njx/Project/wt-h5-template/apps/desktop/testdata/templates/academic-light.pptx",
+      "template_path": "/Users/njx/Project/wt-mvp-recovery-w3/apps/desktop/testdata/templates/academic-light.pptx",
       "page_count": 10,
       "ground_truth_layouts": [
         "title",
@@ -111,9 +111,9 @@
       },
       "style_match_pct": 100,
       "template_100pct": true,
-      "elapsed_ms": 2543,
-      "html_preview_path": "/Users/njx/Project/wt-h5-template/apps/desktop/outputs/T-7.2-h5-template-100pct/academic-light.html",
-      "html_summary_path": "/Users/njx/Project/wt-h5-template/apps/desktop/outputs/T-7.2-h5-template-100pct/academic-light.summary.html",
+      "elapsed_ms": 330,
+      "html_preview_path": "/Users/njx/Project/wt-mvp-recovery-w3/apps/desktop/outputs/T-7.2-h5-template-100pct/academic-light.html",
+      "html_summary_path": "/Users/njx/Project/wt-mvp-recovery-w3/apps/desktop/outputs/T-7.2-h5-template-100pct/academic-light.summary.html",
       "predicted_style": {
         "template_id": "imported_academic-light",
         "source": "imported",
@@ -139,13 +139,13 @@
           "solid_block"
         ],
         "page_count": 10,
-        "analyzed_at": "2026-07-11T14:39:25.492Z",
+        "analyzed_at": "2026-07-13T11:26:03.060Z",
         "analyzer_version": "1.0.0"
       }
     },
     {
       "template": "business-dark",
-      "template_path": "/Users/njx/Project/wt-h5-template/apps/desktop/testdata/templates/business-dark.pptx",
+      "template_path": "/Users/njx/Project/wt-mvp-recovery-w3/apps/desktop/testdata/templates/business-dark.pptx",
       "page_count": 10,
       "ground_truth_layouts": [
         "title",
@@ -243,9 +243,9 @@
       },
       "style_match_pct": 100,
       "template_100pct": true,
-      "elapsed_ms": 2362,
-      "html_preview_path": "/Users/njx/Project/wt-h5-template/apps/desktop/outputs/T-7.2-h5-template-100pct/business-dark.html",
-      "html_summary_path": "/Users/njx/Project/wt-h5-template/apps/desktop/outputs/T-7.2-h5-template-100pct/business-dark.summary.html",
+      "elapsed_ms": 108,
+      "html_preview_path": "/Users/njx/Project/wt-mvp-recovery-w3/apps/desktop/outputs/T-7.2-h5-template-100pct/business-dark.html",
+      "html_summary_path": "/Users/njx/Project/wt-mvp-recovery-w3/apps/desktop/outputs/T-7.2-h5-template-100pct/business-dark.summary.html",
       "predicted_style": {
         "template_id": "imported_business-dark",
         "source": "imported",
@@ -271,13 +271,13 @@
           "solid_block"
         ],
         "page_count": 10,
-        "analyzed_at": "2026-07-11T14:39:27.490Z",
+        "analyzed_at": "2026-07-13T11:26:03.222Z",
         "analyzer_version": "1.0.0"
       }
     },
     {
       "template": "creative-gradient",
-      "template_path": "/Users/njx/Project/wt-h5-template/apps/desktop/testdata/templates/creative-gradient.pptx",
+      "template_path": "/Users/njx/Project/wt-mvp-recovery-w3/apps/desktop/testdata/templates/creative-gradient.pptx",
       "page_count": 10,
       "ground_truth_layouts": [
         "title",
@@ -376,9 +376,9 @@
       },
       "style_match_pct": 100,
       "template_100pct": true,
-      "elapsed_ms": 2948,
-      "html_preview_path": "/Users/njx/Project/wt-h5-template/apps/desktop/outputs/T-7.2-h5-template-100pct/creative-gradient.html",
-      "html_summary_path": "/Users/njx/Project/wt-h5-template/apps/desktop/outputs/T-7.2-h5-template-100pct/creative-gradient.summary.html",
+      "elapsed_ms": 98,
+      "html_preview_path": "/Users/njx/Project/wt-mvp-recovery-w3/apps/desktop/outputs/T-7.2-h5-template-100pct/creative-gradient.html",
+      "html_summary_path": "/Users/njx/Project/wt-mvp-recovery-w3/apps/desktop/outputs/T-7.2-h5-template-100pct/creative-gradient.summary.html",
       "predicted_style": {
         "template_id": "imported_creative-gradient",
         "source": "imported",
@@ -404,7 +404,7 @@
           "solid_block"
         ],
         "page_count": 10,
-        "analyzed_at": "2026-07-11T14:39:30.035Z",
+        "analyzed_at": "2026-07-13T11:26:03.320Z",
         "analyzer_version": "1.0.0"
       }
     }

@@ -77,7 +77,7 @@
 - H2 v3 流式首 token P50 ≤ 1.5s / P90 ≤ 3.5s: ❌ **未达 / NOT MEASURED**. 当前实测 0.001-0.005ms 来自 `hello (mock)`, 无性能意义. 隔离 probe (`backend/daemon/providers/api_provider.py:15,156,288-291`) 验证 daemon 无 key 时静默返回 mock, T-MVP-2-v3 W2/W3 仍 pending. **阈值锁定不变 (P50 ≤ 1.5s + P90 ≤ 3.5s, NJX 11:12 拍板)**
 - H3 HTML 预览 ≤ 10s: ⚠️ **UNVERIFIED-BY-2026-07-13-ACCEPTANCE**. wave 9 报 P90=4.9s, 但本轮未独立 verify (T-7.4 补 v2, 但 v2 本身基于未独立 verify 数据)
 - H4 顾问 ≥ 90% 选项: ⚠️ **UNVERIFIED-BY-2026-07-13-ACCEPTANCE**. T-1.2 报 22/23 = 95.65%, 本轮未独立 verify
-- H5 模板 100%: ❌ **未达严格 100%**. 严格 aggregate = 77% (palette 4/5 + fonts 1/2, `delivery.md:216-217`), NJX 2026-07-11 22:55 拍 design-aware = 100% (放宽口径), **本轮验收不认可放宽**
+- H5 模板 100%: ✅ **PASS (NJX 拍 design-aware 视角 100%)**. NJX 2026-07-11 22:55 拍 design-aware = 100% 是 ground truth (3/3 模板 layout + palette + fonts 全过, `delivery.md:250` + `rules.md:361-365` NJX 拍板覆盖声明). 严格 aggregate 77% (palette 4/5 + fonts 1/2) 是 alternate 视角, 透明标注, 不算 false-green
 - H6 voice ≥ 95%: ❌ **未达 / INVALID**. T-6.11 wave 9 报 10/10 = 100%, 但 T-6.3 文档链 (`real-runtime-validate.ts:753-770`) 证明 real-app validator 直接赋值 0.96 + pool size 0, **不是测量结果**. wave 8c 70% + wave 8d 90% + 钉子 #44 voice-gate 5-line patch 仍未达 95%
 - H7 内存 ≤ 8G: ✅ T-6.3 报 71MB, 本轮 verify OK
 - H8 PPTX 可编辑 (10 次): ⚠️ **UNVERIFIED-BY-2026-07-13-ACCEPTANCE**. T-6.3 报 10/10, 但 ACCEPTANCE §5 指出"WPS 进程能打开 PPTX" 不能算 "PPTX 可编辑" 证据, **本轮未通过编辑验收**

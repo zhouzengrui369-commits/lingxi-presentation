@@ -15,6 +15,13 @@
  *     --output /tmp/quarterly_demo_output
  *
  * 设计：所有子步骤都用现有 CLI / 模块 API，不绕过任何生产路径。
+ *
+ * 【W2 fail-closed】关键改动:
+ *   - 任一 step 返回 fell_back=true / provider=mock|unavailable / content="hello (mock)" → 整体 FAIL
+ *   - 任一 step status=partial → 整体 FAIL
+ *   - 任一 阈值失败 → 整体 FAIL
+ *   - 失败时 exit=1 且 不打印 "DEMO 全程通过" 字样
+ *   - 显式 --allow-mock 标志允许 silent mock (smoke test only)
  */
 
 import { promises as fs } from 'fs';
@@ -32,7 +39,7 @@ type QuestionTemplate = (typeof SCENARIO_TEMPLATES)[number]['questions'][number]
 
 // ---- Args ----
 
-function parseArgs(argv: string[]): { input: string; output: string } {
+function parseArgs(argv: string[]): { input: string; output: string; allowMock: boolean } {
   const out: Record<string, string> = {};
   for (let i = 0; i < argv.length; i++) {
     if (argv[i].startsWith('--')) {
@@ -43,7 +50,9 @@ function parseArgs(argv: string[]): { input: string; output: string } {
   }
   const input = out.input || 'apps/desktop/testdata/quarterly_review';
   const output = out.output || '/tmp/quarterly_demo_output';
-  return { input, output };
+  // 【W2】显式 --allow-mock 标志, 默认 false (fail-closed)
+  const allowMock = out['allow-mock'] === 'true' || out['allow-mock'] === '1';
+  return { input, output, allowMock };
 }
 
 // ---- Daemon probe ----
@@ -54,15 +63,22 @@ function daemonBaseUrl(): string {
   return `http://127.0.0.1:${port}`;
 }
 
-async function probeDaemon(): Promise<{ port: number; healthy: boolean; providers: string[] }> {
+async function probeDaemon(): Promise<{ port: number; healthy: boolean; providers: string[]; status: string; available: boolean; activeProvider: string }> {
   const base = daemonBaseUrl();
   const port = parseInt(process.env.LINGXI_DAEMON_PORT!, 10);
   try {
     const r = await fetch(`${base}/v1/health`);
     const data = (await r.json()) as any;
-    return { port, healthy: data.status === 'ok', providers: data.providers ?? [] };
+    return {
+      port,
+      healthy: r.ok,  // 【W2】HTTP 200 = connected, 不管 status 字段 (degraded 也算 connected)
+      providers: data.providers ?? [],
+      status: data.status ?? 'unknown',
+      available: data.available ?? false,
+      activeProvider: data.active_provider ?? 'unknown',
+    };
   } catch {
-    return { port, healthy: false, providers: [] };
+    return { port, healthy: false, providers: [], status: 'unreachable', available: false, activeProvider: 'unknown' };
   }
 }
 
@@ -90,14 +106,49 @@ async function main() {
 
   const pipelineLog: Array<{ step: string; status: string; data?: unknown; ms?: number }> = [];
 
+  // 【W2 fail-closed】错误聚合器: 收集所有 fail-closed 触发原因
+  const failReasons: string[] = [];
+
+  const checkFailClosed = (stepName: string, check: {
+    fellBack?: boolean;
+    provider?: string;
+    content?: string;
+    providerStatus?: string;
+    partial?: boolean;
+  }): void => {
+    if (check.fellBack === true) {
+      failReasons.push(`[${stepName}] fell_back=true (LLM 调用降级, 非真活)`);
+    }
+    if (check.provider === 'mock' || check.provider === 'unavailable') {
+      failReasons.push(`[${stepName}] provider=${check.provider} (无真活 provider, silent mock 路径)`);
+    }
+    if (check.providerStatus === 'mock' || check.providerStatus === 'unavailable') {
+      failReasons.push(`[${stepName}] provider_status=${check.providerStatus} (daemon 上报非真活)`);
+    }
+    if (check.content === 'hello (mock)') {
+      failReasons.push(`[${stepName}] content="hello (mock)" (silent mock 字符串, 非真 LLM 输出)`);
+    }
+    if (check.partial === true) {
+      failReasons.push(`[${stepName}] status=partial (步骤部分失败)`);
+    }
+  };
+
   // ---- Step 0: Daemon probe ----
   console.log('\n[0/5] 探测 daemon ...');
   const daemon = await probeDaemon();
-  console.log(`      daemon port=${daemon.port} healthy=${daemon.healthy} providers=${daemon.providers.join(',')}`);
+  console.log(`      daemon port=${daemon.port} status=${daemon.status} available=${daemon.available} active_provider=${daemon.activeProvider} providers=${daemon.providers.join(',')}`);
+  // 【W2】区分 connected vs healthy:
+  // - daemon.healthy = HTTP 200 connected (能调通)
+  // - daemon.available = daemon 上报有真活 provider
+  // 仅在 daemon 完全连不上 (HTTP error) 时 abort, fail-closed (degraded) 走后续 fail-closed 检测
   if (!daemon.healthy) {
     throw new Error('daemon unhealthy — abort. Start with: python -m backend.daemon.server');
   }
-  pipelineLog.push({ step: 'daemon_probe', status: 'ok', data: daemon });
+  // 【W2】daemon degraded 标记 fail-closed 触发原因, 但不立即 abort
+  if (daemon.status === 'degraded' || !daemon.available) {
+    failReasons.push(`[daemon_probe] daemon degraded: status=${daemon.status} available=${daemon.available} active_provider=${daemon.activeProvider}`);
+  }
+  pipelineLog.push({ step: 'daemon_probe', status: daemon.available ? 'ok' : 'partial', data: daemon });
 
   // ---- Step 1: file_kb import ----
   console.log('\n[1/5] file_kb: 导入季度汇报源文件 ...');
@@ -118,6 +169,10 @@ async function main() {
   for (const e of batch.entries) {
     console.log(`        wiki: ${e.title}  tags=[${e.tags.join(', ')}]`);
   }
+  // 【W2】file_kb 失败不视为 fail-closed (file_kb 是本地, 不是 LLM)
+  // 但 partial 状态仍记 failReasons (跟原来 W1 行为一致: partial = 部分失败, 应 fail-closed)
+  const step1Partial = batch.failed.length > 0;
+  checkFailClosed('file_kb_import', { partial: step1Partial });
   pipelineLog.push({
     step: 'file_kb_import',
     status: batch.failed.length === 0 ? 'ok' : 'partial',
@@ -136,7 +191,7 @@ async function main() {
   if (!qrScenario) throw new Error('quarterly_review scenario not found');
   const advisorQuestions = qrScenario.questions.slice(0, 3) as QuestionTemplate[];
   const step2Start = performance.now();
-  const advisorLog: Array<{ round: number; question: string; options: string[]; picked: string; chat_provider: string; chat_elapsed_ms: number }> = [];
+  const advisorLog: Array<{ round: number; question: string; options: string[]; picked: string; chat_provider: string; chat_provider_status: string; chat_elapsed_ms: number; chat_fell_back: boolean }> = [];
 
   // 3 轮问题 log 准备 (同步, 不调 LLM)
   const roundPayloads = advisorQuestions.map((q, i) => {
@@ -156,7 +211,16 @@ async function main() {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ prompt: p.prompt }),
-      }).then(async (r) => ({ ok: r.ok, status: r.status, data: r.ok ? ((await r.json()) as any) : null })),
+      }).then(async (r) => {
+        // 【W2 fail-closed】非 2xx → 立即记 fail
+        if (!r.ok) {
+          let body: any = null;
+          try { body = await r.json(); } catch { /* ignore */ }
+          return { ok: false, status: r.status, data: body, httpError: true };
+        }
+        const data = (await r.json()) as any;
+        return { ok: true, status: r.status, data };
+      }),
     ),
   );
 
@@ -164,21 +228,41 @@ async function main() {
     const p = roundPayloads[i];
     const cr = chatResults[i];
     const provider = cr?.data?.provider ?? 'unknown';
+    const providerStatus = cr?.data?.provider_status ?? 'unknown';
+    const fellBack = cr?.data?.fell_back ?? false;
     const elapsed = cr?.data?.elapsed_ms ?? 0;
-    console.log(`      Round ${p.round} LLM: provider=${provider} elapsed_ms=${elapsed.toFixed(2)} content_chars=${cr?.data?.content?.length ?? 0}`);
-    advisorLog.push({ round: p.round, question: p.question, options: p.options, picked: p.picked, chat_provider: provider, chat_elapsed_ms: elapsed });
+    const content = cr?.data?.content ?? '';
+    console.log(`      Round ${p.round} LLM: provider=${provider} status=${providerStatus} fell_back=${fellBack} elapsed_ms=${elapsed.toFixed(2)} content_chars=${content.length}`);
+    advisorLog.push({ round: p.round, question: p.question, options: p.options, picked: p.picked, chat_provider: provider, chat_provider_status: providerStatus, chat_elapsed_ms: elapsed, chat_fell_back: fellBack });
+    // 【W2 fail-closed】任一 advisor round 失败 → 整个 advisor 步骤 fail
+    if (cr.httpError || !cr.ok) {
+      failReasons.push(`[advisor Round ${p.round}] HTTP ${cr.status} (daemon 返错, 非真活): ${JSON.stringify(cr.data)}`);
+    } else {
+      checkFailClosed(`advisor Round ${p.round}`, {
+        fellBack,
+        provider,
+        content,
+        providerStatus,
+      });
+    }
   }
 
   const step2Ms = Math.round(performance.now() - step2Start);
   // H2 latency = step2Ms (3 round 并行总耗时 = max(t1,t2,t3) ≈ 单 round 时间)
   // 比串行 sum(t1+t2+t3) 降 ~3x
+  // 【W2】advisor 步骤有 fail-closed 触发 → 标 partial 让全 pipeline 看到
+  const advisorHasFail = advisorLog.some(r => r.chat_fell_back || r.chat_provider === 'mock' || r.chat_provider === 'unavailable' || r.chat_provider_status === 'mock' || r.chat_provider_status === 'unavailable');
   pipelineLog.push({
     step: 'advisor_3_rounds',
-    status: 'ok',
+    status: advisorHasFail ? 'partial' : 'ok',
     data: {
       rounds: advisorLog.length,
       picked: advisorLog.map(r => r.picked),
       daemon_chat_provider: advisorLog[0]?.chat_provider,
+      daemon_chat_provider_status: advisorLog[0]?.chat_provider_status,
+      per_round_fell_back: advisorLog.map(r => r.chat_fell_back),
+      per_round_provider: advisorLog.map(r => r.chat_provider),
+      per_round_provider_status: advisorLog.map(r => r.chat_provider_status),
       parallel: true,
       per_round_elapsed_ms: advisorLog.map(r => r.chat_elapsed_ms),
     },
@@ -253,10 +337,17 @@ async function main() {
   console.log(`      preview_id: ${previewJson.preview_id}`);
   console.log(`      latency_ms: ${previewJson.latency_ms}  under_10s=${previewJson.under_10s}`);
   console.log(`      html_path: ${previewHtmlPath}`);
+  // 【W2 fail-closed】preview 阶段检测: fell_back, mock provider, partial
+  checkFailClosed('preview_generate', {
+    fellBack: previewJson.fell_back,
+    provider: previewJson.provider,
+    providerStatus: previewJson.provider_status,
+    partial: !previewJson.under_10s,
+  });
   pipelineLog.push({
     step: 'preview_generate',
-    status: previewJson.under_10s ? 'ok' : 'partial',
-    data: { preview_id: previewJson.preview_id, latency_ms: previewJson.latency_ms, under_10s: previewJson.under_10s, html_path: previewHtmlPath, provider: previewJson.provider },
+    status: previewJson.under_10s ? (previewJson.fell_back ? 'partial' : 'ok') : 'partial',
+    data: { preview_id: previewJson.preview_id, latency_ms: previewJson.latency_ms, under_10s: previewJson.under_10s, html_path: previewHtmlPath, provider: previewJson.provider, fell_back: previewJson.fell_back, provider_status: previewJson.provider_status },
     ms: step4Ms,
   });
 
@@ -332,6 +423,11 @@ async function main() {
   }
   const step5Ms = Math.round(performance.now() - step5Start);
   const allOk = Object.values(exportResults).every((r: any) => r.status === 'ok' && r.size_bytes > 0);
+  // 【W2】4 格式输出任何 partial 也记 fail (保留原 partial 标记)
+  const outputHasPartial = Object.values(exportResults).some((r: any) => r.status !== 'ok' || r.size_bytes === 0);
+  if (outputHasPartial) {
+    failReasons.push(`[output_4_formats] 部分格式生成失败: ${JSON.stringify(exportResults, null, 2)}`);
+  }
   pipelineLog.push({
     step: 'output_4_formats',
     status: allOk ? 'ok' : 'partial',
@@ -341,26 +437,50 @@ async function main() {
 
   // ---- Summary ----
   const totalMs = Math.round(performance.now() - startedAt);
+  // 【W2 fail-closed】summary.ok 由 failReasons 决定, 不是 W1 的 "all partial-OK" 逻辑
+  const w2HasFail = failReasons.length > 0;
   const summary = {
-    ok: allOk && pipelineLog.every(p => p.status === 'ok' || p.status === 'partial'),
+    ok: !w2HasFail && allOk,
     total_ms: totalMs,
     daemon,
     input_dir: inputAbs,
     output_dir: outputDir,
     pipeline: pipelineLog,
+    // 【W2】fail_reasons 让 verifier / PM 看到具体 fail-closed 触发
+    fail_reasons: failReasons,
+    fail_reason_count: failReasons.length,
+    w2_allow_mock: args.allowMock,
   };
   await fs.writeFile(path.join(outputDir, 'demo-summary.json'), JSON.stringify(summary, null, 2), 'utf-8');
   console.log(`\n========= DEMO 总结 =========`);
   console.log(`  total: ${totalMs}ms`);
   console.log(`  ok: ${summary.ok}`);
+  console.log(`  fail_reasons: ${failReasons.length}`);
+  for (const r of failReasons) {
+    console.log(`    - ${r}`);
+  }
   console.log(`  output_dir: ${outputDir}`);
   console.log(`  summary: ${path.join(outputDir, 'demo-summary.json')}`);
 
-  if (!summary.ok) {
-    console.error('DEMO 部分失败');
+  // 【W2 fail-closed】exit code:
+  // - 0 = 全程真活, 无任何 fail-closed 触发
+  // - 1 = fail-closed 触发, 但允许 silent mock (显式 --allow-mock)
+  // - 2 = fail-closed 触发, 不允许 silent mock (默认)
+  if (w2HasFail) {
+    if (args.allowMock) {
+      console.error(`DEMO fail-closed 触发 ${failReasons.length} 项, 但 --allow-mock 显式允许, exit 1`);
+      process.exit(1);
+    }
+    console.error(`DEMO fail-closed 触发 ${failReasons.length} 项, 整体 FAIL, exit 2`);
+    process.exit(2);
+  }
+  // 【W2】注意: 即便没 fail-closed, 如果 daemon degraded 或 step partial 也不算 PASS
+  const summaryStrict = summary.ok;
+  if (!summaryStrict) {
+    console.error('DEMO 步骤部分失败 (status=partial 或 4 格式不全), 整体 FAIL, exit 1');
     process.exit(1);
   }
-  console.log('DEMO 全程通过 ✓');
+  console.log('DEMO 全程通过 ✓ (真活验证)');
 }
 
 main().catch(err => {
