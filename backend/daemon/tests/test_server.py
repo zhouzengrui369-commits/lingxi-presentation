@@ -48,18 +48,40 @@ def _make_router(primary_fail: bool = False):
 
 class TestHealthEndpoint:
     def test_health_returns_ok(self):
+        """【W2】健康 router (StubProvider 都 alive) → status=ok, available=True, active_provider=cli."""
         app = create_app(_make_router())
         with TestClient(app) as client:
             r = client.get("/v1/health")
             assert r.status_code == 200
             data = r.json()
             assert data["status"] == "ok"
+            assert data["available"] is True
+            assert data["active_provider"] == "cli"  # 【W2 新增】effective_name
             assert "cli" in data["providers"]
             assert "api" in data["providers"]
+
+    def test_health_returns_degraded_when_no_provider(self, monkeypatch):
+        """【W2 新增】没 API key + 没 CLI → status=degraded, available=False, active_provider=unavailable."""
+        monkeypatch.delenv("MiniMax_API_KEY", raising=False)
+        monkeypatch.delenv("MINIMAX_API_KEY", raising=False)
+        monkeypatch.delenv("minimax_API_KEY", raising=False)
+        monkeypatch.setenv("LINGXI_API_PROVIDER_ALLOW_PS_TOKEN", "0")
+        monkeypatch.delenv("LINGXI_API_PROVIDER_ALLOW_MOCK", raising=False)
+        # 用真 router (cli 找不到 + api 无 key)
+        from backend.daemon.server import build_router
+        app = create_app(build_router())
+        with TestClient(app) as client:
+            r = client.get("/v1/health")
+            assert r.status_code == 200
+            data = r.json()
+            assert data["status"] == "degraded", data
+            assert data["available"] is False
+            assert data["active_provider"] == "unavailable"
 
 
 class TestProvidersEndpoint:
     def test_providers_lists_active(self):
+        """【W2】健康 router → active=cli (effective_name, 不是死值)."""
         app = create_app(_make_router())
         with TestClient(app) as client:
             r = client.get("/v1/providers")
@@ -67,6 +89,21 @@ class TestProvidersEndpoint:
             data = r.json()
             assert data["active"] == "cli"
             assert set(data["available"]) == {"cli", "api"}
+
+    def test_providers_active_unavailable_when_no_provider(self, monkeypatch):
+        """【W2】没 key + 没 CLI → active=unavailable."""
+        monkeypatch.delenv("MiniMax_API_KEY", raising=False)
+        monkeypatch.delenv("MINIMAX_API_KEY", raising=False)
+        monkeypatch.delenv("minimax_API_KEY", raising=False)
+        monkeypatch.setenv("LINGXI_API_PROVIDER_ALLOW_PS_TOKEN", "0")
+        monkeypatch.delenv("LINGXI_API_PROVIDER_ALLOW_MOCK", raising=False)
+        from backend.daemon.server import build_router
+        app = create_app(build_router())
+        with TestClient(app) as client:
+            r = client.get("/v1/providers")
+            assert r.status_code == 200
+            data = r.json()
+            assert data["active"] == "unavailable"
 
 
 class TestChatEndpoint:
@@ -79,6 +116,8 @@ class TestChatEndpoint:
             assert data["content"] == "cli-reply:hello"
             assert data["provider"] == "cli"
             assert data["fell_back"] is False
+            # 【W2 新增】provider_status 字段
+            assert data.get("provider_status") == "live"
 
     def test_chat_falls_back_to_api(self):
         app = create_app(_make_router(primary_fail=True))
@@ -89,6 +128,8 @@ class TestChatEndpoint:
             assert data["content"] == "api-reply:hello"
             assert data["provider"] == "api"
             assert data["fell_back"] is True
+            # 【W2 新增】provider_status 字段
+            assert data.get("provider_status") == "degraded"  # 真活 fallback 走 degraded (不是 mock)
 
     def test_chat_validates_empty_prompt(self):
         app = create_app(_make_router())
@@ -164,7 +205,12 @@ class TestServerRealBoot:
     """
 
     async def test_real_server_health(self):
-        """起真 server + httpx async client 验证 4 endpoints。"""
+        """【W2 更新】显式 LINGXI_API_PROVIDER_ALLOW_MOCK=1 让 mock 可用 (smoke test)。
+
+        W1 行为: silent mock 返 "hello (mock)" + provider=api
+        W2 行为 (显式允许 mock): 返 "hello (mock)" + provider=mock + provider_status=mock
+        W2 行为 (默认): 返 503 E_NO_PROVIDER (在 test_real_server_fail_closed_no_key 测)
+        """
         import os
         import signal
         import subprocess
@@ -172,14 +218,18 @@ class TestServerRealBoot:
         import time
 
         env = os.environ.copy()
-        # 让 fallback 用 mock（避免任何真实网络调用）
-        env["MiniMax_API_KEY"] = ""
+        # 【W2】显式允许 mock 模式
+        env["LINGXI_API_PROVIDER_ALLOW_MOCK"] = "1"
+        env["LINGXI_API_PROVIDER_ALLOW_PS_TOKEN"] = "0"
         env.pop("MiniMax_API_KEY", None)
+        env.pop("MINIMAX_API_KEY", None)
+        env.pop("minimax_API_KEY", None)
+        env.pop("__MAVIS_PARENT_ACCESS_TOKEN", None)
 
         # 起 server
         proc = subprocess.Popen(
             [sys.executable, "-m", "backend.daemon.server"],
-            cwd="/Users/njx/Project/wt-daemon",
+            cwd="/Users/njx/Project/wt-mvp-recovery-w2",
             env=env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -210,26 +260,116 @@ class TestServerRealBoot:
             # 1. health
             r = httpx.get(f"{base}/v1/health")
             assert r.status_code == 200
-            assert r.json()["status"] == "ok"
+            data = r.json()
+            # 【W2】smoke test 模式: status="ok" (允许 mock 也算 ok)
+            assert data["status"] == "ok", data
+            assert data["available"] is True
+            # 【W2】active_provider 报 "mock" (effective_name), 因为允许 mock
+            assert data["active_provider"] == "mock"
 
             # 2. providers
             r = httpx.get(f"{base}/v1/providers")
             assert r.status_code == 200
-            assert r.json()["active"] == "cli"
+            assert r.json()["active"] == "mock"  # 【W2】effective_name
 
-            # 3. chat（CLI 找不到 → fallback mock）
+            # 3. chat (CLI 找不到 → fallback mock → 显式允许)
             r = httpx.post(f"{base}/v1/chat", json={"prompt": "hi"})
             assert r.status_code == 200
             data = r.json()
-            # 因为 PATH 没有 MiniMax CLI → CLI 会失败 → fallback mock
             assert data["fell_back"] is True
-            assert data["provider"] == "api"  # mock 在 API provider 里
+            # 【W2】provider 字段保持 "api" (router 内部名), 但 provider_status 显式标 "mock"
+            assert data["provider"] == "api"
+            assert data["provider_status"] == "mock"
             assert data["content"] == "hello (mock)"
 
             # 4. force
             r = httpx.post(f"{base}/v1/chat/force?provider=api", json={"prompt": "force"})
             assert r.status_code == 200
-            assert r.json()["provider"] == "api"
+            data = r.json()
+            assert data["provider"] == "api"
+            assert data["provider_status"] == "mock"
+        finally:
+            proc.send_signal(signal.SIGTERM)
+            try:
+                proc.wait(timeout=3)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                proc.wait()
+
+    async def test_real_server_fail_closed_no_key(self):
+        """【W2 fail-closed 关键测试】无 key + 默认 → /v1/chat 返 503 E_NO_PROVIDER, /v1/health 报 degraded.
+
+        这是钉子 #46 false-green 的根因修复 — 之前 silent mock 返 200 OK, 现在 503.
+        """
+        import os
+        import signal
+        import subprocess
+        import sys
+        import time
+
+        env = os.environ.copy()
+        # 【W2 默认行为】不显式设 LINGXI_API_PROVIDER_ALLOW_MOCK → 默认 0 → fail-closed
+        env.pop("LINGXI_API_PROVIDER_ALLOW_MOCK", None)
+        env["LINGXI_API_PROVIDER_ALLOW_PS_TOKEN"] = "0"
+        env.pop("MiniMax_API_KEY", None)
+        env.pop("MINIMAX_API_KEY", None)
+        env.pop("minimax_API_KEY", None)
+        env.pop("__MAVIS_PARENT_ACCESS_TOKEN", None)
+
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "backend.daemon.server"],
+            cwd="/Users/njx/Project/wt-mvp-recovery-w2",
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+
+        try:
+            pid_line = proc.stdout.readline().strip()
+            port_line = proc.stdout.readline().strip()
+            port = int(port_line)
+
+            base = f"http://127.0.0.1:{port}"
+            for _ in range(20):
+                try:
+                    r = httpx.get(f"{base}/v1/health", timeout=0.5)
+                    if r.status_code == 200:
+                        break
+                except Exception:
+                    pass
+                time.sleep(0.1)
+            else:
+                pytest.fail("server didn't become ready in 2s")
+
+            # 1. /v1/health: degraded, available=False, active_provider=unavailable
+            r = httpx.get(f"{base}/v1/health")
+            assert r.status_code == 200
+            data = r.json()
+            assert data["status"] == "degraded", data
+            assert data["available"] is False
+            assert data["active_provider"] == "unavailable"
+
+            # 2. /v1/providers: active=unavailable
+            r = httpx.get(f"{base}/v1/providers")
+            assert r.status_code == 200
+            assert r.json()["active"] == "unavailable"
+
+            # 3. /v1/chat: 503 E_NO_PROVIDER (NOT 200 + "hello (mock)")
+            r = httpx.post(f"{base}/v1/chat", json={"prompt": "hi"})
+            assert r.status_code == 503, f"Expected 503 (fail-closed), got {r.status_code}: {r.text}"
+            data = r.json()
+            assert data["detail"]["error"] == "no_provider_available"
+            assert data["detail"]["error_code"] == "E_NO_PROVIDER"
+            assert "api_key_missing" in data["detail"]["message"] or "fail-closed" in data["detail"]["message"]
+
+            # 4. /v1/chat/force?provider=api: 503 (key missing, fail-closed)
+            r = httpx.post(f"{base}/v1/chat/force?provider=api", json={"prompt": "force"})
+            assert r.status_code == 503, f"Expected 503, got {r.status_code}: {r.text}"
+
+            # 5. /v1/chat/force?provider=cli: 503 (CLI not found)
+            r = httpx.post(f"{base}/v1/chat/force?provider=cli", json={"prompt": "force"})
+            assert r.status_code == 503
         finally:
             proc.send_signal(signal.SIGTERM)
             try:
