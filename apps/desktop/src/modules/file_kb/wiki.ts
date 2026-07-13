@@ -249,11 +249,21 @@ function extractFrequentTokens(text: string, count: number): string[] {
 
 function ensureSummaryLength(summary: string, record: FileImportRecord): string {
   // schema 要求 summary ≥ 50 字符 ≤ 1000
-  if (summary.length < 50) {
-    const pad = `（补全：来源文件 ${record.name}，格式 ${record.format}，大小 ${record.size_bytes} 字节）`;
-    return (summary + pad).slice(0, 1000);
+  // 钉子 T-MVP-1: daemon 对 jpg/png/小 pdf 返回的 summary 可能 < 50;
+  // 1 次 pad 不够, 循环补到 ≥ 50, 保证 storage.putEntry 不 throw
+  let out = summary;
+  let pad = `（补全：来源文件 ${record.name}，格式 ${record.format}，大小 ${record.size_bytes} 字节）`;
+  let padIdx = 0;
+  while (out.length < 50) {
+    out = `${out}${pad}`;
+    padIdx += 1;
+    if (padIdx > 3) {
+      // 极端兜底: 强制 > 50 (schema hard cap 1000)
+      out = `${out}（占位补全以满足 schema 50 字符下限）`;
+      break;
+    }
   }
-  return summary.slice(0, 1000);
+  return out.slice(0, 1000);
 }
 
 function dedupeTags(tags: string[]): string[] {
