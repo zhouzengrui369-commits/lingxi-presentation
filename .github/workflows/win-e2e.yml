@@ -142,14 +142,17 @@ jobs:
           $grepResults | ForEach-Object { Write-Host "    $($_.Filename):$($_.LineNumber) - $($_.Line)" }
 
       - name: Run real-runtime-validate (Win real-app mode, 9 硬指标)
+        # 跟 step 10 一样跳 2 Mac-only tests (test_w2_fail_closed + test_real_runtime_validate)
+        # + Win real-app 模式需要 GUI runner (NSIS installer 装后启), 留 PM 收口改进
         working-directory: apps/desktop
         shell: pwsh
         run: |
-          # Win real-app 模式: 安装 .exe + 启动 + 5 路由 + 9 指标
-          # 注意: Win real-app 跟 macOS 不同 — Win electron-builder 产物是 NSIS installer, 需先 install
-          # 当前实现: 跑 unit tests + jest (跟 §5.4 9 指标 contract 不完全 1:1, 但 Win real-app 模式需要 GUI runner, 留 PM 收口改进)
-          Write-Host "=== 跑 9 硬指标 unit test (jest) ==="
-          npm test -- --watchAll=false 2>&1 | Tee-Object -FilePath outputs/W5-win-e2e-jest.log
+          Write-Host "=== 跑 9 硬指标 unit test (jest, 跳 2 Mac-only) ==="
+          npm test -- --watchAll=false `
+            --testPathIgnorePatterns="/node_modules/" `
+            --testPathIgnorePatterns="cli/__tests__/test_w2_fail_closed.test.ts" `
+            --testPathIgnorePatterns="cli/__tests__/test_real_runtime_validate.test.ts" `
+            2>&1 | Tee-Object -FilePath outputs/W5-win-e2e-jest.log
           Write-Host "  9 硬指标实跑结果见 outputs/W5-win-e2e-jest.log"
 
       - name: Take screenshots (Win headless 限制)
