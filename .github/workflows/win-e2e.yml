@@ -183,12 +183,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: win-e2e-artifacts
-          # job cwd = apps/desktop/, .exe 在 dist/windows/ (相对 cwd)
+          # upload-artifact 用 GITHUB_WORKSPACE (repo root) 作 base, 不是 step cwd
+          # .exe 在 apps/desktop/dist/windows/, outputs 在 apps/desktop/outputs/
           path: |
-            dist/windows/*.exe
-            outputs/W5-win-e2e-*.log
-            outputs/W5-win-e2e-*.txt
-            outputs/W5-win-e2e-screenshots/
+            apps/desktop/dist/windows/*.exe
+            apps/desktop/outputs/W5-win-e2e-*.log
+            apps/desktop/outputs/W5-win-e2e-*.txt
+            apps/desktop/outputs/W5-win-e2e-screenshots/
           retention-days: 30
 
       - name: Summary
