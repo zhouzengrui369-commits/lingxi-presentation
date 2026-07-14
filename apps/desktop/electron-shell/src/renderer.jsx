@@ -29,6 +29,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import './renderer.css';
+import * as fc from './failClosed.js';
+
+const { validateFileKbImport, validateAdvisorChat, validatePreviewGenerate, validateOutputGenerate, VERDICT } = fc;
 
 // ---- 5 路由元数据 (与 src/router.tsx 保持一致) ----
 export const ROUTES = [
@@ -112,6 +115,23 @@ function ErrorBlock({ title = '请求失败', error, errorCode, latencyMs, onRet
   );
 }
 
+// ---- 【W3 fail-closed 治本】Degraded 降级状态块 ----
+// 父级 PM 规则 3: 降级与失败必须区分; mock/fallback 可以显示"降级",
+// 但不得解锁用户对产物的成功认知。
+// 因此 DegradedBlock 不显示 ✓ 图标, 用 ⚠, 标题带"降级"字样, 不进 success-block data-testid。
+function DegradedBlock({ title, summary, reason, provider, fellBack, nextStep, children }) {
+  return (
+    <div className="state-block degraded" data-testid="degraded-block">
+      <div className="icon">⚠</div>
+      <div className="title">{title}</div>
+      {summary && <div className="summary">{summary}</div>}
+      {reason && <div className="degraded-reason" data-testid="degraded-reason">原因: {reason}</div>}
+      {nextStep && <div className="degraded-next" data-testid="degraded-next-step">下一步: {nextStep}</div>}
+      {children}
+    </div>
+  );
+}
+
 // ---- 5 路由真业务 web-native 组件 (T-6.1 + W1 接通 + W2 验证) ----
 // 简化版, 每个组件演示 state machine (idle/loading/success/error) + 调真业务 electronAPI
 
@@ -138,8 +158,19 @@ function FileKbScreen({ appendLog }) {
     appendLog('[file-kb] 导入测试文件...');
     try {
       const r = await window.electronAPI.fileKb.import(['/Users/njx/Project/wt-mvp-recovery-w2/apps/desktop/testdata/quarterly_review']);
-      setState({ kind: 'success', data: r });
-      appendLog(`[file-kb] 导入 OK: ${r?.data?.files ?? 0} 文件, ${r?.data?.entries ?? 0} wiki 条目`);
+      // 【W3 fail-closed 治本】先调 validator, false-green (data.files=0) 走 invalid 错误态
+      // 父级 PM 场景 1: daemon unavailable → data.files=0 → 仍显示"导入完成" → 治本
+      const verdict = validateFileKbImport(r);
+      if (verdict.kind === VERDICT.SUCCESS) {
+        setState({ kind: 'success', data: r, verdict });
+        appendLog(`[file-kb] 导入 OK: ${verdict.data.files} 文件, ${verdict.data.entries ?? 0} wiki 条目`);
+      } else if (verdict.kind === VERDICT.DEGRADED) {
+        setState({ kind: 'degraded', data: r, verdict });
+        appendLog(`[file-kb] 导入 DEGRADED: ${verdict.reason}`);
+      } else {
+        setState({ kind: 'error', error: verdict.reason, errorCode: verdict.kind === VERDICT.FAILED ? 'E_FILE_KB_IMPORT' : 'E_INVALID_RESPONSE', latencyMs: r?.latency_ms });
+        appendLog(`[file-kb] 导入 ${verdict.kind.toUpperCase()}: ${verdict.reason}`);
+      }
     } catch (e) {
       setState({ kind: 'error', error: e?.message ?? 'unknown' });
       appendLog(`[file-kb] 导入 FAIL: ${e?.message}`);
@@ -162,12 +193,20 @@ function FileKbScreen({ appendLog }) {
       {state.kind === 'success' && (
         <SuccessBlock
           title="导入完成"
-          summary={`${state.data?.data?.files ?? 0} 文件, ${state.data?.data?.entries ?? 0} wiki 条目 · ${state.data?.latency_ms ?? 0}ms`}
+          summary={`${state.verdict.data.files} 文件, ${state.verdict.data.entries ?? 0} wiki 条目 · ${state.verdict.latency_ms}ms`}
         >
           {kbInfo && <div className="kb-list">KB: {kbInfo?.data?.total ?? 0} 文件</div>}
         </SuccessBlock>
       )}
-      {state.kind === 'error' && <ErrorBlock title="导入失败" error={state.error} onRetry={doImport} />}
+      {state.kind === 'degraded' && (
+        <DegradedBlock
+          title="导入降级完成"
+          summary={`${state.data?.data?.files ?? 0} 文件, ${state.data?.data?.entries ?? 0} wiki 条目`}
+          reason={state.verdict.reason}
+          nextStep="检查 daemon 日志和 provider 配置"
+        />
+      )}
+      {state.kind === 'error' && <ErrorBlock title="导入失败" error={state.error} errorCode={state.errorCode} onRetry={doImport} />}
     </div>
   );
 }
@@ -182,8 +221,19 @@ function AdvisorScreen({ appendLog }) {
     try {
       const r = await window.electronAPI.advisor.chat('请推荐一个季度汇报的章节大纲');
       setChatResult(r);
-      setState({ kind: 'success', data: r });
-      appendLog(`[advisor] chat OK: provider=${r?.provider} fell_back=${r?.fell_back}`);
+      // 【W3 fail-closed 治本】advisor 失败场景: provider=undefined / 0ms → 走 degraded/error 而非 success
+      // 父级 PM 场景 2: provider=undefined, elapsed_ms=0 仍显示"建议已生成" → 治本
+      const verdict = validateAdvisorChat(r);
+      if (verdict.kind === VERDICT.SUCCESS) {
+        setState({ kind: 'success', data: r, verdict });
+        appendLog(`[advisor] chat OK: provider=${verdict.provider} ${verdict.elapsed_ms}ms`);
+      } else if (verdict.kind === VERDICT.DEGRADED) {
+        setState({ kind: 'degraded', data: r, verdict });
+        appendLog(`[advisor] chat DEGRADED: ${verdict.reason}`);
+      } else {
+        setState({ kind: 'error', error: verdict.reason, errorCode: verdict.kind === VERDICT.FAILED ? 'E_ADVISOR_CHAT' : 'E_INVALID_RESPONSE', latencyMs: r?.latency_ms });
+        appendLog(`[advisor] chat ${verdict.kind.toUpperCase()}: ${verdict.reason}`);
+      }
     } catch (e) {
       setState({ kind: 'error', error: e?.error ?? e?.message ?? 'unknown', errorCode: e?.error_code, latencyMs: e?.latency_ms });
       appendLog(`[advisor] chat FAIL: ${e?.error_code ?? e?.message}`);
@@ -205,14 +255,24 @@ function AdvisorScreen({ appendLog }) {
       {state.kind === 'success' && (
         <SuccessBlock
           title="顾问建议已生成"
-          summary={`provider=${state.data?.provider} · ${state.data?.elapsed_ms ?? 0}ms`}
-          provider={state.data?.provider}
-          providerStatus={state.data?.provider_status}
-          fellBack={state.data?.fell_back}
-          content={state.data?.content}
+          summary={`provider=${state.verdict.provider} · ${state.verdict.elapsed_ms}ms`}
+          provider={state.verdict.provider}
+          providerStatus="live"
+          fellBack={false}
+          content={state.verdict.data?.content}
         >
-          <div className="chat-content">{(state.data?.content ?? '').slice(0, 200)}</div>
+          <div className="chat-content">{(state.verdict.data?.content ?? '').slice(0, 200)}</div>
         </SuccessBlock>
+      )}
+      {state.kind === 'degraded' && (
+        <DegradedBlock
+          title="顾问建议(降级)"
+          summary={`provider=${state.verdict.provider ?? '?'} · ${state.data?.data?.elapsed_ms ?? 0}ms`}
+          reason={state.verdict.reason}
+          nextStep="设 MiniMax_API_KEY 或启用 CLI (LINGXI_API_PROVIDER_ALLOW_PS_TOKEN=1) 拿真活 LLM"
+        >
+          <div className="chat-content">{(state.data?.data?.content ?? '').slice(0, 200)}</div>
+        </DegradedBlock>
       )}
       {state.kind === 'error' && (
         <ErrorBlock
@@ -283,8 +343,19 @@ function PreviewScreen({ appendLog }) {
     try {
       const r = await window.electronAPI.preview.generate('灵犀演示 Q1 2026 季度汇报');
       setPreview(r);
-      setState({ kind: 'success', data: r });
-      appendLog(`[preview] 生成 OK: ${r?.data?.section_count ?? 0} 章节, ${r?.data?.latency_ms ?? 0}ms`);
+      // 【W3 fail-closed 治本】preview 失败场景: fell_back=true / provider=mock / 0ms → degraded/invalid 而非 success
+      // 父级 PM 场景 3: fell_back=true, provider=mock, 0ms 仍显示"预览生成完成" → 治本
+      const verdict = validatePreviewGenerate(r);
+      if (verdict.kind === VERDICT.SUCCESS) {
+        setState({ kind: 'success', data: r, verdict });
+        appendLog(`[preview] 生成 OK: ${verdict.data.sections.length} 章节, ${verdict.latency_ms}ms`);
+      } else if (verdict.kind === VERDICT.DEGRADED) {
+        setState({ kind: 'degraded', data: r, verdict });
+        appendLog(`[preview] 生成 DEGRADED: ${verdict.reason}`);
+      } else {
+        setState({ kind: 'error', error: verdict.reason, errorCode: verdict.kind === VERDICT.FAILED ? 'E_PREVIEW' : 'E_INVALID_RESPONSE' });
+        appendLog(`[preview] ${verdict.kind.toUpperCase()}: ${verdict.reason}`);
+      }
     } catch (e) {
       setState({ kind: 'error', error: e?.error ?? e?.message ?? 'unknown', errorCode: e?.error_code });
       appendLog(`[preview] FAIL: ${e?.error_code ?? e?.message}`);
@@ -306,10 +377,26 @@ function PreviewScreen({ appendLog }) {
       {state.kind === 'success' && (
         <SuccessBlock
           title="预览生成完成"
-          summary={`${state.data?.data?.section_count ?? 0} 章节 · ${state.data?.data?.latency_ms ?? 0}ms`}
-          provider={state.data?.data?.provider}
-          providerStatus={state.data?.data?.provider_status}
-          fellBack={state.data?.data?.fell_back}
+          summary={`${state.verdict.data.sections.length} 章节 · ${state.verdict.latency_ms}ms`}
+          provider={state.verdict.provider}
+          providerStatus="live"
+          fellBack={false}
+        >
+          <div className="preview-sections">
+            {(state.verdict.data.sections ?? []).map((s, i) => (
+              <div key={i} className="section-item">
+                <strong>{s.heading}</strong>: {(s.content_html ?? '').replace(/<[^>]+>/g, '').slice(0, 80)}
+              </div>
+            ))}
+          </div>
+        </SuccessBlock>
+      )}
+      {state.kind === 'degraded' && (
+        <DegradedBlock
+          title="预览生成(降级)"
+          summary={`${state.data?.data?.sections?.length ?? 0} 章节 · ${state.data?.data?.latency_ms ?? 0}ms`}
+          reason={state.verdict.reason}
+          nextStep="设 MiniMax_API_KEY 或启用 CLI 拿真活 preview"
         >
           <div className="preview-sections">
             {(state.data?.data?.sections ?? []).map((s, i) => (
@@ -318,7 +405,7 @@ function PreviewScreen({ appendLog }) {
               </div>
             ))}
           </div>
-        </SuccessBlock>
+        </DegradedBlock>
       )}
       {state.kind === 'error' && <ErrorBlock title="预览生成失败" error={state.error} errorCode={state.errorCode} onRetry={doGenerate} />}
     </div>
@@ -337,16 +424,19 @@ function OutputScreen({ appendLog }) {
       const htmlPath = previewLoad?.data?.html_path ?? '/tmp/lingxi_w1_4format_outputs/w1.html';
       const outputPath = `/tmp/lingxi_w2_output_test/Q1_2026_季度汇报.${format}`;
       const r = await window.electronAPI.output.generate(format, htmlPath, outputPath);
-      // 【W3 §3.2 治本】解析 /v1/output 返的 provider_status 字段, 显式标 mock 警告
-      // Wave 1 verifier #4 + Wave 2 钉子 #40 #5 PARTIAL 治本:
-      // - provider_status='mock' → 显式 mock 模式 (W2 §1.9 effective_name)
-      // - provider_status='unavailable' → 无 provider, 必然是降级
-      // - provider_status='degraded' → 降级过 (e.g. CLI 失败后 API 真活)
-      // - fell_back=true → 任何降级过
-      const providerStatus = r?.data?.provider_status ?? r?.provider_status ?? 'live';
-      const fellBack = r?.data?.fell_back ?? r?.fell_back ?? false;
-      setState({ kind: 'success', data: r, format, providerStatus, fellBack });
-      appendLog(`[output] ${format} OK: ${r?.data?.output_path ?? '?'} provider=${providerStatus} fell_back=${fellBack}`);
+      // 【W3 fail-closed 治本】output 失败场景: status=failed / size_bytes=0 / path=? → failed/invalid 而非 success
+      // 父级 PM 场景 4: status=failed, size_bytes=0, path="?" 仍显示".pptx 已生成 ✓" → 治本
+      const verdict = validateOutputGenerate(r);
+      if (verdict.kind === VERDICT.SUCCESS) {
+        setState({ kind: 'success', data: r, format, verdict });
+        appendLog(`[output] ${format} OK: ${verdict.data.output_path} ${verdict.data.size_bytes}B`);
+      } else if (verdict.kind === VERDICT.DEGRADED) {
+        setState({ kind: 'degraded', data: r, format, verdict });
+        appendLog(`[output] ${format} DEGRADED: ${verdict.reason}`);
+      } else {
+        setState({ kind: 'error', error: verdict.reason, errorCode: verdict.kind === VERDICT.FAILED ? 'E_OUTPUT' : 'E_INVALID_RESPONSE', data: r, format });
+        appendLog(`[output] ${format} ${verdict.kind.toUpperCase()}: ${verdict.reason}`);
+      }
     } catch (e) {
       setState({ kind: 'error', error: e?.error ?? e?.message ?? 'unknown', errorCode: e?.error_code });
       appendLog(`[output] FAIL: ${e?.error_code ?? e?.message}`);
@@ -371,33 +461,23 @@ function OutputScreen({ appendLog }) {
       {state.kind === 'success' && (
         <SuccessBlock
           title={`.${state.format} 已生成 ✓`}
-          summary={`${state.data?.data?.size_bytes ?? 0}B · ${state.data?.data?.elapsed_ms ?? 0}ms`}
-          providerStatus={state.providerStatus}
-          fellBack={state.fellBack}
-          provider={state.data?.data?.provider ?? 'unknown'}
+          summary={`${state.verdict.data.size_bytes}B`}
+          providerStatus="live"
+          fellBack={false}
+          provider={state.verdict.data.provider ?? 'unknown'}
+        >
+          <div className="output-path">📁 {state.verdict.data.output_path}</div>
+        </SuccessBlock>
+      )}
+      {state.kind === 'degraded' && (
+        <DegradedBlock
+          title={`.${state.format} 降级完成 (非真活产物)`}
+          summary={`${state.data?.data?.size_bytes ?? 0}B`}
+          reason={state.verdict.reason}
+          nextStep="设 MiniMax_API_KEY 或启用 CLI 拿真活 LLM 输出"
         >
           <div className="output-path">📁 {state.data?.data?.output_path ?? '?'}</div>
-          {/* 【W3 §3.2 治本】PDF mock 显式警告 — Wave 1 verifier #4 + Wave 2 钉子 #40 #5 PARTIAL 治本 */}
-          {state.format === 'pdf' && state.providerStatus === 'mock' && (
-            <div className="output-pdf-mock-warning" data-testid="pdf-mock-warning" style={{
-              background: '#FFF3CD', border: '1px solid #FFC107', padding: '8px 12px',
-              marginTop: '8px', borderRadius: '4px', fontSize: '13px', color: '#856404',
-            }}>
-              ⚠ <b>PDF 内容是 mock</b> (provider 降级): 当前 provider_status=<code>mock</code>, 
-              fell_back=<code>{String(state.fellBack)}</code>. 
-              真活 LLM 输出需 <code>MiniMax_API_KEY</code> + <code>LINGXI_API_PROVIDER_ALLOW_PS_TOKEN=1</code> 或 CLI 可达.
-            </div>
-          )}
-          {state.format === 'pdf' && state.fellBack && state.providerStatus !== 'mock' && (
-            <div className="output-pdf-fallback-warning" data-testid="pdf-fallback-warning" style={{
-              background: '#FFF3CD', border: '1px solid #FFC107', padding: '8px 12px',
-              marginTop: '8px', borderRadius: '4px', fontSize: '13px', color: '#856404',
-            }}>
-              ⚠ <b>PDF 生成降级过</b>: provider_status=<code>{state.providerStatus}</code>, 
-              fell_back=true. 当前 PDF 不是最优路径, 检查 daemon 日志.
-            </div>
-          )}
-        </SuccessBlock>
+        </DegradedBlock>
       )}
       {state.kind === 'error' && <ErrorBlock title="生成失败" error={state.error} errorCode={state.errorCode} onRetry={() => doGenerate('pptx')} />}
     </div>
