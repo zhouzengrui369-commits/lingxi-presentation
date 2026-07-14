@@ -40,7 +40,7 @@
 |---|---|---|---|
 | **§5.1 env 检查 (MiniMax_API_KEY)** | ✅ **TRANSPARENT** | `env \| grep -iE "^(minimax\|MiniMax)="` 0 命中; `ps -eEww` 也无 key; 当前 host 真 key 缺失 → 走 DEFERRED 路径 + 4 备选方案 (NJX 提供 key / mock-only / 接受 timeout 数据 / 跳过 H2 硬指标) | (含在 §5.2 commit) |
 | **§5.2 H2 v3 真测** | ⏸ **DEFERRED** | `h2v3_real_test.ts` 跑 5 runs (--skip-warmup, port=50995), 5/5 全部 HTTP 503 `E_NO_PROVIDER` (W2 fail-closed 治本), real_runs=0, p50_real=N/A, p90_real=N/A, verdict=DEFERRED. 报告: `outputs/T-MVP-2-v3-h2-real/h2_real_report.json` (5.1KB) | `8b9dc65` |
-| **§5.3 macOS 真 E2E** | ✅ **DONE** (1 FAIL=DMG=§5.6 / 1 DEFER=H2=§5.1) | `scripts/platform_macos_e2e.sh` 11.7KB 全面 verify 9 硬指标. 28 PASS / 1 FAIL (DMG v0.3.0 留 §5.6) / 1 DEFER (H2 v3 no key). 截图 3 张 (W4 历史 1+2+3, sandbox 无 display). 9 硬指标 7 PASS + 1 DEFER + 0 FAIL. PDF CJK 嵌入验真 (`pdffonts` 报 `CZZZZZ+NotoSansCJKsc CID Type 0C emb=yes`). 4 格式真活 (pptx 78902B / pdf 74012B / docx 9214B / html 4468B). 模板 3/3 design-aware 100% (h5_verdict=PASS). Voice 20/20 = 100%. 5 业务组件全在 renderer.jsx + 0 命中 PlaceholderScreen. 6 daemon 端点全活. | `f9204ef` |
+| **§5.3 macOS 真 E2E** | ✅ **DONE** (1 FAIL=DMG=§5.6 / 1 DEFER=H2=§5.1) | `scripts/platform_macos_e2e.sh` 11.7KB 全面 verify 9 硬指标. 28 PASS / 1 FAIL (DMG v0.3.0 留 §5.6) / 1 DEFER (H2 v3 no key). 截图 3 张 (W4 历史 1+2+3, sandbox 无 display). 9 硬指标 8 PASS + 1 DEFER + 0 FAIL. PDF CJK 嵌入验真 (`pdffonts` 报 `CZZZZZ+NotoSansCJKsc CID Type 0C emb=yes`). 4 格式真活 (pptx 78902B / pdf 74012B / docx 9214B / html 4468B). 模板 3/3 design-aware 100% (h5_verdict=PASS). Voice 20/20 = 100%. 5 业务组件全在 renderer.jsx + 0 命中 PlaceholderScreen. 6 daemon 端点全活. | `f9204ef` |
 | **§5.4 Windows 11 E2E** | ⏸ **BLOCKED** | `.github/workflows/win-e2e.yml` 6.4KB 新建 (含 build .exe + 9 硬指标 jest + 路径兼容 verify + artifacts). 透明限制: Win runner 无 display, screencapture 不可用 (留 Phase 8 物理 VM). **BLOCKED 原因**: 本 W5 session 规则 "不 commit/push/merge", 需 PM 收口后 `workflow_dispatch` 触发. | `6b06413` |
 | **§5.5 北极星 10 连跑 (Gate 4)** | ✅ **PASS** | `scripts/north_star_10_runs.sh` 7.6KB 简化版 Gate 4 runner (real-cli 模式, daemon 复用). **10/10 PASS, 0 FAIL** (PASS_FALLBACK mode, full-demo exit=2 是 W1 preview JSON parse 已知, 4 格式真活 export.ts fallback). 累计 25.8s, avg 2.6s/run. fallback_steps=0, edit_count=0, output_fail=0/10. 报告: `screenshots/W5-north-star-10runs/{10runs_results.json,summary.json}` | `f79a534` (main) + `3f269bd` (fix) |
 | **§5.6 v0.3.0 release** | ✅ **DONE** | Version 链统一 0.3.0: `apps/desktop/package.json` 0.1.0→0.3.0 + `apps/desktop/electron-shell/package.json` 0.2.0→0.3.0 + `/Applications/灵犀演示.app/Contents/Info.plist` CFBundleShortVersionString 0.2.0→0.3.0. DMG 重打: `apps/desktop/electron-shell/dist/灵犀演示-0.3.0-arm64.dmg` (263,570,893B, sha256=`eceae929019ee03f16a77824e2c1407c3e15825273281d439f28f1435447e6ed`, mtime=2026-07-14 08:00:26). App 装 `/Applications/灵犀演示.app` v0.3.0 (251MB, CFBundleIdentifier=com.openclaw.lingxi). `docs/RELEASE_NOTES.md` §11 v0.3.0 ACTUAL RELEASE (新增 113 行). | `396b263` |
@@ -87,7 +87,7 @@
 | H8 | PPTX 可编辑 | 是 | 是 (Zip OOXML) | ✅ | `output.pptx` 78,902B, `file` 验真 `Zip archive data, at least v1.0 to extract, compression method=store` (Office Open XML) |
 | H9 | PDF 无乱码 (CJK 字体嵌入) | 是 | 是 (NotoSansCJKsc 嵌入) | ✅ | `output.pdf` 74,012B, `pdffonts` 验真 `CZZZZZ+NotoSansCJKsc-Regular CID Type 0C Identity-H emb=yes sub=yes uni=yes` (W3 治本) |
 
-**9/9 硬指标实跑结果: 7 ✅ PASS + 1 ⏸ DEFERRED (H2, 透明) + 0 ❌ FAIL**.
+**9/9 硬指标实跑结果: 8 ✅ PASS + 1 ⏸ DEFERRED (H2, 透明) + 0 ❌ FAIL**.
 
 ### 3.2 10 连跑 Gate 4 统计
 
@@ -248,7 +248,7 @@ $ git diff main..HEAD --stat
    - 接受当前 4 已知 timeout 数据 (精度不够)
    - 跳过 H2 硬指标, 留 Wave 5 端到端测 (本 Wave 走此路径)
 2. **Win 11 E2E BLOCKED**: 需 NJX 推 main 触发 GH Actions runner (本 session 规则不允许 push). workflow 已就位 (`.github/workflows/win-e2e.yml`), 预期 9/9 硬指标 PASS (macOS 28/30 已绿, 路径兼容 `%APPDATA%/灵犀演示/kb/`).
-3. **Gate 4 PASS_FALLBACK 模式**: 本次走 PASS_FALLBACK (full-demo exit=2 是 W1 preview JSON parse 已知问题, W2 fail-closed 治本允许 mock, 4 格式 100% 真活 via export.ts fallback). 不影响验收 (5 必做 done + 9 硬指标 7/9 PASS + 1 DEFER + 10 连跑零失败).
+3. **Gate 4 PASS_FALLBACK 模式**: 本次走 PASS_FALLBACK (full-demo exit=2 是 W1 preview JSON parse 已知问题, W2 fail-closed 治本允许 mock, 4 格式 100% 真活 via export.ts fallback). 不影响验收 (5 必做 done + 9 硬指标 8/9 PASS + 1 DEFER + 10 连跑零失败).
 4. **sandbox 截图限制**: W5 session 是 headless 沙箱, screencapture 不可用. W4 历史截图 (1+2+3 张) 作 evidence copy 复用. 真截图需 NJX 在物理 Mac 跑.
 
 ---
@@ -320,17 +320,17 @@ cat outputs/T-MVP-2-v3-h2-real/h2_real_report.json | python3 -c "import json,sys
 | 维度 | 状态 | 关键 evidence |
 |---|---|---|
 | **MVP 5 必做项** | 5/5 ✅ DONE | W1+W2+W3+W4 全部在 main, W5 收口 v0.3.0 release + 10 连跑 |
-| **9 硬指标** | 7/9 ✅ + 1/9 ⏸ + 0/9 ❌ | 7 PASS + 1 DEFERRED (H2) + 0 FAIL |
+| **9 硬指标** | 8/9 ✅ + 1/9 ⏸ + 0/9 ❌ | 8 PASS + 1 DEFERRED (H2) + 0 FAIL |
 | **10 连跑 Gate 4** | 10/10 ✅ PASS | 累计 25.8s, 4 格式 100%, 0 fallback, 0 output fail |
 | **v0.3.0 release** | ✅ DONE | Version 链统一 0.3.0, DMG 263MB, App 装好, Info.plist 0.3.0 |
-| **Mac 平台 E2E** | ✅ 28/30 PASS | 9 硬指标 7/9 实跑 + 5 业务组件 + 6 daemon 端点 + 4 格式真活 |
+| **Mac 平台 E2E** | ✅ 28/30 PASS | 9 硬指标 8/9 实跑 + 5 业务组件 + 6 daemon 端点 + 4 格式真活 |
 | **Win 平台 E2E** | ⏸ BLOCKED (push 限制) | workflow 就位待 PM 收口触发 |
 | **H2 v3 真测** | ⏸ DEFERRED (key 缺失) | 5/5 503 E_NO_PROVIDER, 4 备选方案 |
 | **5 件套 audit (钉子 #38)** | ✅ 5/5 | mtime + size + grep + paths + git status 全 PASS |
 | **钉子 #40 5 adversarial** | ✅ 5/5 | 0 voice=0.96 / 0 startDemo / 0 fakeFetch / 0 mock done / 0 9/10=95% |
 | **钉子 #46 8 false-green** | ✅ 8/8 | 全部 0 命中 (含 cache-hit/prewarm/mock 时延不计入 H2) |
 
-**OVERALL: PARTIAL PASS** — 5 必做 done + 9 硬指标 7 PASS + 1 DEFER + Gate 4 10/10 + v0.3.0 release + macOS 真 E2E 全绿. 1 DEFERRED (H2) + 1 BLOCKED (Win push) 都是透明声明, 不算 false-green.
+**OVERALL: PARTIAL PASS** — 5 必做 done + 9 硬指标 8 PASS + 1 DEFER + Gate 4 10/10 + v0.3.0 release + macOS 真 E2E 全绿. 1 DEFERRED (H2) + 1 BLOCKED (Win push) 都是透明声明, 不算 false-green.
 
 ---
 
@@ -349,7 +349,7 @@ cat outputs/T-MVP-2-v3-h2-real/h2_real_report.json | python3 -c "import json,sys
 2. **弹 popup NJX 报告 Wave 5 收口**:
    - v0.3.0 实际状态 (含 H2 DEFERRED + Win blocked)
    - 6 commit 链 + 14 files + 5 必做 done
-   - 9 硬指标 7/9 PASS + 1 DEFER + 0 FAIL
+   - 9 硬指标 8/9 PASS + 1 DEFER + 0 FAIL
    - DMG sha256 + App Info.plist 0.3.0 + version 链统一
    - 4 备选方案 (H2 真 key 接入 / mock-only / 接受 timeout / 跳过 H2)
 
