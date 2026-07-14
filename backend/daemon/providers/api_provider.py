@@ -237,8 +237,8 @@ class MiniMaxAPIProvider(AIProvider):
     # 但当 is_mock=True 且 mock 不允许时, 上层应改报 "unavailable"
     name = "api"
 
-    DEFAULT_BASE_URL = "https://agent.minimaxi.com/mavis/api/v1/llm/v1"
-    DEFAULT_OPENAI_BASE_URL = "https://api.MiniMax.com/v1"
+    DEFAULT_BASE_URL = "https://api.minimaxi.com/v1"
+    DEFAULT_OPENAI_BASE_URL = "https://api.minimaxi.com/v1"
     DEFAULT_ENDPOINT_OPENAI = "/chat/completions"
     DEFAULT_ENDPOINT_ANTHROPIC = "/messages"
     DEFAULT_MODEL = "MiniMax-M3"
