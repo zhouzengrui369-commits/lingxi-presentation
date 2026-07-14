@@ -3,129 +3,129 @@
     "run": 1,
     "verdict": "PASS_FALLBACK",
     "full_demo_exit": 2,
-    "duration_ms": 3575,
+    "duration_ms": 2199,
     "formats": {"pptx": 1, "pdf": 1, "docx": 1, "html": 1},
     "fallback_steps": 0,
     "edit_count": 0,
     "ttft_ms": 0,
     "output_dir": "/tmp/north_star_w5_run_01",
-    "log": "/Users/njx/Project/wt-mvp-recovery-w5/screenshots/W5-north-star-10runs/run_01.log"
+    "log": "/Users/njx/Project/灵犀演示/screenshots/W5-north-star-10runs/run_01.log"
   }
 ,
   {
     "run": 2,
     "verdict": "PASS_FALLBACK",
     "full_demo_exit": 2,
-    "duration_ms": 2183,
+    "duration_ms": 1725,
     "formats": {"pptx": 1, "pdf": 1, "docx": 1, "html": 1},
     "fallback_steps": 0,
     "edit_count": 0,
     "ttft_ms": 0,
     "output_dir": "/tmp/north_star_w5_run_02",
-    "log": "/Users/njx/Project/wt-mvp-recovery-w5/screenshots/W5-north-star-10runs/run_02.log"
+    "log": "/Users/njx/Project/灵犀演示/screenshots/W5-north-star-10runs/run_02.log"
   }
 ,
   {
     "run": 3,
     "verdict": "PASS_FALLBACK",
     "full_demo_exit": 2,
-    "duration_ms": 3419,
+    "duration_ms": 2392,
     "formats": {"pptx": 1, "pdf": 1, "docx": 1, "html": 1},
     "fallback_steps": 0,
     "edit_count": 0,
     "ttft_ms": 0,
     "output_dir": "/tmp/north_star_w5_run_03",
-    "log": "/Users/njx/Project/wt-mvp-recovery-w5/screenshots/W5-north-star-10runs/run_03.log"
+    "log": "/Users/njx/Project/灵犀演示/screenshots/W5-north-star-10runs/run_03.log"
   }
 ,
   {
     "run": 4,
     "verdict": "PASS_FALLBACK",
     "full_demo_exit": 2,
-    "duration_ms": 2291,
+    "duration_ms": 2296,
     "formats": {"pptx": 1, "pdf": 1, "docx": 1, "html": 1},
     "fallback_steps": 0,
     "edit_count": 0,
     "ttft_ms": 0,
     "output_dir": "/tmp/north_star_w5_run_04",
-    "log": "/Users/njx/Project/wt-mvp-recovery-w5/screenshots/W5-north-star-10runs/run_04.log"
+    "log": "/Users/njx/Project/灵犀演示/screenshots/W5-north-star-10runs/run_04.log"
   }
 ,
   {
     "run": 5,
     "verdict": "PASS_FALLBACK",
     "full_demo_exit": 2,
-    "duration_ms": 2029,
+    "duration_ms": 1924,
     "formats": {"pptx": 1, "pdf": 1, "docx": 1, "html": 1},
     "fallback_steps": 0,
     "edit_count": 0,
     "ttft_ms": 0,
     "output_dir": "/tmp/north_star_w5_run_05",
-    "log": "/Users/njx/Project/wt-mvp-recovery-w5/screenshots/W5-north-star-10runs/run_05.log"
+    "log": "/Users/njx/Project/灵犀演示/screenshots/W5-north-star-10runs/run_05.log"
   }
 ,
   {
     "run": 6,
     "verdict": "PASS_FALLBACK",
     "full_demo_exit": 2,
-    "duration_ms": 1730,
+    "duration_ms": 2859,
     "formats": {"pptx": 1, "pdf": 1, "docx": 1, "html": 1},
     "fallback_steps": 0,
     "edit_count": 0,
     "ttft_ms": 0,
     "output_dir": "/tmp/north_star_w5_run_06",
-    "log": "/Users/njx/Project/wt-mvp-recovery-w5/screenshots/W5-north-star-10runs/run_06.log"
+    "log": "/Users/njx/Project/灵犀演示/screenshots/W5-north-star-10runs/run_06.log"
   }
 ,
   {
     "run": 7,
     "verdict": "PASS_FALLBACK",
     "full_demo_exit": 2,
-    "duration_ms": 2140,
+    "duration_ms": 2211,
     "formats": {"pptx": 1, "pdf": 1, "docx": 1, "html": 1},
     "fallback_steps": 0,
     "edit_count": 0,
     "ttft_ms": 0,
     "output_dir": "/tmp/north_star_w5_run_07",
-    "log": "/Users/njx/Project/wt-mvp-recovery-w5/screenshots/W5-north-star-10runs/run_07.log"
+    "log": "/Users/njx/Project/灵犀演示/screenshots/W5-north-star-10runs/run_07.log"
   }
 ,
   {
     "run": 8,
     "verdict": "PASS_FALLBACK",
     "full_demo_exit": 2,
-    "duration_ms": 2061,
+    "duration_ms": 1817,
     "formats": {"pptx": 1, "pdf": 1, "docx": 1, "html": 1},
     "fallback_steps": 0,
     "edit_count": 0,
     "ttft_ms": 0,
     "output_dir": "/tmp/north_star_w5_run_08",
-    "log": "/Users/njx/Project/wt-mvp-recovery-w5/screenshots/W5-north-star-10runs/run_08.log"
+    "log": "/Users/njx/Project/灵犀演示/screenshots/W5-north-star-10runs/run_08.log"
   }
 ,
   {
     "run": 9,
     "verdict": "PASS_FALLBACK",
     "full_demo_exit": 2,
-    "duration_ms": 3942,
+    "duration_ms": 2653,
     "formats": {"pptx": 1, "pdf": 1, "docx": 1, "html": 1},
     "fallback_steps": 0,
     "edit_count": 0,
     "ttft_ms": 0,
     "output_dir": "/tmp/north_star_w5_run_09",
-    "log": "/Users/njx/Project/wt-mvp-recovery-w5/screenshots/W5-north-star-10runs/run_09.log"
+    "log": "/Users/njx/Project/灵犀演示/screenshots/W5-north-star-10runs/run_09.log"
   }
 ,
   {
     "run": 10,
     "verdict": "PASS_FALLBACK",
     "full_demo_exit": 2,
-    "duration_ms": 2468,
+    "duration_ms": 2521,
     "formats": {"pptx": 1, "pdf": 1, "docx": 1, "html": 1},
     "fallback_steps": 0,
     "edit_count": 0,
     "ttft_ms": 0,
     "output_dir": "/tmp/north_star_w5_run_10",
-    "log": "/Users/njx/Project/wt-mvp-recovery-w5/screenshots/W5-north-star-10runs/run_10.log"
+    "log": "/Users/njx/Project/灵犀演示/screenshots/W5-north-star-10runs/run_10.log"
   }
 ]
