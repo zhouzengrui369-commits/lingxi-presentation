@@ -126,6 +126,8 @@ jobs:
           if ($ver -ne "0.3.0") { throw "version mismatch: $ver (expected 0.3.0)" }
 
       - name: Path compatibility check (Windows %APPDATA%/灵犀演示/kb/)
+        # 改 working-directory 根, Select-String 用 Get-ChildItem | Select-String (-Recurse 是 Get-ChildItem 的 flag)
+        working-directory: ./
         shell: pwsh
         run: |
           Write-Host "=== Windows 路径兼容 (%APPDATA%/灵犀演示/kb/) ==="
@@ -133,8 +135,9 @@ jobs:
           $expected = Join-Path $appData "灵犀演示"
           Write-Host "  APPDATA: $appData"
           Write-Host "  expected kb root: $expected\kb"
-          # 不强制建目录, 必查代码引用
-          $grepResults = Select-String -Path "apps/desktop" -Pattern "APPDATA|%APPDATA%" -Recurse -ErrorAction SilentlyContinue
+          # 不强制建目录, 必查代码引用 (Select-String 没 -Recurse, 走 Get-ChildItem)
+          $grepResults = Get-ChildItem -Path "apps/desktop" -Recurse -ErrorAction SilentlyContinue |
+            Select-String -Pattern "APPDATA|%APPDATA%" -ErrorAction SilentlyContinue
           Write-Host "  APPDATA references in code: $($grepResults.Count)"
           $grepResults | ForEach-Object { Write-Host "    $($_.Filename):$($_.LineNumber) - $($_.Line)" }
 
