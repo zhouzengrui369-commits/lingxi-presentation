@@ -376,7 +376,7 @@ cat outputs/T-MVP-2-v3-h2-real/h2_real_report.json | python3 -c "import json,sys
 - **Phase 1 · W1-W4 工作台 MVP** ✅ **DONE** (本次 W1-5 全 5 wave, MVP 收口)
 - **Phase 2 · W5-W8 场景产品化** (NJX 路线图): 待 MVP 验收包签收后启动
 - W4 Gate + 12h heartbeat cron 持续运行 (memory: 4 层持续运行自动化)
-- W5 北极星 10 连跑 PASS 是 Phase 1 收口标志 → Phase 2 启动 (1-2 航材场景)
+- W5 北极星 10 连跑 PASS 是 MVP 工程层收口标志 → 启动 MVP 验收 (Gate 1-4 签字) + POST-MVP 12 周路线图阶段 2 (场景产品化, 后移, MVP 收口后另起)
 
 ---
 
