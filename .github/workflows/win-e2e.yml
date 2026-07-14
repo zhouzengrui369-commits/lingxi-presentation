@@ -83,20 +83,24 @@ jobs:
         continue-on-error: true
 
       # ---- Real Win E2E (Wave 5 §5.4) ----
-      - name: Install electron-builder (no-save workaround for npm ci skip dev-deps)
-        # 原因: 之前 npm ci 在 apps/desktop 不装 electron-shell devDeps,
-        #       step 12 `npx --no-install electron-builder` 报 missing packages.
-        # 修法: 显式装 electron-builder (跟 vite workaround 一致)
-        working-directory: apps/desktop/electron-shell
+      - name: Install electron-builder (no-save workaround for dmg-license)
+        # 原因: electron-shell/package.json 有 dmg-license@1.0.11 (darwin-only) devDep,
+        #       'npm install' 在 electron-shell/ on win32 报 EBADPLATFORM.
+        # 修法: 改 working-directory 到 apps/desktop/ (跟 step 7 vite workaround 一致,
+        #       apps/desktop/package.json 没 dmg-license, win32 友好)
+        #       装完后 npx --prefix ../ 找 electron-builder (parent node_modules lookup)
+        working-directory: apps/desktop
         shell: pwsh
         run: npm install --no-save electron-builder@^26.15.3
         env:
           CI: 'true'
 
       - name: Build Windows .exe (electron-builder)
+        # electron-builder 装在 apps/desktop/node_modules (跟 step 12 配套),
+        # 用 npx --prefix ../ 找到它, working-directory 保持 electron-shell
         working-directory: apps/desktop/electron-shell
         shell: pwsh
-        run: npx --no-install electron-builder --win nsis --x64 --publish=never
+        run: npx --no-install --prefix ../ electron-builder --win nsis --x64 --publish=never
         # 输出: dist/灵犀演示 Setup 0.3.0.exe
 
       - name: Verify .exe exists + Info.plist equivalent
