@@ -83,15 +83,18 @@ jobs:
         continue-on-error: true
 
       # ---- Real Win E2E (Wave 5 §5.4) ----
-      - name: Install electron-builder (no-save workaround for dmg-license)
-        # 原因: electron-shell/package.json 有 dmg-license@1.0.11 (darwin-only) devDep,
-        #       'npm install' 在 electron-shell/ on win32 报 EBADPLATFORM.
-        # 修法: 改 working-directory 到 apps/desktop/ (跟 step 7 vite workaround 一致,
-        #       apps/desktop/package.json 没 dmg-license, win32 友好)
-        #       装完后 npx --prefix ../ 找 electron-builder (parent node_modules lookup)
+      - name: Install electron-builder + electron (no-save, --os=win32 to skip dmg-license)
+        # 原因:
+        #   1. apps/desktop/electron-shell/node_modules/electron 是 binary 位置
+        #   2. electron-builder 跑在 apps/desktop/ 时找不到 electron module
+        #       (apps/desktop/node_modules/electron 没装, 报 'Cannot compute electron version')
+        #   3. apps/desktop/electron-shell/package.json devDep dmg-license@1.0.11 darwin-only
+        #       'npm install' 在 win32 报 EBADPLATFORM
+        # 修法: 装 electron-builder + electron 都装在 apps/desktop/node_modules/,
+        #       加 --os=win32 过滤掉 dmg-license (darwin-only)
         working-directory: apps/desktop
         shell: pwsh
-        run: npm install --no-save electron-builder@^26.15.3
+        run: npm install --no-save --os=win32 electron-builder@^26.15.3 electron@^33.0.0
         env:
           CI: 'true'
 
