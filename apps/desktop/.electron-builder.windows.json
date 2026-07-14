@@ -4,8 +4,13 @@
   "directories": {
     "output": "dist/windows"
   },
+  "main": "electron-shell/main.js",
   "files": [
-    "windows/Release/**/*",
+    "electron-shell/main.js",
+    "electron-shell/preload.js",
+    "electron-shell/dist/**/*",
+    "electron-shell/src/**/*",
+    "electron-shell/package.json",
     "package.json"
   ],
   "win": {
