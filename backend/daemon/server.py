@@ -366,35 +366,110 @@ def create_app(router: ProviderRouter | None = None) -> FastAPI:
 
     @app.post("/v1/preview")
     async def v1_preview(req: dict) -> dict:
-        """W3 治本: 真 spawn cli/preview,返 preview_id + 5 章节"""
+        """【W6 治本】真 spawn cli/preview.ts 跑 5 章节并发 LLM, 返真 html_path (文件实存)
+
+        之前 v3 返 mocked response: html_path 指 /tmp/lingxi_preview_w3/{id}.html
+        但文件没真创建 → 后续 /v1/output 报 html_path_not_found (race)
+        现在跟 /v1/output 同样模式: spawn subprocess 跑 cli/preview.ts → 解析 stdout JSON
+        → 返真 html_path (preview.ts 已落盘 <out_dir>/<preview_id>.html)
+        """
+        import uuid as _uuid
+        import json as _json
         prompt = req.get("prompt", "")
         if not prompt:
             raise HTTPException(status_code=422, detail={"error": "prompt required"})
-        import uuid as _uuid
         preview_id = str(_uuid.uuid4())
         effective = _get_effective_provider_name(router)
         available = _is_provider_available(router)
-        return {
-            "status": "ok",
-            "data": {
-                "ok": True,
-                "preview_id": preview_id,
-                "latency_ms": 0,
-                "under_10s": True,
-                "provider": "api" if available else "mock",
-                "fell_back": not available,
-                "html_path": f"/tmp/lingxi_preview_w3/{preview_id}.html",
-                "mode": "parallel",
-                "concurrency": 4,
-                "section_count": 5,
-                "sections": [
-                    {"heading": f"章节 {i+1}", "content_html": f"<p>{prompt} — 章节 {i+1} 内容</p>"}
-                    for i in range(5)
-                ],
-            },
-            "provider_status": "live" if available else effective,
-            "fell_back": not available,
-        }
+        provider_status = effective  # 'api' or 'mock' or 'unavailable'
+        fell_back = effective != "api"  # 任何非真活都标 fell_back
+        try:
+            desktop_dir = _os.path.join(
+                _os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))),
+                "apps", "desktop",
+            )
+            tsx_bin = _os.path.join(desktop_dir, "node_modules", ".bin", "tsx")
+            out_dir = "/tmp/lingxi_preview_w6"
+            _os.makedirs(out_dir, exist_ok=True)
+            # preview.ts 同时需要 LINGXI_DAEMON_PORT (调 /v1/chat 5 次并发)
+            # daemon 自己的 port 来自 LINGXI_DAEMON_PORT env
+            spawn_env = {
+                **_os.environ,
+                "PATH": f"{desktop_dir}/node_modules/.bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:{_os.environ.get('PATH', '')}",
+            }
+            # 把 daemon 自己的 LINGXI_DAEMON_PORT 显式传给 preview.ts, 让它能调 /v1/chat
+            daemon_port = _os.environ.get("LINGXI_DAEMON_PORT", "0")
+            if daemon_port and daemon_port != "0":
+                spawn_env["LINGXI_DAEMON_PORT"] = daemon_port
+            proc = subprocess.run(
+                [tsx_bin, "cli/preview.ts", "--prompt", prompt, "--out", out_dir, "--mode", "parallel", "--concurrency", "4"],
+                cwd=desktop_dir,
+                capture_output=True,
+                timeout=60,
+                env=spawn_env,
+            )
+            if proc.returncode != 0:
+                return {
+                    "status": "failed",
+                    "data": {
+                        "ok": False,
+                        "preview_id": preview_id,
+                        "error": proc.stderr.decode("utf-8", errors="replace")[:500] or f"exit={proc.returncode}",
+                    },
+                    "provider_status": provider_status,
+                    "fell_back": fell_back,
+                }
+            # 解析 cli/preview.ts 的 stdout (---JSON--- 标记 + 末段 JSON object)
+            stdout = proc.stdout.decode("utf-8", errors="replace")
+            cli_json: dict = {}
+            marker = "---JSON---"
+            if marker in stdout:
+                idx = stdout.rindex(marker)
+                json_str = stdout[idx + len(marker):].strip()
+                try:
+                    cli_json = _json.loads(json_str)
+                except Exception:
+                    pass
+            # 兜底: 找最后完整 {...} 块
+            if not cli_json:
+                last_brace = stdout.rfind("}")
+                if last_brace != -1:
+                    first_brace = stdout.rfind("{", 0, last_brace)
+                    if first_brace != -1:
+                        try:
+                            cli_json = _json.loads(stdout[first_brace:last_brace + 1])
+                        except Exception:
+                            pass
+            real_html_path = cli_json.get("html_path") or _os.path.join(out_dir, f"{preview_id}.html")
+            return {
+                "status": "ok",
+                "data": {
+                    "ok": True,
+                    "preview_id": preview_id,
+                    "latency_ms": int(cli_json.get("latency_ms", 0)),
+                    "under_10s": bool(cli_json.get("under_10s", False)),
+                    "provider": cli_json.get("provider", "api" if available else "mock"),
+                    "fell_back": bool(cli_json.get("fell_back", fell_back)),
+                    "html_path": real_html_path,
+                    "mode": cli_json.get("mode", "parallel"),
+                    "concurrency": int(cli_json.get("concurrency", 4)),
+                    "section_count": int(cli_json.get("section_count", 5)),
+                    "sections": cli_json.get("sections", []),
+                },
+                "provider_status": provider_status,
+                "fell_back": fell_back,
+            }
+        except subprocess.TimeoutExpired:
+            return {
+                "status": "failed",
+                "data": {
+                    "ok": False,
+                    "preview_id": preview_id,
+                    "error": "subprocess timeout 60s",
+                },
+                "provider_status": provider_status,
+                "fell_back": fell_back,
+            }
 
     @app.post("/v1/output")
     async def v1_output(req: dict) -> dict:

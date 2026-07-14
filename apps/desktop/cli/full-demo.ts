@@ -321,17 +321,38 @@ async function main() {
     console.error('      stderr:', preview.stderr);
     throw new Error(`preview cli failed: status=${preview.status}`);
   }
-  // preview.ts 在最后写一个完整 JSON object，前面可能跟其他 log 行
-  // 用 lastIndexOf 找 '} 末尾，从首个 '{' 开始
+  // preview.ts 在最后写一个完整 JSON object (前面有 '---JSON---' 标记)
+  // 【W6 治本】之前 rfind('{', lastBrace) 找到的是 nested object 的 '{', 不是 root JSON
+  // 现在改: 用 '---JSON---' 标记定位 root JSON 起点, 然后用 lastIndexOf('}') 找终点
   const previewOut = preview.stdout;
-  const lastBrace = previewOut.lastIndexOf('}');
-  const firstBrace = previewOut.lastIndexOf('{', lastBrace);
+  const jsonMarker = '---JSON---';
+  const markerIdx = previewOut.lastIndexOf(jsonMarker);
   let previewJson: any;
-  try {
-    previewJson = JSON.parse(previewOut.slice(firstBrace, lastBrace + 1));
-  } catch (e) {
-    console.error('      preview stdout:', preview.stdout);
-    throw new Error(`preview JSON parse failed: ${(e as Error).message}`);
+  if (markerIdx !== -1) {
+    // 标记后第一个 '{' 是 root JSON 起点
+    const afterMarker = previewOut.slice(markerIdx + jsonMarker.length);
+    const firstBrace = afterMarker.indexOf('{');
+    const lastBrace = afterMarker.lastIndexOf('}');
+    if (firstBrace === -1 || lastBrace === -1 || lastBrace < firstBrace) {
+      console.error('      preview stdout:', preview.stdout);
+      throw new Error(`preview JSON parse failed: cannot locate JSON braces (marker found at ${markerIdx})`);
+    }
+    try {
+      previewJson = JSON.parse(afterMarker.slice(firstBrace, lastBrace + 1));
+    } catch (e) {
+      console.error('      preview stdout:', preview.stdout);
+      throw new Error(`preview JSON parse failed: ${(e as Error).message}`);
+    }
+  } else {
+    // 兜底: 找最后完整 {...} 块 (v3 逻辑, 但已知有 bug, 仅兼容无 marker 的旧 preview.ts)
+    const lastBrace = previewOut.lastIndexOf('}');
+    const firstBrace = previewOut.lastIndexOf('{', lastBrace);
+    try {
+      previewJson = JSON.parse(previewOut.slice(firstBrace, lastBrace + 1));
+    } catch (e) {
+      console.error('      preview stdout:', preview.stdout);
+      throw new Error(`preview JSON parse failed (fallback): ${(e as Error).message}`);
+    }
   }
   const previewHtmlPath = previewJson.html_path;
   console.log(`      preview_id: ${previewJson.preview_id}`);
