@@ -54,10 +54,13 @@ jobs:
         run: npx --prefix ../ vite build
 
       # ---- Lint + Unit tests + Type check (reused from win-test.yml) ----
-      - name: Lint (eslint)
+      - name: Lint (eslint) - 预存 23 errors 70 warnings (PM 7-14 拍板 skip, 走 fail-soft)
+        # 原因: 本地 npm run lint 同样 fail 23 errors (未用 imports + 2 no-undef),
+        #       跟 Win E2E 真功能 (.exe 构建 + 9 硬指标) 无关, 留 PM 收口后修.
+        #       Win E2E 目的是 .exe 跑通 + 9 硬指标, 不是 lint 质量门.
         shell: pwsh
         run: npm run lint
-        continue-on-error: false
+        continue-on-error: true
 
       - name: Unit tests (jest)
         shell: pwsh
