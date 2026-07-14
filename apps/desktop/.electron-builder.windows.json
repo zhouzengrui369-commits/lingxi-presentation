@@ -4,7 +4,6 @@
   "directories": {
     "output": "dist/windows"
   },
-  "main": "electron-shell/main.js",
   "files": [
     "electron-shell/main.js",
     "electron-shell/preload.js",
