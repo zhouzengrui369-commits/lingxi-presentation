@@ -20,6 +20,20 @@ const fs = require('fs');
 const os = require('os');
 const http = require('http');
 
+// ---- 【W6】test-flow 模式: --test-flow=<json> 启 App, IPC 真业务触发 + 写 done_marker ----
+// JSON 格式: {"ops": [{"method": "fileKb.import", "args": {...}}, ...],
+//              "screenshots": ["/abs/path/01.png", ...],   // optional, 与 ops 等长
+//              "done_marker": "/abs/path/done.json",
+//              "inter_step_ms": 1500}                        // optional, 每步间 wait
+//
+// 工作流: app ready → createWindow → 等 page load → 2s render settle
+//   → 对每个 op: executeJavaScript('window.electronAPI.X.Y(args)') → 写 .step_done
+//   → 写 done_marker (含所有 op 结果)
+//   → app.quit()
+//
+// 用例: mvp_real_operation_v4.sh 用这个 flag 走 IPC 真业务触发 (vs v3 --initial-route 静态页面)
+const testFlowArg = process.argv.find((a) => a.startsWith('--test-flow='));
+
 // ---- T-6.1: 路径解析 (含 renderer bundle 校验) ----
 function resolveRuntimePaths() {
   const isDev = !app.isPackaged;
@@ -384,7 +398,123 @@ ipcMain.handle('show-in-finder', async (event, dir) => {
   if (dir && fs.existsSync(dir)) shell.showItemInFolder(dir);
 });
 
+// ---- 【W6】test-flow 执行: IPC 真业务触发 + 写 done_marker ----
+async function runTestFlow(flowJsonStr) {
+  let flow;
+  try {
+    flow = JSON.parse(flowJsonStr);
+  } catch (e) {
+    logW1(`[test-flow] FATAL: JSON parse failed: ${e.message}`);
+    setTimeout(() => app.quit(), 500);
+    return;
+  }
+  const ops = Array.isArray(flow.ops) ? flow.ops : [];
+  const screenshots = Array.isArray(flow.screenshots) ? flow.screenshots : [];
+  const doneMarker = flow.done_marker || '';
+  const interStepMs = Number.isInteger(flow.inter_step_ms) ? flow.inter_step_ms : 1500;
+  const renderSettleMs = 2500; // RN renderer 挂载 + 初始 render 等待
+
+  logW1(`[test-flow] start: ops=${ops.length} done_marker=${doneMarker} inter_step_ms=${interStepMs}`);
+
+  const win = createWindow();
+  // 等 page load 完成
+  await new Promise((resolve) => {
+    if (win.webContents.isLoading()) {
+      win.webContents.once('did-finish-load', () => resolve(undefined));
+    } else {
+      resolve(undefined);
+    }
+  });
+  // RN renderer 渲染 settle
+  await new Promise((r) => setTimeout(r, renderSettleMs));
+  logW1(`[test-flow] page loaded + settled, executing ${ops.length} ops`);
+
+  const results = [];
+  for (let i = 0; i < ops.length; i++) {
+    const op = ops[i];
+    const screenshotPath = screenshots[i] || '';
+    const methodPath = String(op.method || '').trim();
+    if (!methodPath || !methodPath.includes('.')) {
+      logW1(`[test-flow] step ${i} skip: bad method=${methodPath}`);
+      results.push({ step: i, op: methodPath, args: op.args, result: { ok: false, error: 'bad_method' }, elapsed: 0, screenshot: screenshotPath });
+      continue;
+    }
+    // op.args 约定:
+    //   - 数组: spread 成 function 多个 positional args (匹配 preload.js 的签名)
+    //   - 对象/单值: 走 JSON 序列化, 当成单 arg
+    // 例: fileKb.import([path1, path2]) → fileKb.import(path1, path2)
+    //     advisor.chat("prompt") → advisor.chat("prompt")
+    //     output.generate(["pptx", html, out]) → output.generate("pptx", html, out)
+    let argsExpr;
+    const opArgs = op.args;
+    if (Array.isArray(opArgs)) {
+      const parts = opArgs.map((a) => JSON.stringify(a));
+      argsExpr = parts.join(', ');
+    } else {
+      argsExpr = JSON.stringify(opArgs ?? null);
+    }
+    const js = `window.electronAPI.${methodPath}(${argsExpr})`;
+    const t0 = Date.now();
+    let result;
+    try {
+      result = await win.webContents.executeJavaScript(js, true);
+    } catch (e) {
+      result = { ok: false, error: e?.message ?? 'execute_failed', error_code: 'E_EXEC' };
+    }
+    const elapsed = Date.now() - t0;
+    logW1(`[test-flow] step ${i} ${methodPath} elapsed=${elapsed}ms ok=${result?.ok}`);
+    results.push({ step: i, op: methodPath, args: opArgs, result, elapsed, screenshot: screenshotPath });
+    // 写 step done marker (per-op 落盘, 即使中途挂也保留进度)
+    if (screenshotPath) {
+      try {
+        await fs.promises.writeFile(screenshotPath + '.step_done', JSON.stringify(results[i]), 'utf8');
+      } catch (e) {
+        logW1(`[test-flow] step ${i} marker write failed: ${e.message}`);
+      }
+    }
+    // inter-step wait (给 UI 时间反映状态变化)
+    await new Promise((r) => setTimeout(r, interStepMs));
+  }
+
+  // 写最终 done marker
+  const final = { ok: true, total_steps: ops.length, results };
+  if (doneMarker) {
+    try {
+      await fs.promises.writeFile(doneMarker, JSON.stringify(final, null, 2), 'utf8');
+      logW1(`[test-flow] done_marker written: ${doneMarker}`);
+    } catch (e) {
+      logW1(`[test-flow] done_marker write failed: ${e.message}`);
+    }
+  } else {
+    logW1(`[test-flow] no done_marker specified, final=${JSON.stringify(final).slice(0, 300)}`);
+  }
+  // 留 1s 给 screencapture 拍下终态
+  await new Promise((r) => setTimeout(r, 1000));
+  logW1(`[test-flow] quitting app`);
+  setTimeout(() => app.quit(), 500);
+}
+
 app.whenReady().then(async () => {
+  // 【W6】test-flow 模式: --test-flow=<json> 走 IPC 真业务触发, 不走 createWindow 静态页面
+  if (testFlowArg) {
+    const flowJson = testFlowArg.slice('--test-flow='.length);
+    logW1(`[test-flow] mode detected, flow_json_len=${flowJson.length}`);
+    // 启 daemon (供 IPC handler 用), 然后跑 test-flow
+    if (process.env.LINGXI_DAEMON_AUTOSTART !== '0') {
+      try {
+        await startW1Daemon();
+      } catch (e) {
+        logW1(`[test-flow] daemon autostart failed: ${e?.message}`);
+      }
+    }
+    try {
+      await runTestFlow(flowJson);
+    } catch (e) {
+      logW1(`[test-flow] FATAL: ${e?.message}`);
+      setTimeout(() => app.quit(), 1000);
+    }
+    return;  // 跳过下面 createWindow 主路径
+  }
   // 【W2】app 启动时自动启 daemon (供 renderer 调)
   if (process.env.LINGXI_DAEMON_AUTOSTART !== '0') {
     try {
