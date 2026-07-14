@@ -96,18 +96,20 @@ jobs:
           CI: 'true'
 
       - name: Build Windows .exe (electron-builder)
-        # electron-builder 装在 apps/desktop/node_modules (跟 step 12 配套),
-        # 用 npx --prefix ../ 找到它, working-directory 保持 electron-shell
-        working-directory: apps/desktop/electron-shell
+        # 关键: working-directory 改 apps/desktop/ (不在 electron-shell/ 避免 dmg-license EBADPLATFORM).
+        # apps/desktop/package.json 没 dmg-license, electron-builder 内部 npm install 不会触发.
+        # 用 --config 显式指定 .electron-builder.windows.json (output: dist/windows)
+        working-directory: apps/desktop
         shell: pwsh
-        run: npx --no-install --prefix ../ electron-builder --win nsis --x64 --publish=never
-        # 输出: dist/灵犀演示 Setup 0.3.0.exe
+        run: npx --no-install electron-builder --config .electron-builder.windows.json --win nsis --x64 --publish=never
+        # 输出: apps/desktop/dist/windows/灵犀演示 Setup 0.3.0.exe
 
       - name: Verify .exe exists + Info.plist equivalent
+        # 跟 step 13 配套: .exe 在 apps/desktop/dist/windows/ (electron-builder config 路径)
         shell: pwsh
         run: |
-          Write-Host "=== 检查 .exe 产物 ==="
-          Get-ChildItem -Path "apps/desktop/electron-shell/dist" -Filter "*.exe" -Recurse | ForEach-Object {
+          Write-Host "=== 检查 .exe 产物 (apps/desktop/dist/windows/) ==="
+          Get-ChildItem -Path "apps/desktop/dist/windows" -Filter "*.exe" -Recurse | ForEach-Object {
             Write-Host "  exe: $($_.FullName) ($($_.Length) bytes)"
             $hash = (Get-FileHash -Algorithm SHA256 -Path $_.FullName).Hash
             Write-Host "  sha256: $hash"
@@ -167,7 +169,7 @@ jobs:
         with:
           name: win-e2e-artifacts
           path: |
-            apps/desktop/electron-shell/dist/*.exe
+            apps/desktop/dist/windows/*.exe
             outputs/W5-win-e2e-*.log
             outputs/W5-win-e2e-*.txt
             outputs/W5-win-e2e-screenshots/
