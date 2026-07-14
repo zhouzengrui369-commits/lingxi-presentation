@@ -126,14 +126,15 @@ jobs:
           Write-Host "  截图证据: 复用 win-test.yml 单元测试 artifact + 9 硬指标 log"
           # 创建空 evidence dir
           New-Item -ItemType Directory -Force -Path "outputs/W5-win-e2e-screenshots" | Out-Null
-          # 写 placeholder 透明声明
-          @"
-Win E2E 截图限制 (Wave 5 透明声明):
-- Windows runner (windows-latest) 在 GitHub Actions VM 里跑, 无物理 display
-- screencapture 等价命令不可用
-- 9 硬指标实跑: 复用 jest unit tests + 路径兼容 verify
-- 真截图需 NJX 在 Win 物理机 (¥95/月 Win VM SKU) 跑, 留 Phase 8
-"@ | Out-File -Encoding utf8 outputs/W5-win-e2e-screenshots/README.md
+          # 写 placeholder 透明声明 (YAML-safe multi-line, no PowerShell here-string)
+          $readmeLines = @(
+            'Win E2E 截图限制 (Wave 5 透明声明):'
+            '- Windows runner (windows-latest) 在 GitHub Actions VM 里跑, 无物理 display'
+            '- screencapture 等价命令不可用'
+            '- 9 硬指标实跑: 复用 jest unit tests + 路径兼容 verify'
+            '- 真截图需 NJX 在 Win 物理机 (¥95/月 Win VM SKU) 跑, 留 Phase 8'
+          )
+          $readmeLines | Out-File -Encoding utf8 outputs/W5-win-e2e-screenshots/README.md
 
       - name: Upload artifacts
         if: always()
