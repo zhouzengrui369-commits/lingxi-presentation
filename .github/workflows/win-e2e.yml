@@ -108,11 +108,12 @@ jobs:
         # 输出: apps/desktop/dist/windows/灵犀演示 Setup 0.3.0.exe
 
       - name: Verify .exe exists + Info.plist equivalent
-        # 跟 step 13 配套: .exe 在 apps/desktop/dist/windows/ (electron-builder config 路径)
+        # 跟 step 13 配套: .exe 在 dist/windows/ (job defaults working-directory = apps/desktop/)
+        # 实际 path = apps/desktop/dist/windows/灵犀演示 Setup 0.3.0.exe
         shell: pwsh
         run: |
-          Write-Host "=== 检查 .exe 产物 (apps/desktop/dist/windows/) ==="
-          Get-ChildItem -Path "apps/desktop/dist/windows" -Filter "*.exe" -Recurse | ForEach-Object {
+          Write-Host "=== 检查 .exe 产物 (dist/windows/, job cwd = apps/desktop/) ==="
+          Get-ChildItem -Path "dist/windows" -Filter "*.exe" -Recurse | ForEach-Object {
             Write-Host "  exe: $($_.FullName) ($($_.Length) bytes)"
             $hash = (Get-FileHash -Algorithm SHA256 -Path $_.FullName).Hash
             Write-Host "  sha256: $hash"
@@ -120,7 +121,7 @@ jobs:
             "exe_sha256=$hash" | Out-File -Encoding utf8 outputs/W5-win-e2e-exe-info.txt
           }
           # 验证 package.json version 0.3.0
-          $ver = (Get-Content -Raw "apps/desktop/electron-shell/package.json" | ConvertFrom-Json).version
+          $ver = (Get-Content -Raw "electron-shell/package.json" | ConvertFrom-Json).version
           Write-Host "  package.json version: $ver"
           if ($ver -ne "0.3.0") { throw "version mismatch: $ver (expected 0.3.0)" }
 
@@ -171,8 +172,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: win-e2e-artifacts
+          # job cwd = apps/desktop/, .exe 在 dist/windows/ (相对 cwd)
           path: |
-            apps/desktop/dist/windows/*.exe
+            dist/windows/*.exe
             outputs/W5-win-e2e-*.log
             outputs/W5-win-e2e-*.txt
             outputs/W5-win-e2e-screenshots/
