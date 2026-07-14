@@ -1,0 +1,115 @@
+{
+  "task": "H2 v3 真模型流式首 token P50/P90 真测",
+  "generated_at": "2026-07-13T23:53:00.394Z",
+  "args": {
+    "runs": 5,
+    "skipWarmup": true,
+    "allowMock": false,
+    "daemonPort": 50995,
+    "prompt": "用一句话介绍灵犀演示, 不超过 50 字",
+    "model": "MiniMax-M3"
+  },
+  "daemon": {
+    "port": 50995,
+    "isMock": false
+  },
+  "total_runs": 5,
+  "real_runs": 0,
+  "mock_runs": 0,
+  "error_runs": 5,
+  "errors": [
+    "HTTP 503: {\"detail\":{\"error\":\"no_provider_available\",\"error_code\":\"E_NO_PROVIDER\",\"message\":\"[unavailable] [W2 fail-closed] api_key_missing: 无 MiniMax_API_KEY, LINGXI_API_PROVIDER_ALLOW_PS_TOKEN 默认 0 禁用 ps 抓 to",
+    "HTTP 503: {\"detail\":{\"error\":\"no_provider_available\",\"error_code\":\"E_NO_PROVIDER\",\"message\":\"[unavailable] [W2 fail-closed] api_key_missing: 无 MiniMax_API_KEY, LINGXI_API_PROVIDER_ALLOW_PS_TOKEN 默认 0 禁用 ps 抓 to",
+    "HTTP 503: {\"detail\":{\"error\":\"no_provider_available\",\"error_code\":\"E_NO_PROVIDER\",\"message\":\"[unavailable] [W2 fail-closed] api_key_missing: 无 MiniMax_API_KEY, LINGXI_API_PROVIDER_ALLOW_PS_TOKEN 默认 0 禁用 ps 抓 to",
+    "HTTP 503: {\"detail\":{\"error\":\"no_provider_available\",\"error_code\":\"E_NO_PROVIDER\",\"message\":\"[unavailable] [W2 fail-closed] api_key_missing: 无 MiniMax_API_KEY, LINGXI_API_PROVIDER_ALLOW_PS_TOKEN 默认 0 禁用 ps 抓 to",
+    "HTTP 503: {\"detail\":{\"error\":\"no_provider_available\",\"error_code\":\"E_NO_PROVIDER\",\"message\":\"[unavailable] [W2 fail-closed] api_key_missing: 无 MiniMax_API_KEY, LINGXI_API_PROVIDER_ALLOW_PS_TOKEN 默认 0 禁用 ps 抓 to"
+  ],
+  "p50_all_ms": null,
+  "p90_all_ms": null,
+  "p50_real_ms": null,
+  "p90_real_ms": null,
+  "threshold_p50_ms": 1500,
+  "threshold_p90_ms": 3500,
+  "has_real_data": false,
+  "real_pass": null,
+  "verdict": "DEFERRED",
+  "records": [
+    {
+      "run": 1,
+      "ttft_ms": 0,
+      "total_ms": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "provider": "error",
+      "fell_back": false,
+      "is_warm": false,
+      "cache_status": "miss",
+      "prewarm": false,
+      "model": "MiniMax-M3",
+      "error": "HTTP 503: {\"detail\":{\"error\":\"no_provider_available\",\"error_code\":\"E_NO_PROVIDER\",\"message\":\"[unavailable] [W2 fail-closed] api_key_missing: 无 MiniMax_API_KEY, LINGXI_API_PROVIDER_ALLOW_PS_TOKEN 默认 0 禁用 ps 抓 to"
+    },
+    {
+      "run": 2,
+      "ttft_ms": 0,
+      "total_ms": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "provider": "error",
+      "fell_back": false,
+      "is_warm": true,
+      "cache_status": "miss",
+      "prewarm": false,
+      "model": "MiniMax-M3",
+      "error": "HTTP 503: {\"detail\":{\"error\":\"no_provider_available\",\"error_code\":\"E_NO_PROVIDER\",\"message\":\"[unavailable] [W2 fail-closed] api_key_missing: 无 MiniMax_API_KEY, LINGXI_API_PROVIDER_ALLOW_PS_TOKEN 默认 0 禁用 ps 抓 to"
+    },
+    {
+      "run": 3,
+      "ttft_ms": 0,
+      "total_ms": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "provider": "error",
+      "fell_back": false,
+      "is_warm": true,
+      "cache_status": "miss",
+      "prewarm": false,
+      "model": "MiniMax-M3",
+      "error": "HTTP 503: {\"detail\":{\"error\":\"no_provider_available\",\"error_code\":\"E_NO_PROVIDER\",\"message\":\"[unavailable] [W2 fail-closed] api_key_missing: 无 MiniMax_API_KEY, LINGXI_API_PROVIDER_ALLOW_PS_TOKEN 默认 0 禁用 ps 抓 to"
+    },
+    {
+      "run": 4,
+      "ttft_ms": 0,
+      "total_ms": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "provider": "error",
+      "fell_back": false,
+      "is_warm": true,
+      "cache_status": "miss",
+      "prewarm": false,
+      "model": "MiniMax-M3",
+      "error": "HTTP 503: {\"detail\":{\"error\":\"no_provider_available\",\"error_code\":\"E_NO_PROVIDER\",\"message\":\"[unavailable] [W2 fail-closed] api_key_missing: 无 MiniMax_API_KEY, LINGXI_API_PROVIDER_ALLOW_PS_TOKEN 默认 0 禁用 ps 抓 to"
+    },
+    {
+      "run": 5,
+      "ttft_ms": 0,
+      "total_ms": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "provider": "error",
+      "fell_back": false,
+      "is_warm": true,
+      "cache_status": "miss",
+      "prewarm": false,
+      "model": "MiniMax-M3",
+      "error": "HTTP 503: {\"detail\":{\"error\":\"no_provider_available\",\"error_code\":\"E_NO_PROVIDER\",\"message\":\"[unavailable] [W2 fail-closed] api_key_missing: 无 MiniMax_API_KEY, LINGXI_API_PROVIDER_ALLOW_PS_TOKEN 默认 0 禁用 ps 抓 to"
+    }
+  ],
+  "notes": [
+    "【W3 治本】只统计 provider=api + fell_back=false (真活) 的样本 — 任务 §3.5 禁止 cache-hit / prewarm / mock 时延计入 H2",
+    "【W3 治本】当前 daemon /v1/chat 是非流式 (整段响应), TTFT ≈ total; 真流式需 /v1/chat/stream 端点 (Wave 4)",
+    "【W3 治本】无真 MiniMax_API_KEY 时, provider_status=unavailable, 真活样本=0, verdict=DEFERRED",
+    "【W3 治本】cache_status=miss 在每轮 run 前清 cache (避免 cache-hit 时延混入)",
+    "【W3 治本】is_warm 标 cold vs warm, 1st run=cold, 2+ = warm"
+  ]
+}

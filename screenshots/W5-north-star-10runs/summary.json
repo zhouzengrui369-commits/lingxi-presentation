@@ -1,0 +1,22 @@
+{
+  "task": "灵犀演示 Gate 4 北极星 10 连跑 — Wave 5 §5.5",
+  "generated_at": "2026-07-14T00:11:35Z",
+  "testdata_dir": "/Users/njx/Project/wt-mvp-recovery-w5/apps/desktop/testdata/quarterly_review",
+  "testdata_count": 7,
+  "daemon_port": 50997,
+  "totals": {
+    "pass": 10,
+    "fail": 0,
+    "rounds": 10,
+    "total_ms": 25838,
+    "avg_ms": 2583,
+    "fallback_steps": 0,
+    "edit_count": 0,
+    "ttft_sum_ms": 0,
+    "ttft_count": 0,
+    "ttft_avg_ms": 0,
+    "output_fail_runs": 0
+  },
+  "verdict": "PASS",
+  "per_run_json": "/Users/njx/Project/wt-mvp-recovery-w5/screenshots/W5-north-star-10runs/10runs_results.json"
+}

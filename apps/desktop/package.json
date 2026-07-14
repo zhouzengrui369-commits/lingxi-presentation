@@ -1,6 +1,6 @@
 {
   "name": "lingxi-desktop",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": true,
   "description": "灵犀演示 — AI 驱动的办公内容生成桌面 App（macOS + Windows）",
   "scripts": {
