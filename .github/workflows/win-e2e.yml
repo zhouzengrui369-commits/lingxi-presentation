@@ -62,9 +62,17 @@ jobs:
         run: npm run lint
         continue-on-error: true
 
-      - name: Unit tests (jest)
+      - name: Unit tests (jest) - 跳过 2 Mac-only tests (PM 7-14 拍板)
+        # 原因: cli/__tests__/test_w2_fail_closed.test.ts + test_real_runtime_validate.test.ts
+        #       硬编码 macOS .venv-daemon-py312 路径, Win runner ENOENT.
+        #       跟 Win E2E 真功能无关, 留 PM 收口后修 (test file 加 process.platform === 'win32' skip).
+        #       41 个跨平台 tests 仍跑.
         shell: pwsh
-        run: npm test -- --watchAll=false
+        run: |
+          npm test -- --watchAll=false `
+            --testPathIgnorePatterns="/node_modules/" `
+            --testPathIgnorePatterns="cli/__tests__/test_w2_fail_closed.test.ts" `
+            --testPathIgnorePatterns="cli/__tests__/test_real_runtime_validate.test.ts"
         env:
           CI: 'true'
           NODE_OPTIONS: --experimental-vm-modules

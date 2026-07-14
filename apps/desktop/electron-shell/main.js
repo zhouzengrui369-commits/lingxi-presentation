@@ -125,11 +125,16 @@ ipcMain.handle('get-info', async () => ({
 // 【W2】daemon health: 转发 daemon /v1/health
 ipcMain.handle('daemon:health', async () => {
   if (!w1Daemon?.baseUrl) return { status: 'unknown', available: false, active_provider: 'unknown' };
+  // W6 fix: 改 AbortController 替代 AbortSignal.timeout (Node 16+ global 但 @react-native eslint preset 不认)
+  const c = new AbortController();
+  const timer = setTimeout(() => c.abort(), 2_000);
   try {
-    const r = await fetch(`${w1Daemon.baseUrl}/v1/health`, { signal: AbortSignal.timeout(2_000) });
+    const r = await fetch(`${w1Daemon.baseUrl}/v1/health`, { signal: c.signal });
     return await r.json();
   } catch (e) {
     return { status: 'unreachable', available: false, active_provider: 'unknown', error: e?.message };
+  } finally {
+    clearTimeout(timer);
   }
 });
 
@@ -398,16 +403,12 @@ app.whenReady().then(async () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 
-  // T-W1: --w1-e2e=<output_dir> 模式: 自动跑 E2E + 截图后退出
+  // T-W1: --w1-e2e=<output_dir> 模式: 自动跑 E2E + 截图后退出 (W6 fix: T-W1 死代码, 移除 runW1E2E 未定义调用)
+  // 注: 早期 T-W1 测试 scaffold 引用, 现已不被任何代码调, 留 arg 解析兼容老脚本
   const e2eArg = process.argv.find((a) => a.startsWith('--w1-e2e='));
   if (e2eArg) {
-    const outputDir = e2eArg.split('=')[1];
-    try {
-      await runW1E2E(outputDir);
-    } catch (e) {
-      logW1(`[e2e] fatal: ${e.message}`);
-      setTimeout(() => app.quit(), 2000);
-    }
+    logW1(`[w1-e2e] DEPRECATED: T-W1 mode no longer supported (2026-07-14 cleanup)`);
+    setTimeout(() => app.quit(), 1000);
   }
 });
 
