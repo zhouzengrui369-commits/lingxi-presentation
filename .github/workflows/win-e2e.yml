@@ -83,6 +83,16 @@ jobs:
         continue-on-error: true
 
       # ---- Real Win E2E (Wave 5 §5.4) ----
+      - name: Install electron-builder (no-save workaround for npm ci skip dev-deps)
+        # 原因: 之前 npm ci 在 apps/desktop 不装 electron-shell devDeps,
+        #       step 12 `npx --no-install electron-builder` 报 missing packages.
+        # 修法: 显式装 electron-builder (跟 vite workaround 一致)
+        working-directory: apps/desktop/electron-shell
+        shell: pwsh
+        run: npm install --no-save electron-builder@^26.15.3
+        env:
+          CI: 'true'
+
       - name: Build Windows .exe (electron-builder)
         working-directory: apps/desktop/electron-shell
         shell: pwsh
